@@ -1,12 +1,13 @@
 # Todo
   
 - [x] Player Left/Right
-- [ ] Player Enter/Exit
+- [x] Player Enter/Exit
 
 # Then
 - [ ] Animate Player Left/Right
-- [ ] Animate Player+Elevator Enter/Exit
+- [x] Animate Player+Elevator Enter/Exit
 
 # Next
 - [ ] Wave Scroll
 - [ ] Intro scene (in-game)
+- [ ] Open all elevators on player's floor.
