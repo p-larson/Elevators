@@ -6,5 +6,5 @@
 - [ ] Wave Scroll
 - [x] Intro scene (in-game)
 - [x] Open all elevators on player's floor.
-- [ ] Fix Doors Closed when Player Rides
-- [ ] Fix Animations for Riding
+- [x] Fix Doors Closed when Player Rides
+- [x] Fix Animations for Riding
