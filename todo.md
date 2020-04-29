@@ -8,4 +8,4 @@
 - [x] Open all elevators on player's floor.
 - [x] Fix Doors Closed when Player Rides
 - [x] Fix Animations for Riding
-- [ ] Fix long tap during movement
+- [x] Fix long tap during movement
