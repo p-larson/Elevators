@@ -13,3 +13,8 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [x] Fix Animations for Riding
 - [x] Fix long tap during movement
 - [x] Move todo.md to readme.md
+- [ ] Fix Player Movement Animations
+- [ ] Fix Elevator Placement ?
+- [ ] GameStorage (load/save)
+- [ ] Coins
+- [ ] Time / Stars / Move Count / Achievements
