@@ -16,5 +16,6 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] Fix Player Movement Animations
 - [ ] Fix Elevator Placement ?
 - [ ] GameStorage (load/save)
+- [x] Game Model
 - [ ] Coins
 - [ ] Time / Stars / Move Count / Achievements
