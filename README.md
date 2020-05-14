@@ -2,6 +2,13 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Player Selected Elevator Highlight / Opacity Select
+- [ ] Fix Player Movement Animations
+- [ ] Fix Elevator Placement ?
+- [ ] GameStorage (load/save)
+- [x] Game Model
+- [ ] Coins
+- [ ] Time / Stars / Move Count / Achievements
 - [x] Player Left/Right
 - [x] Player Enter/Exit
 - [x] Animate Player Left/Right
@@ -13,9 +20,3 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [x] Fix Animations for Riding
 - [x] Fix long tap during movement
 - [x] Move todo.md to readme.md
-- [ ] Fix Player Movement Animations
-- [ ] Fix Elevator Placement ?
-- [ ] GameStorage (load/save)
-- [x] Game Model
-- [ ] Coins
-- [ ] Time / Stars / Move Count / Achievements
