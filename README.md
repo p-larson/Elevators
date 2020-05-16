@@ -2,10 +2,11 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Fix JSON for LevelModel (elevators/coins not encoding)
 - [ ] Player Selected Elevator Highlight / Opacity Select
 - [ ] Fix Player Movement Animations
 - [ ] Fix Elevator Placement ?
-- [ ] GameStorage (load/save)
+- [x] GameStorage (load/save)
 - [x] Game Model
 - [ ] Coins
 - [ ] Time / Stars / Move Count / Achievements
