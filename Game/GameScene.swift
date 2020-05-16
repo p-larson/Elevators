@@ -9,18 +9,20 @@
 import Foundation
 import SpriteKit
 
-final public class GameScene: SKScene {
+final public class GameScene: SKScene, ObservableObject {
     // Model
-    let floors: Int
-    let elevatorModels: [ElevatorModel]
+    let model: LevelModel
     // Data
-    var currentFloor: Int = 1
-    let playerNode = PlayerNode()
-    // Player ---
+    let playerNode = PlayerNode(floor: 1)
+    var didSucceedLongTouch = false
+    var isTouching = false
+    // State
+    @Published var hasEnded: Bool = false
+    @Published var hasWon: Bool = false
     
-    init(floors: Int, elevators: [ElevatorModel]) {
-        self.floors = floors
-        self.elevatorModels = elevators
+    init(model: LevelModel) {
+        self.model = model
+        
         super.init(size: UIScreen.main.bounds.size)
     }
     
@@ -37,17 +39,41 @@ extension GameScene {
         }
     }
     
+    func elevatorNodes(on floor: Int) -> [ElevatorNode] {
+        elevatorNodes.filter { (node) -> Bool in
+            node.floor == floor
+        }
+    }
+    
+    func originNode(for elevator: ElevatorModel) -> ElevatorNode? {
+        elevatorNodes.first { (elevatorNode) -> Bool in
+            elevator.floor == elevatorNode.floor && elevator.slot == elevatorNode.slot
+        }
+    }
+    
+    func targetNode(for elevator: ElevatorModel) -> ElevatorNode? {
+        elevatorNodes.first { (elevatorNode) -> Bool in
+            elevator.target == elevatorNode.floor && elevator.slot == elevatorNode.slot
+        }
+    }
+    
     func elevators(on floor: Int) -> [ElevatorModel] {
-        elevatorModels.filter { (model) -> Bool in
-            model.floor == floor || model.target == floor
+        model.elevators.filter { (elevator) -> Bool in
+            elevator.floor == floor || elevator.target == floor
         }.sorted { (e1, e2) -> Bool in
             e1.floor < e2.floor
         }
     }
     
     func elevator(at slot: Int, on floor: Int) -> ElevatorModel? {
-        elevators(on: floor).first { (model) -> Bool in
-            model.slot == slot
+        elevators(on: floor).first { (elevator) -> Bool in
+            elevator.slot == slot
+        }
+    }
+    
+    func coin(for model: CoinModel) -> CoinNode? {
+        coinNodes.first { (node) -> Bool in
+            node.model == model
         }
     }
     
@@ -68,27 +94,49 @@ extension GameScene {
             floorNode.floor == floor
         }
     }
+    
+    var cableNodes: [CableNode] {
+        children.compactMap { (child) -> CableNode? in
+            child as? CableNode
+        }
+    }
+    
+    var coinNodes: [CoinNode] {
+        children.compactMap { (child) -> CoinNode? in
+            child as? CoinNode
+        }
+    }
 }
 
 extension GameScene {
-    public override func didMove(to view: SKView) {
+    public override func sceneDidLoad() {
         self.render()
+        self.clean()
         self.setupPlayer()
-        self.setupSwipes()
+        self.setupCamera()
+        self.startWave()
+        print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
     }
 }
 
 extension GameScene {
-    static var maxSlot: Int { slots - 1 }
-    static let slots: Int = 5
-    static let maxFloorsShown: CGFloat = 8
-    static let floorSpeed: TimeInterval = 0.25
-    static let playerSpeed: TimeInterval = 0.5
-    static let doorSpeed: TimeInterval = 0.1
-    static let elevatorSpace: CGFloat = 20.0
-    static var validSlots: Range<Int> {
-        0 ..< slots
+    var maxSlot: Int {
+        model.slots - 1
     }
+    
+    var validSlots: Range<Int> {
+        0 ..< model.slots
+    }
+}
+
+extension GameScene {
+    static let maxFloorsShown: CGFloat = 8
+    static let floorSpeed: TimeInterval = 0.5
+    static let playerSpeed: TimeInterval = 0.3
+    static let doorSpeed: TimeInterval = 0.3
+    static let waveSpeed: TimeInterval = 3.0
+    static let cameraSpeed: TimeInterval = 0.25
+    static let elevatorSpace: CGFloat = 20.0
 }
 
 // Size
@@ -128,12 +176,19 @@ extension GameScene {
         ).applying(.init(scaleX: 0.6, y: 0.6))
     }
     
+    static var coinSize: CGSize {
+        return CGSize(
+            width: (GameScene.playerSize.width / 2),
+            height: (GameScene.playerSize.width / 2)
+        )
+    }
+    
     static var slotWidth: CGFloat {
         return elevatorSize.width + 20.0
     }
     
     static var bottomSpace: CGFloat {
-        return UIScreen.main.bounds.size.height / 7
+        return UIScreen.main.bounds.size.height / 4
     }
     
     static func cableSize(of length: Int) -> CGSize {
@@ -144,13 +199,13 @@ extension GameScene {
     }
 }
 
-fileprivate extension GameScene {
+public extension GameScene {
     func elevatorXPosition(at slot: Int) -> CGFloat {
         var x: CGFloat = 0
         
         x += GameScene.floorSize.width / 2
-        x -= (CGFloat(GameScene.slots) / 2) * GameScene.elevatorSize.width
-        x -= (CGFloat(GameScene.slots / 2)) * GameScene.elevatorSpace
+        x -= (CGFloat(self.model.slots) / 2) * GameScene.elevatorSize.width
+        x -= (CGFloat(self.model.slots / 2)) * GameScene.elevatorSpace
         
         x += GameScene.elevatorSize.width / 2
         x += GameScene.elevatorSize.width * CGFloat(slot)
@@ -160,64 +215,75 @@ fileprivate extension GameScene {
     }
     
     func elevatorYPosition(at floor: Int) -> CGFloat {
-        var y: CGFloat = 0
+        var y: CGFloat = floorYPosition(at: floor)
         
-        y += GameScene.bottomSpace + GameScene.floorBaseSize.height
-        y -= GameScene.floorSize.height
-        y += GameScene.floorSize.height * CGFloat(floor)
-        y += self.currentFloorOffset
+        y += GameScene.floorBaseSize.height
         
         return y
+    }
+    
+    var currentFloorYPosition: CGFloat {
+        return GameScene.bottomSpace
+    }
+    
+    func floorYPosition(at floor: Int) -> CGFloat {
+        var y: CGFloat = currentFloorYPosition
+        
+        y += CGFloat(floor - playerNode.floor) * GameScene.floorSize.height
+        
+        return y
+    }
+    
+    func cableYPosition(at floor: Int) -> CGFloat {
+        return floorYPosition(at: floor)
     }
 }
 
 // Rendering Floors
 fileprivate extension GameScene {
     
-    var maxElevatorDistance: Int {
-        return elevatorModels.map { $0.distance }.max()!
-    }
-    
     var validFloors: ClosedRange<Int> {
-        return 1 ... floors
+        return (1 ... model.floors)
     }
     
     var rendered: Range<Int> {
-        return currentFloor - maxElevatorDistance ..< currentFloor + Int(GameScene.maxFloorsShown.rounded(.up))
+        return playerNode.floor - Int(GameScene.maxFloorsShown.rounded(.up)) ..< playerNode.floor + Int(GameScene.maxFloorsShown.rounded(.up))
     }
     
-    var loaded: Range<Int> {
-        return rendered.lowerBound ..< rendered.upperBound + maxElevatorDistance
+    func shouldRender(elevator: ElevatorModel) -> Bool {
+        rendered.contains(elevator.floor) || rendered.contains(elevator.target)
     }
     
-    func load(model: ElevatorModel) {
+    func load(elevator: ElevatorModel) {
+        
+        guard elevator.floor != elevator.target else {
+            print("Invalid Elevator Model \(elevator). Check Elevator's Floor & Target")
+            return
+        }
+        
         do {
-            let destination = ElevatorNode(model: model, isOrigin: false)
+            let destination = ElevatorNode(floor: elevator.target, slot: elevator.slot)
             
-            destination.position.y = elevatorYPosition(at: model.target)
-            destination.position.x = elevatorXPosition(at: model.slot)
-            
-            model.destination = destination
-            
+            destination.position.y = elevatorYPosition(at: elevator.target)
+            destination.position.x = elevatorXPosition(at: elevator.slot)
+                        
             self.addChild(destination)
         }
         
         do {
-            let origin = ElevatorNode(model: model, isOrigin: true)
+            let origin = ElevatorNode(floor: elevator.floor, slot: elevator.slot)
             
-            origin.position.y = elevatorYPosition(at: model.floor)
-            origin.position.x = elevatorXPosition(at: model.slot)
-            
-            model.origin = origin
+            origin.position.y = elevatorYPosition(at: elevator.floor)
+            origin.position.x = elevatorXPosition(at: elevator.slot)
             
             self.addChild(origin)
         }
         
         do {
-            let cable = CableNode(length: model.distance)
+            let cable = CableNode(length: elevator.distance, bottom: elevator.bottom)
             
-            cable.position.y = elevatorYPosition(at: model.floor)
-            cable.position.x = elevatorXPosition(at: model.slot)
+            cable.position.y = elevatorYPosition(at: elevator.floor)
+            cable.position.x = elevatorXPosition(at: elevator.slot)
             
             self.addChild(cable)
         }
@@ -225,56 +291,84 @@ fileprivate extension GameScene {
     
     func load(_ floor: Int) {
         let node = FloorNode(floor: floor)
+        
+        node.position.y = floorYPosition(at: floor)
+        
+        self.addChild(node)
+    }
+    
+    func load(_ model: CoinModel) {
+        let node = CoinNode(model: model)
+        
+        node.position.x = elevatorXPosition(at: model.slot)
+        node.position.y = elevatorYPosition(at: model.floor)
+        
         self.addChild(node)
     }
     
     var currentFloorOffset: CGFloat {
-        let distance = CGFloat(rendered.lowerBound - currentFloor)
-        
+        let distance = CGFloat(rendered.lowerBound - playerNode.floor)
         return distance * GameScene.floorSize.height
     }
     
     func render() {
         // Load elevators
-        for model in elevatorModels where loaded.contains(model.floor) {
-            if model.destination == nil && model.origin == nil {
-                self.load(model: model)
-            } else if let topNode = model.topNode, let bottomNode = model.bottomNode {
-                // Update elevator y positions
-                topNode.position.y = elevatorYPosition(at: model.top)
-                bottomNode.position.y = elevatorYPosition(at: model.bottom)
-            }
-        }
-        // Load floors
-        for floor in rendered where validFloors.contains(floor) {
-            if floorNode(at: floor) == nil {
-                self.load(floor)
+        for elevator in model.elevators where shouldRender(elevator: elevator) {
+            // Ensure elevator has not yet been rendered
+            if let originNode = originNode(for: elevator), let targetNode = targetNode(for: elevator) {
+                originNode.position.y = elevatorYPosition(at: elevator.floor)
+                targetNode.position.y = elevatorYPosition(at: elevator.target)
+            } else {
+                self.load(elevator: elevator)
             }
         }
         
-        self.vStack(
-            children: floorNodes,
-            spacing: 0,
-            totalOffset:
-            GameScene.bottomSpace + currentFloorOffset,
-            print: true
-        )
+        // Load floor nodes
+        for floor in rendered where validFloors.contains(floor) {
+            if let floorNode = floorNode(at: floor) {
+                floorNode.position.y = floorYPosition(at: floor)
+            } else {
+                self.load(floor)
+            }
+        }
+        // Coins
+        for coin in model.coins where rendered.contains(coin.floor) {
+            if let node = self.coin(for: coin) {
+                node.position.x = elevatorXPosition(at: coin.slot)
+                node.position.y = elevatorYPosition(at: coin.floor)
+            } else {
+                self.load(coin)
+            }
+        }
+        
+        // Cables
+        for cableNode in cableNodes where rendered.contains(cableNode.bottom) {
+            cableNode.position.y = cableYPosition(at: cableNode.bottom)
+        }
+        
+        // Open all elevators on the player's floor.
+        for elevatorNode in elevatorNodes(on: playerNode.floor) where !elevatorNode.isOpen {
+            elevatorNode.open(wait: Double(elevatorNode.slot) * 0.05)
+        }
     }
     // Remove any floor or elevator that is shouldn't be rendered
     func clean() {
-        for model in elevatorModels where !loaded.contains(model.floor) {
-            model.destination?.removeFromParent()
-            model.origin?.removeFromParent()
+        
+        for elevatorNode in elevatorNodes where !rendered.contains(elevatorNode.floor) {
+            elevatorNode.removeFromParent()
         }
-    }
-}
-
-// Changing current floor
-extension GameScene {
-    func set(floor: Int) {
-        self.currentFloor = floor
-        self.render()
-        // Move camera then after move, dealocate
+        
+        for floorNode in floorNodes where !rendered.contains(floorNode.floor) {
+            floorNode.removeFromParent()
+        }
+        
+        for cableNode in cableNodes where !rendered.contains(cableNode.bottom) {
+            cableNode.removeFromParent()
+        }
+        
+        for coinNode in coinNodes where !rendered.contains(coinNode.model.floor) {
+            coinNode.removeFromParent()
+        }
     }
 }
 
@@ -287,162 +381,164 @@ extension GameScene {
         }
         
         playerNode.position.x = self.elevatorXPosition(at: playerNode.slot)
-        playerNode.position.y = self.playerYPosition()
+        playerNode.position.y = playerYPosition()
         
         self.addChild(playerNode)
     }
     
     func playerYPosition() -> CGFloat {
-        var y: CGFloat = -3.25 // Images have a weird spacing, needs to be removed in final builds
+        var y: CGFloat = -3.25 // TODO: Images have a weird spacing, needs to be removed in final builds
         
-        y += GameScene.bottomSpace + GameScene.floorBaseSize.height
-        y -= GameScene.floorSize.height
-        y += GameScene.floorSize.height * CGFloat(playerNode.floor)
+        y += elevatorYPosition(at: playerNode.floor)
         
         return y
     }
 }
 
-protocol MoveHandler {
-    func right()
-    func left()
-    func send()
-    func `return`()
-}
-
-extension GameScene: MoveHandler {
+extension GameScene {
     func right() {
-        guard !playerNode.isInsideElevator else {
+        guard !playerNode.isInsideElevator, !playerNode.isMoving else {
             return
         }
         
-        var range = (playerNode.slot ..< GameScene.slots)
+        var range = Array(playerNode.slot ..< model.slots)
         
-        if range.isEmpty == false {
+        if !range.isEmpty {
             range.removeFirst()
         }
         
-        for slot in range {
-            if elevator(at: slot, on: playerNode.floor) != nil {
-                // Move player
-                self.playerNode.right()
-                PlayerSkin.current.set(state: .run)
-            }
+        guard let slot = range.first(where: { (slot) -> Bool in
+            elevator(at: slot, on: playerNode.floor) != nil
+        }) else {
+            return
         }
+        
+        self.playerNode.move(to: slot)
     }
     
     func left() {
-        
-        guard !playerNode.isInsideElevator else {
+        guard !playerNode.isInsideElevator, !playerNode.isMoving else {
             return
         }
         
-        var range = (0 ..< playerNode.slot)
+        let range = Array(0 ..< playerNode.slot).reversed() as [Int]
         
-        if range.isEmpty == false {
-            range.removeLast()
+        guard let slot = range.first(where: { (slot) -> Bool in
+            elevator(at: slot, on: playerNode.floor) != nil
+        }) else {
+            return
         }
         
-        for slot in range {
-            if elevator(at: slot, on: playerNode.floor) != nil {
-                // Move player
-                self.playerNode.left()
-                PlayerSkin.current.set(state: .run)
-            }
-        }
+        self.playerNode.move(to: slot)
     }
-    
-    @objc func send() {
-        guard !playerNode.isInsideElevator, let elevatorModel = playerElevator(), playerNode.floor == elevatorModel.bottom, let currentElevator = elevatorModel.bottomNode, let targetElevator = elevatorModel.topNode else {
+}
+extension GameScene {
+    func ride() {
+        // Player cannot be inside a elevator.
+        // Player must be on a elevator
+        guard !playerNode.isInsideElevator, let elevator = playerElevator() else {
             return
         }
         
-        /*
-         
-         1. open doors/player enter
-         2. close doors
-         3. move camera
-         4. update player location, re-render.
-         5. open doors/player exit
-         
-         */
+        self.stopWave()
         
-        let cameraSpeed: TimeInterval = Double(abs(elevatorModel.distance)) * GameScene.floorSpeed
+        var target: Int!, origin: Int!
         
+        switch playerNode.floor {
+        case elevator.bottom:
+            target = elevator.top
+            origin = elevator.bottom
+            
+            break
+        case elevator.top:
+            target = elevator.bottom
+            origin = elevator.top
+            break
+        default:
+            return
+        }
+        
+        let distance = target - playerNode.floor
+        
+        let cameraSpeed: TimeInterval = Double(abs(distance)) * GameScene.cameraSpeed
+                
         PlayerSkin.current.set(state: .idle)
-        
-        self.run(
+                
+        self.camera?.run(
             .sequence(
                 [
                     SKAction.run(duration: GameScene.doorSpeed) {
                         self.playerNode.enter()
-                        currentElevator.open()
                     },
                     SKAction.run(duration: GameScene.doorSpeed) {
-                        currentElevator.close()
+                        self.elevatorNodes(on: origin).forEach { (elevatorNode) in
+                            elevatorNode.close()
+                        }
                     },
-                    SKAction.run(duration: cameraSpeed) {
-                        self.camera?.run(
-                            SKAction.moveBy(
-                                x: 0,
-                                y: self.cameraYTranslation(
-                                    distance: elevatorModel.distance),
-                                duration: cameraSpeed
-                            )
-                        )
-                    },
-                    SKAction.run {
-                        self.currentFloor = elevatorModel.top
+                    SKAction.moveTo(
+                        y: self.cameraOrigin.y + self.cameraYTranslation(distance: distance),
+                        duration: cameraSpeed
+                    ),
+                    SKAction.run(duration: GameScene.doorSpeed) {
+                        self.playerNode.floor = target
                         self.playerNode.position.y = self.playerYPosition()
-                        self.render()
+                        self.render() // Opens the target Elevator
                         self.clean()
-                    },
-                    SKAction.run(duration: GameScene.doorSpeed) {
-                        targetElevator.open()
+                        self.camera?.position = self.cameraOrigin
                     },
                     SKAction.run(duration: GameScene.doorSpeed) {
                         self.playerNode.exit()
-                        targetElevator.close()
                     },
                     SKAction.run {
-                        print("finished")
+                        self.startWave()
                     }
                 ]
             )
         )
     }
+}
+
+
+extension GameScene {
     
-    @objc func `return`() {
-        guard !playerNode.isInsideElevator, let elevator = playerElevator(), playerNode.floor == elevator.top else {
-            return
+    static let moveFeedback = UIImpactFeedbackGenerator(style: .light)
+    static let rideFeedback = UIImpactFeedbackGenerator(style: .heavy)
+    
+    func attemptLongTouch(threshold: TimeInterval = 0.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + threshold) {
+            if self.isTouching && !self.playerNode.isInsideElevator && !self.playerNode.isMoving {
+                // Ignore next touch end.
+                self.didSucceedLongTouch = true
+                // Give user feedback
+                GameScene.rideFeedback.impactOccurred()
+                // Enter/Exit
+                self.ride()
+            }
         }
-        
-        
-        
     }
-}
-
-extension GameScene {
-    func setupSwipes() {
-        let up = UISwipeGestureRecognizer(target: self, action: #selector(self.send))
-        
-        up.direction = .up
-        
-        view?.addGestureRecognizer(up)
-        
-        let down = UISwipeGestureRecognizer(target: self, action: #selector(self.return))
-        
-        down.direction = .down
-        
-        view?.addGestureRecognizer(down)
+    
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if !isTouching {
+            self.isTouching.toggle()
+            self.attemptLongTouch()
+        }
     }
-}
-
-extension GameScene {
+    
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            touch.location(in: self).x < frame.midX ? left():right()
+        self.isTouching = false
+        
+        if !self.didSucceedLongTouch, let touch = touches.first {
+            // Apply feedback
+            GameScene.moveFeedback.impactOccurred()
+            // Move
+            if touch.location(in: self).x < frame.midX {
+                self.left()
+            } else {
+                self.right()
+            }
         }
+        
+        self.didSucceedLongTouch = false
     }
 }
 
@@ -464,8 +560,47 @@ extension GameScene {
         let camera = SKCameraNode()
         
         camera.position = cameraOrigin
-        
+
+        self.addChild(camera)
+
         self.camera = camera
+    }
+}
+
+extension GameScene {
+    
+    func startWave() {
+        self.camera?.run(
+            .sequence(
+                [
+                    SKAction.group(
+                        [
+//                            SKAction.scale(to: 0.75, duration: GameScene.waveSpeed),
+                            SKAction.moveBy(
+                                x: 0,
+                                y: GameScene.bottomSpace,
+                                duration: GameScene.waveSpeed
+                            )
+                        ]
+                    ),
+                    SKAction.run {
+                        // You loose.
+                        // close all elevators
+                        self.elevatorNodes.forEach { (elevatorNode) in
+                            elevatorNode.close()
+                        }
+                        self.hasEnded = true
+                    }
+                ]
+            ),
+            withKey: "wave"
+        )
+    }
+    
+    // When the player rides, it should cancel
+    func stopWave() {
+        camera?.removeAction(forKey: "wave")
+//        camera?.run(SKAction.scale(to: 1.0, duration: GameScene.waveSpeed))
     }
 }
 
@@ -475,14 +610,5 @@ import SwiftUI
 struct GameScene_Previews: PreviewProvider {
     static var previews: some View {
         GameView_Previews.previews
-    }
-}
-
-extension GameScene {
-    // debugging
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            //            print(touch.location(in: self))
-        }
     }
 }

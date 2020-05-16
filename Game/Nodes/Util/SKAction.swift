@@ -11,7 +11,7 @@ import SpriteKit
 
 extension SKAction {
     static func run(duration: TimeInterval, block: @escaping () -> Void) -> SKAction {
-        SKAction.group(
+        SKAction.sequence(
             [
                 SKAction.run(block), SKAction.wait(forDuration: duration)
             ]

@@ -25,7 +25,12 @@ public class ElevatorSkin {
         
         elevatorBackground = SKTexture(image: Graphics.elevatorBackground(style: elevatorStyle))
         elevatorOverlay = (1 ... 20).map { frame in
-            return SKTexture(image: Graphics.elevatorOverlay(style: self.elevatorStyle, percent: CGFloat(frame) / CGFloat(20)))
+            return SKTexture(
+                image: Graphics.elevatorOverlay(
+                    style: self.elevatorStyle,
+                    percent: CGFloat(frame) / CGFloat(20)
+                )
+            )
         }
 
     }

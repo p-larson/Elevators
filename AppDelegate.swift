@@ -18,6 +18,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        LevelStorage.current.save()
+    }
+    
+    func applicationWillResignActive(_ application: UIApplication) {
+        LevelStorage.current.save()
+    }
+    
     // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {

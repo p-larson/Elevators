@@ -15,6 +15,8 @@ public class PlayerSkin: ExpressibleByStringLiteral {
     
     public typealias StringLiteralType = String
     
+    private var timer: Timer? = nil
+    
     private var skins = [String:SKTexture]()
     
     public let outfit: PlayerOutfit
@@ -40,7 +42,7 @@ public class PlayerSkin: ExpressibleByStringLiteral {
         if skins[name] == nil {
             skins[name] = SKTexture(imageNamed: name)
         }
-        
+                
         return skins[name]!
         
     }
@@ -57,7 +59,9 @@ public class PlayerSkin: ExpressibleByStringLiteral {
     
     
     func animate(_ node: PlayerNode) {
-        Timer.scheduledTimer(withTimeInterval: 1.0 / 20.0, repeats: true) { (timer) in
+        print("animating!")
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20.0, repeats: true) { (timer) in
             node.texture = self.next()
         }
     }

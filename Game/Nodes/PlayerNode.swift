@@ -11,8 +11,14 @@ import SpriteKit
 
 class PlayerNode: SKSpriteNode {
     var slot: Int = 0
-    var floor: Int = 1
+    var floor: Int
     var target: Int? = nil
+    
+    fileprivate(set) var isMoving: Bool = false {
+        didSet {
+            
+        }
+    }
     
     fileprivate(set) var isInsideElevator: Bool = false {
         didSet {
@@ -20,7 +26,8 @@ class PlayerNode: SKSpriteNode {
         }
     }
     
-    init() {
+    init(floor: Int = 1) {
+        self.floor = floor
         super.init(texture: PlayerSkin.current.next(), color: .clear, size: GameScene.playerSize)
         self.anchorPoint = .init(x: 0.5, y: 0)
         self.zPosition = ZPosition.playerOutside
@@ -33,25 +40,30 @@ class PlayerNode: SKSpriteNode {
 }
 
 extension PlayerNode {
-    
-    private var isMoving: Bool {
-        return action(forKey: "move") != nil
-    }
-    
-    func right() {
-        guard !isMoving else {
-            return
-        }
+    func move(to slot: Int) {
+        let translation = slot - self.slot
         
+        self.slot = slot
+        self.isMoving = true
         
-    }
-    
-    func left() {
-        guard !isMoving else {
-            return
-        }
-        
-        
+        PlayerSkin.current.set(state: .run)
+        PlayerSkin.current.set(direction: translation > 0 ? .right : .left)
+
+        self.run(
+            SKAction.sequence(
+                [
+                    SKAction.moveBy(
+                        x: GameScene.slotWidth * CGFloat(translation),
+                        y: 0,
+                        duration: TimeInterval(abs(translation)) * GameScene.playerSpeed
+                    ),
+                    SKAction.run {
+                        self.isMoving = false
+                        PlayerSkin.current.set(state: .idle)
+                    }
+                ]
+            )
+        )
     }
 }
 

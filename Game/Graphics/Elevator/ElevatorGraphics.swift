@@ -44,7 +44,7 @@ struct Graphics {
     static func elevatorOverlay(style: ElevatorStyle, percent: CGFloat) -> UIImage {
         return Graphics.draw { (context) in
             // Doors
-            let space = (size.width / 2 - size.width / 50) * percent + size.width / 50
+            let space = (size.width / 2) * percent
             let padding = size.width / 50
             // Draw
             context.setFillColor(style.door.cgColor)

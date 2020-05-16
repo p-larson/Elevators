@@ -8,13 +8,14 @@
 
 import Foundation
 
-final class ElevatorModel: Identifiable, Decodable, Encodable {
+public struct ElevatorModel: Identifiable, Decodable, Encodable {
     let target: Int
     let floor: Int
     let slot: Int
     
-    weak var origin: ElevatorNode? = nil
-    weak var destination: ElevatorNode? = nil
+    public var id: [Int] {
+        [target, floor, slot]
+    }
     
     init(floor: Int, slot: Int, target: Int) {
         self.floor = floor
@@ -26,7 +27,7 @@ final class ElevatorModel: Identifiable, Decodable, Encodable {
         case floor, slot, target
     }
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
         do {
@@ -36,7 +37,7 @@ final class ElevatorModel: Identifiable, Decodable, Encodable {
         }
     }
     
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(floor, forKey: .floor)
@@ -54,32 +55,8 @@ extension ElevatorModel {
         return min(floor, target)
     }
     
-    var bottomNode: ElevatorNode? {
-        guard let origin = origin, let destination = destination else {
-            return nil
-        }
-        
-        if floor > target {
-            return destination
-        } else {
-            return origin
-        }
-    }
-    
     var top: Int {
         return max(floor, target)
-    }
-    
-    var topNode: ElevatorNode? {
-        guard let origin = origin, let destination = destination else {
-            return nil
-        }
-        
-        if floor < target {
-            return destination
-        } else {
-            return origin
-        }
     }
 }
 
@@ -90,7 +67,14 @@ extension ElevatorModel {
 }
 
 extension ElevatorModel: CustomStringConvertible {
-    var description: String {
-        return [self.slot, "@", self.floor, "->",self.target].description
+    public var description: String {
+        return "(\(slot), \(floor), \(target))"
+    }
+}
+
+extension ElevatorModel: Equatable {
+    public static func == (lhs: ElevatorModel, rhs: ElevatorModel) -> Bool {
+        print(lhs, rhs)
+        return lhs.floor == rhs.floor && lhs.slot == rhs.slot
     }
 }

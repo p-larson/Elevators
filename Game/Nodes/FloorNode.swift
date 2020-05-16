@@ -27,7 +27,7 @@ public class FloorNode: SKNode {
             self.wallpaper.anchorPoint = .zero
             self.wallpaper.zPosition = ZPosition.floorWallpaper
             self.addChild(wallpaper)
-            self.vStack(children: [base, wallpaper], print: true)
+            self.vStack(children: [base, wallpaper])
         }
         
         do {

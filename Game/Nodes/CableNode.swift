@@ -10,8 +10,16 @@ import Foundation
 import SpriteKit
 
 class CableNode: SKSpriteNode {
-    init(length: Int) {
-        super.init(texture: nil, color: .black, size: GameScene.cableSize(of: length))
+    
+    let bottom: Int
+    
+    init(length: Int, bottom: Int) {
+        self.bottom = bottom
+        super.init(
+            texture: nil,
+            color: .black,
+            size: GameScene.cableSize(of: abs(length))
+        )
         self.anchorPoint = .init(x: 0.5, y: 0)
         self.zPosition = ZPosition.cable
     }
