@@ -14,9 +14,9 @@ public class LevelStorage: ObservableObject {
     private let storage = UserDefaults()
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
+    
     // All levels, local and hard file.
     @Published public var levels: [LevelModel]
-    
     // Save of local models
     private var local: [LevelModel]
     
@@ -33,6 +33,7 @@ public class LevelStorage: ObservableObject {
     }
     
     public func remove(_ indexSet: IndexSet) {
+        
         for index in indexSet {
             let target = levels[index]
             
@@ -48,16 +49,19 @@ public class LevelStorage: ObservableObject {
                 model == target
             }
         }
+        // Update id's
+        
     }
     
     public func save(_ model: LevelModel) {
         var replaced = false
         
-        print("Saving Level \(model.id) to Local File. Current Levels: \(levels.map { $0.id }).")
+        print("Saving \(model) to Local File. Current Levels: \(levels.map { $0.id }).")
         
         // Replace in locals
         for (index, level) in levels.enumerated() {
             if level == model {
+                print("\t", "replacing \(levels[index]) with \(model)")
                 levels[index] = model
                 replaced = true
                 break
@@ -77,6 +81,15 @@ public class LevelStorage: ObservableObject {
             local.append(model)
         }
         
+        
+        self.save()
+        
+        print("\t\t", self.levels)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            print("\t\t", self.levels)
+        }
+        
         print("Locally Saved. Replaced: \(replaced). Current Levels: \(levels.map { $0.id }).")
     }
     
@@ -89,16 +102,36 @@ public class LevelStorage: ObservableObject {
     private init() {
         if
             let localData = storage.data(forKey: "levels"),
-            let localSave = try? decoder.decode([LevelModel].self, from: localData)
+            let localSave = try? decoder.decode([LevelModel].self, from: localData),
+            let hardFolder = Bundle.main.urls(forResourcesWithExtension: "txt", subdirectory: nil)
         {
             levels = localSave
             local = localSave
-        } else {
-//            levels = [LevelModel]()
-//            local = [LevelModel]()
             
-            levels = [.demo]
-            local = [.demo]
+            for url in hardFolder {
+                guard
+                    let data = try? Data(contentsOf: url),
+                    let model = decode(data)
+                else {
+                    continue
+                }
+                
+                levels.append(model)
+            }
+        } else {
+            levels = [LevelModel]()
+            local = [LevelModel]()
+            
+            // levels = [.demo]
+            // local = [.demo]
+        }
+        
+        print("Loaded \(levels.count) Levels (\(local.count) Local).")
+        
+        levels.sorted { (m1, m2) -> Bool in
+            m1.id < m2.id
+        }.forEach { (model) in
+            print("\t", model.id, model.name)
         }
     }
     
@@ -107,9 +140,31 @@ public class LevelStorage: ObservableObject {
             let data = try encoder.encode(local)
             
             storage.set(data, forKey: "levels")
+            
+            guard
+                let localData = storage.data(forKey: "levels"),
+                let localSave = try? decoder.decode([LevelModel].self, from: localData)
+            else {
+                
+                print("FAILED TO LOAD FROM SAVE.")
+                
+                return
+            }
+            
+            localSave.forEach { (model) in
+                print("Saved \(model).")
+            }
         } catch {
            print("FAILED TO SAVE LOCAL MODELS.", error)
         }
+    }
+    
+    func data(from model: LevelModel) -> Data? {
+        try? encoder.encode(model)
+    }
+    
+    func decode(_ data: Data) -> LevelModel? {
+        try? decoder.decode(LevelModel.self, from: data)
     }
     
     func getFile(for id: Int) -> NSURL? {

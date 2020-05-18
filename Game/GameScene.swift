@@ -101,6 +101,12 @@ extension GameScene {
         }
     }
     
+    func cableNode(for model: ElevatorModel) -> CableNode? {
+        cableNodes.first { (node) -> Bool in
+            node.floor == model.floor && node.slot == model.slot
+        }
+    }
+    
     var coinNodes: [CoinNode] {
         children.compactMap { (child) -> CoinNode? in
             child as? CoinNode
@@ -115,6 +121,7 @@ extension GameScene {
         self.setupPlayer()
         self.setupCamera()
         self.startWave()
+        self.updateTarget()
         print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
     }
 }
@@ -188,13 +195,13 @@ extension GameScene {
     }
     
     static var bottomSpace: CGFloat {
-        return UIScreen.main.bounds.size.height / 4
+        return UIScreen.main.bounds.size.height / 2
     }
     
     static func cableSize(of length: Int) -> CGSize {
         return CGSize(
             width: elevatorSize.width / 5,
-            height: floorSize.height * CGFloat(length)
+            height: floorSize.height * CGFloat(length) - elevatorSize.height - GameScene.floorBaseSize.height
         )
     }
 }
@@ -235,7 +242,7 @@ public extension GameScene {
     }
     
     func cableYPosition(at floor: Int) -> CGFloat {
-        return floorYPosition(at: floor)
+        return floorYPosition(at: floor) + GameScene.elevatorSize.height + GameScene.floorBaseSize.height
     }
 }
 
@@ -256,22 +263,24 @@ fileprivate extension GameScene {
     
     func load(elevator: ElevatorModel) {
         
+        print("Loading \(elevator) into view.")
+        
         guard elevator.floor != elevator.target else {
             print("Invalid Elevator Model \(elevator). Check Elevator's Floor & Target")
             return
         }
         
         do {
-            let destination = ElevatorNode(floor: elevator.target, slot: elevator.slot)
+            let destination = ElevatorNode(floor: elevator.target, slot: elevator.slot, target: elevator.floor)
             
             destination.position.y = elevatorYPosition(at: elevator.target)
             destination.position.x = elevatorXPosition(at: elevator.slot)
-                        
+            
             self.addChild(destination)
         }
         
         do {
-            let origin = ElevatorNode(floor: elevator.floor, slot: elevator.slot)
+            let origin = ElevatorNode(floor: elevator.floor, slot: elevator.slot, target: elevator.target)
             
             origin.position.y = elevatorYPosition(at: elevator.floor)
             origin.position.x = elevatorXPosition(at: elevator.slot)
@@ -280,7 +289,7 @@ fileprivate extension GameScene {
         }
         
         do {
-            let cable = CableNode(length: elevator.distance, bottom: elevator.bottom)
+            let cable = CableNode(length: elevator.distance, floor: elevator.floor, slot: elevator.slot)
             
             cable.position.y = elevatorYPosition(at: elevator.floor)
             cable.position.x = elevatorXPosition(at: elevator.slot)
@@ -342,19 +351,23 @@ fileprivate extension GameScene {
         }
         
         // Cables
-        for cableNode in cableNodes where rendered.contains(cableNode.bottom) {
-            cableNode.position.y = cableYPosition(at: cableNode.bottom)
+        for cableNode in cableNodes where rendered.contains(cableNode.floor) {
+            cableNode.position.y = cableYPosition(at: cableNode.floor)
         }
         
         // Open all elevators on the player's floor.
         for elevatorNode in elevatorNodes(on: playerNode.floor) where !elevatorNode.isOpen {
             elevatorNode.open(wait: Double(elevatorNode.slot) * 0.05)
         }
+        
+        // Clean
+        self.clean()
     }
     // Remove any floor or elevator that is shouldn't be rendered
     func clean() {
         
-        for elevatorNode in elevatorNodes where !rendered.contains(elevatorNode.floor) {
+        for elevatorNode in elevatorNodes where !rendered.contains(elevatorNode.floor) && !rendered.contains(elevatorNode.target) {
+            print("Unloading \(elevatorNode)")
             elevatorNode.removeFromParent()
         }
         
@@ -362,7 +375,7 @@ fileprivate extension GameScene {
             floorNode.removeFromParent()
         }
         
-        for cableNode in cableNodes where !rendered.contains(cableNode.bottom) {
+        for cableNode in cableNodes where !rendered.contains(cableNode.floor) {
             cableNode.removeFromParent()
         }
         
@@ -461,9 +474,9 @@ extension GameScene {
         let distance = target - playerNode.floor
         
         let cameraSpeed: TimeInterval = Double(abs(distance)) * GameScene.cameraSpeed
-                
+        
         PlayerSkin.current.set(state: .idle)
-                
+        
         self.camera?.run(
             .sequence(
                 [
@@ -560,9 +573,9 @@ extension GameScene {
         let camera = SKCameraNode()
         
         camera.position = cameraOrigin
-
+        
         self.addChild(camera)
-
+        
         self.camera = camera
     }
 }
@@ -575,7 +588,6 @@ extension GameScene {
                 [
                     SKAction.group(
                         [
-//                            SKAction.scale(to: 0.75, duration: GameScene.waveSpeed),
                             SKAction.moveBy(
                                 x: 0,
                                 y: GameScene.bottomSpace,
@@ -600,10 +612,45 @@ extension GameScene {
     // When the player rides, it should cancel
     func stopWave() {
         camera?.removeAction(forKey: "wave")
-//        camera?.run(SKAction.scale(to: 1.0, duration: GameScene.waveSpeed))
+        //        camera?.run(SKAction.scale(to: 1.0, duration: GameScene.waveSpeed))
     }
 }
 
+extension GameScene {
+    
+    func updateTarget() {
+        guard
+            let model = playerElevator(),
+            let target = targetNode(for: model)?.overlay,
+            let origin = originNode(for: model)?.overlay,
+            let cable = cableNode(for: model)
+        else {
+                return
+        }
+        
+        let slot = model.slot
+        
+        [target, origin, cable].forEach { (node) in
+            node.run(
+                SKAction.repeatForever(
+                    SKAction
+                        .sequence(
+                            [
+                                SKAction.fadeAlpha(by: -0.5, duration: 0.5),
+                                SKAction.fadeAlpha(to: 1.0, duration: 0.5),
+                                SKAction.run {
+                                    if self.playerElevator()?.slot != slot {
+                                        node.removeAction(forKey: "target")
+                                    }
+                                }
+                            ]
+                    ).with(timing: .easeInEaseOut)
+                ),
+                withKey: "target"
+            )
+        }
+    }
+}
 
 import SwiftUI
 

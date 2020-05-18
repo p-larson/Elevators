@@ -36,6 +36,10 @@ struct DeveloperView: View {
                                         Text("Local")
                                             .foregroundColor(.red)
                                             .underline()
+                                    } else {
+                                        Text("Hard Saved")
+                                            .foregroundColor(.green)
+                                            .italic()
                                     }
                                 }
                             }.deleteDisabled(!LevelStorage.current.isLocalallySaved(model: model))

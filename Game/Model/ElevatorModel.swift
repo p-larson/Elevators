@@ -74,7 +74,6 @@ extension ElevatorModel: CustomStringConvertible {
 
 extension ElevatorModel: Equatable {
     public static func == (lhs: ElevatorModel, rhs: ElevatorModel) -> Bool {
-        print(lhs, rhs)
         return lhs.floor == rhs.floor && lhs.slot == rhs.slot
     }
 }

@@ -10,24 +10,31 @@ import Foundation
 import SpriteKit
 
 class ElevatorNode: SKNode {
-    private var background: SKSpriteNode!
-    private var overlay: SKSpriteNode!
+    fileprivate var background: SKSpriteNode!
+    fileprivate var _overlay: SKSpriteNode!
     
-    let floor: Int, slot: Int
+    public var overlay: SKNode {
+        get {
+            _overlay
+        }
+    }
+    
+    let floor: Int, slot: Int, target: Int
     
     public var isOpen: Bool = false
     
-    init(floor: Int, slot: Int) {
+    init(floor: Int, slot: Int, target: Int) {
         self.background = SKSpriteNode(
             texture: ElevatorSkin.current.elevatorBackground,
             size: GameScene.elevatorSize
         )
         
-        self.overlay = SKSpriteNode(
+        self._overlay = SKSpriteNode(
             texture: ElevatorSkin.current.elevatorOverlay.first,
             size: GameScene.elevatorSize
         )
         
+        self.target = target
         self.floor = floor
         self.slot = slot
         
@@ -42,9 +49,9 @@ class ElevatorNode: SKNode {
 
         self.addChild(background)
         
-        self.overlay.zPosition = ZPosition.elevatorOverlay
-        self.overlay.anchorPoint = .init(x: 0.5, y: 0)
-        self.addChild(overlay)
+        self._overlay.zPosition = ZPosition.elevatorOverlay
+        self._overlay.anchorPoint = .init(x: 0.5, y: 0)
+        self.addChild(_overlay)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -53,18 +60,24 @@ class ElevatorNode: SKNode {
 }
 
 extension ElevatorNode {
+    override var description: String {
+        return "Elevator Node (\(floor), \(slot))"
+    }
+}
+
+extension ElevatorNode {
     func open(wait duration: TimeInterval = 0) {
-        self.run(
+        self._overlay.run(
             SKAction.sequence(
                 [
                     SKAction.wait(forDuration: duration),
-                    SKAction.scale(to: 0.9, duration: GameScene.doorSpeed / 3),
+                    SKAction.scale(to: 1.1, duration: GameScene.doorSpeed / 3),
                     SKAction.scale(to: 1.0, duration: GameScene.doorSpeed / 3)
                 ]
             )
         )
         
-        self.overlay.run(
+        self._overlay.run(
             SKAction.sequence(
                 [
                     SKAction.wait(forDuration: duration),
@@ -81,17 +94,17 @@ extension ElevatorNode {
     }
     
     func close(wait duration: TimeInterval = 0) {
-        self.run(
+        self._overlay.run(
             SKAction.sequence(
                 [
                     SKAction.wait(forDuration: duration),
-                    SKAction.scale(to: 0.9, duration: GameScene.doorSpeed / 3),
+                    SKAction.scale(to: 1.1, duration: GameScene.doorSpeed / 3),
                     SKAction.scale(to: 1.0, duration: GameScene.doorSpeed / 3)
                 ]
             )
         )
         
-        self.overlay.run(
+        self._overlay.run(
             SKAction.sequence(
                 [
                     SKAction.wait(forDuration: duration),

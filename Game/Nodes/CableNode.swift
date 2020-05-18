@@ -11,10 +11,11 @@ import SpriteKit
 
 class CableNode: SKSpriteNode {
     
-    let bottom: Int
+    let floor: Int, slot: Int
     
-    init(length: Int, bottom: Int) {
-        self.bottom = bottom
+    init(length: Int, floor: Int, slot: Int) {
+        self.floor = floor
+        self.slot = slot
         super.init(
             texture: nil,
             color: .black,

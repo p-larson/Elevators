@@ -41,3 +41,9 @@ public struct CoinModel: Identifiable, Encodable, Decodable, Equatable {
         return lhs.floor == rhs.floor && lhs.slot == rhs.slot
     }
 }
+
+extension CoinModel: CustomStringConvertible {
+    public var description: String {
+        return "(\(slot), \(floor))"
+    }
+}

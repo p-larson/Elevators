@@ -13,9 +13,12 @@ struct GameContainerView: UIViewRepresentable {
     typealias UIViewType = SKView
     
     let model: LevelModel
+    @State var scene: GameScene
     
-    var scene: GameScene {
-        GameScene(model: model)
+    init(model: LevelModel, isPlaying: Binding<Bool>) {
+        self.model = model
+        self._scene = State(initialValue: GameScene(model: model))
+        self._isPlaying = isPlaying
     }
     
     @Binding var isPlaying: Bool

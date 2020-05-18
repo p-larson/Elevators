@@ -65,6 +65,12 @@ public struct LevelModel: Identifiable, Encodable & Decodable {
     }
 }
 
+extension LevelModel: CustomStringConvertible {
+    public var description: String {
+        "(\(id) \(name))"
+    }
+}
+
 extension LevelModel: Equatable {
     public static func ==(lhs: LevelModel, rhs: LevelModel) -> Bool {
         return lhs.id == rhs.id
@@ -77,8 +83,12 @@ extension LevelModel {
             name: "demo",
             floors: 10,
             slots: 5,
-            elevators: [],
-            coins: [],
+            elevators: [
+                .init(floor: 1, slot: 0, target: 5),
+            ],
+            coins: [
+                .init(slot: 0, floor: 5)
+            ],
             start: nil,
             id: 0
         )

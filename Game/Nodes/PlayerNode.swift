@@ -14,11 +14,7 @@ class PlayerNode: SKSpriteNode {
     var floor: Int
     var target: Int? = nil
     
-    fileprivate(set) var isMoving: Bool = false {
-        didSet {
-            
-        }
-    }
+    fileprivate(set) var isMoving: Bool = false
     
     fileprivate(set) var isInsideElevator: Bool = false {
         didSet {
@@ -43,27 +39,53 @@ extension PlayerNode {
     func move(to slot: Int) {
         let translation = slot - self.slot
         
-        self.slot = slot
+//        self.slot = slot
         self.isMoving = true
         
-        PlayerSkin.current.set(state: .run)
-        PlayerSkin.current.set(direction: translation > 0 ? .right : .left)
-
         self.run(
             SKAction.sequence(
                 [
-                    SKAction.moveBy(
-                        x: GameScene.slotWidth * CGFloat(translation),
-                        y: 0,
-                        duration: TimeInterval(abs(translation)) * GameScene.playerSpeed
+                    SKAction.repeat(
+                        SKAction.sequence(
+                            [
+                                SKAction.run {
+                                    self.slot += (translation / abs(translation))
+                                    self.gamescene?.updateTarget()
+                                },
+                                SKAction
+                                    .moveBy(
+                                        x: GameScene.slotWidth * CGFloat(translation / abs(translation)),
+                                        y: 0, duration: GameScene.playerSpeed
+                                )
+                            ]
+                        ),
+                        count: abs(translation)
                     ),
                     SKAction.run {
-                        self.isMoving = false
-                        PlayerSkin.current.set(state: .idle)
+                        self.isMoving = false  
                     }
                 ]
             )
         )
+        
+        PlayerSkin.current.set(state: .run)
+        PlayerSkin.current.set(direction: translation > 0 ? .right : .left)
+
+//        self.run(
+//            SKAction.sequence(
+//                [
+//                    SKAction.moveBy(
+//                        x: GameScene.slotWidth * CGFloat(translation),
+//                        y: 0,
+//                        duration: TimeInterval(abs(translation)) * GameScene.playerSpeed
+//                    ),
+//                    SKAction.run {
+//                        self.isMoving = false
+//                        PlayerSkin.current.set(state: .idle)
+//                    }
+//                ]
+//            )
+//        )
     }
 }
 

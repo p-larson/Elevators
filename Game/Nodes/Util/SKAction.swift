@@ -17,4 +17,10 @@ extension SKAction {
             ]
         )
     }
+    
+    func with(timing mode: SKActionTimingMode) -> SKAction {
+        self.timingMode = mode
+        
+        return self
+    }
 }
