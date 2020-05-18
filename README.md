@@ -2,6 +2,8 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Reposition/Size Cable (Above bottom elevator and below top elevator)
+- [x] Cable Selected Animation
 - [x] Fix JSON for LevelModel (elevators/coins not encoding)
 - [x] Player Selected Elevator Highlight / Opacity Select
 - [ ] Fix Player Movement Animations
