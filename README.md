@@ -2,6 +2,8 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Character Selector
+- [ ] Settings
 - [ ] Optimize Game Graphics (high energy usage).
 - [ ] End Game (Win/Loose)
 - [x] Reposition/Size Cable (Above bottom elevator and below top elevator)
