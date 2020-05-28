@@ -5,7 +5,7 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] Sound FX
 - [ ] Character Selector
 - [ ] Settings
-- [ ] Optimize Game Graphics (high energy usage).
+- [x] Optimize Game Graphics (high energy usage). It's pretty good right now
 - [ ] End Game (Win/Loose)
 - [x] Reposition/Size Cable (Above bottom elevator and below top elevator)
 - [x] Cable Selected Animation
