@@ -11,6 +11,8 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    static let impact = UIImpactFeedbackGenerator(style: .light)
+
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -20,11 +22,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     
     func applicationWillTerminate(_ application: UIApplication) {
-        LevelStorage.current.save()
+        Storage.current.save()
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
-        LevelStorage.current.save()
+        Storage.current.save()
     }
     
     // MARK: UISceneSession Lifecycle

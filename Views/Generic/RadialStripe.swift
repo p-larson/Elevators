@@ -10,6 +10,8 @@ import SwiftUI
 
 struct RadialStripes: ViewModifier {
     
+    @State var animating = false
+    
     var stripes: some View {
         GeometryReader { reader in
             Path { path in
@@ -27,12 +29,25 @@ struct RadialStripes: ViewModifier {
                     )
                     path.closeSubpath()
                 }
-            }.blendMode(.darken).opacity(0.01)
+            }
+        
+            .blendMode(.lighten)
+            .opacity(0.02)
+            .blur(radius: 5)
+            .onAppear(perform: {
+                withAnimation {
+                    self.animating = true
+                }
+            })
+            .rotationEffect(Angle.degrees(self.animating ? 0 : 30))
+            .animation(Animation.linear(
+                    duration: 1
+            ).repeatForever(autoreverses: false), value: self.animating)
         }
     }
     
     func body(content: Content) -> some View {
-        content.overlay(stripes)
+        content.background(stripes)
     }
 }
 
@@ -43,13 +58,11 @@ struct RadialStripe_Previews: PreviewProvider {
     ]
     
     static var previews: some View {
-        Group {
-            colors[0].edgesIgnoringSafeArea(.all).modifier(RadialStripes())
-            LinearGradient(
-                gradient: Gradient(colors: colors),
-                startPoint: .bottom,
-                endPoint: .top
-            )
+        ZStack {
+            GameBackground()
+            
+            Image("chef.idle.right.1")
+                .modifier(RadialStripes())
         }
     }
 }

@@ -34,4 +34,24 @@ public struct ElevatorStyle {
         backdrop: UIColor(displayP3Red: 86/255, green: 86/255, blue: 86/255, alpha: 1),
         cable: UIColor(displayP3Red: 0/255, green: 0/255, blue: 0/255, alpha: 1)
     )
+    
+    static let locked = ElevatorStyle(
+        background: .black,
+        frame: .black,
+        door: .black,
+        padding: .black,
+        backdrop: .black,
+        cable: .black
+    )
+    
+    static var random: ElevatorStyle {
+        return ElevatorStyle(
+            background: .random,
+            frame: .random,
+            door: .random,
+            padding: .random,
+            backdrop: .random,
+            cable: .random
+        )
+    }
 }

@@ -14,32 +14,34 @@ public class FloorNode: SKNode {
     private var base: SKSpriteNode!
     private var wallpaper: SKSpriteNode!
     
-    init(floor: Int) {
+    private static let baseTexture: SKTexture = SKTexture(image: Graphics.base())
+    private static let finish: SKTexture = SKTexture(image: Graphics.finishLine())
+    
+    init(floor: Int, isFinal: Bool) {
         self.floor = floor
         super.init()
         
         do {
-            self.base = SKSpriteNode(color: .black, size: GameScene.floorBaseSize)
+            self.base = SKSpriteNode(texture: FloorNode.baseTexture, size: GameScene.floorBaseSize)
             self.base.anchorPoint = .zero
+            self.base.position.x = 16
             self.base.zPosition = ZPosition.floorBase
             self.addChild(base)
-            self.wallpaper = SKSpriteNode(color: .lightGray, size: GameScene.floorWallPaperSize)
-            self.wallpaper.anchorPoint = .zero
-            self.wallpaper.zPosition = ZPosition.floorWallpaper
-            self.addChild(wallpaper)
-            self.vStack(children: [base, wallpaper])
         }
         
-        do {
-            let node = SKLabelNode()
+        
+        if isFinal {
+            let node = SKSpriteNode(texture: FloorNode.finish, size: GameScene.finishLineSize)
             
-            node.text = floor.description
-            node.fontColor = .black
-            node.position.y = GameScene.floorSize.height / 2
-            node.position.x = GameScene.floorSize.width / 2
+            node.position.y += GameScene.floorBaseSize.height
+            node.position.y += GameScene.elevatorSize.height / 2
+            node.position.x = GameScene.finishLineSize.width / 2
+            node.alpha = 1.0
+            node.zPosition = ZPosition.floorWallpaper
             
             self.addChild(node)
         }
+        
     }
     
     required init?(coder aDecoder: NSCoder) {

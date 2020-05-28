@@ -19,6 +19,7 @@ public struct LevelModel: Identifiable, Encodable & Decodable {
     public var coins: [CoinModel]
     public var start: CellModel?
     public var id: Int
+    public var number: Int { id + 1 }
     
     enum CodingKeys: CodingKey {
         case name, floors, slots, elevators, coins, selected, start, id
@@ -81,7 +82,7 @@ extension LevelModel {
     static var demo: LevelModel {
         LevelModel(
             name: "demo",
-            floors: 10,
+            floors: 5,
             slots: 5,
             elevators: [
                 .init(floor: 1, slot: 0, target: 5),

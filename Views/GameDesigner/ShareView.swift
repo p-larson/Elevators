@@ -73,7 +73,7 @@ struct ShareView: View {
     
     private var content: [NSURL] {
         self.models.compactMap { (id) -> NSURL? in
-            LevelStorage.current.getFile(for: id)
+            Storage.current.getFile(for: id)
         }
     }
     

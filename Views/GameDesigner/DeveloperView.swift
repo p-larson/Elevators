@@ -10,7 +10,9 @@ import SwiftUI
 
 struct DeveloperView: View {
         
-    @ObservedObject var saves = LevelStorage.current
+    @Binding var isShowing: Bool
+    
+    @ObservedObject var saves = Storage.current
     
     var body: some View {
         NavigationView {
@@ -32,7 +34,7 @@ struct DeveloperView: View {
                                 HStack {
                                     Text("\(model.id). \(model.name)")
                                     Spacer()
-                                    if LevelStorage.current.isLocalallySaved(model: model) {
+                                    if Storage.current.isLocalallySaved(model: model) {
                                         Text("Local")
                                             .foregroundColor(.red)
                                             .underline()
@@ -42,12 +44,12 @@ struct DeveloperView: View {
                                             .italic()
                                     }
                                 }
-                            }.deleteDisabled(!LevelStorage.current.isLocalallySaved(model: model))
+                            }.deleteDisabled(!Storage.current.isLocalallySaved(model: model))
                         }
                         .onMove { (indexSet, destination) in
                             self.saves.move(offsets: indexSet, destination: destination)
                         }.onDelete { (indexSet) in
-                            LevelStorage.current.remove(indexSet)
+                            Storage.current.remove(indexSet)
                         }
                         .listStyle(GroupedListStyle())
                     }
@@ -61,10 +63,15 @@ struct DeveloperView: View {
                         }
                     }
                 }
+                
+                Button("Done") {
+                    self.isShowing = false
+                }
 
             }
             .navigationBarTitle("Menu", displayMode: .large)
             .navigationBarItems(trailing: EditButton())
+            .font(.custom("Futura Medium", size: 16))
 
         }
     }
@@ -72,7 +79,7 @@ struct DeveloperView: View {
 
 struct DeveloperView_Previews: PreviewProvider {
     static var previews: some View {
-        DeveloperView()
+        DeveloperView(isShowing: .constant(true))
     }
 }
 

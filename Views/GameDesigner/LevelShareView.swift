@@ -10,13 +10,13 @@ import SwiftUI
 
 struct LevelShareView: View {
     
-    @ObservedObject var save = LevelStorage.current
+    @ObservedObject var save = Storage.current
     @State var selection = Set<Int>()
     @State var share = false
     
     private var content: [NSURL] {
         self.selection.compactMap { (id) -> NSURL? in
-            LevelStorage.current.getFile(for: id)
+            Storage.current.getFile(for: id)
         }
     }
     

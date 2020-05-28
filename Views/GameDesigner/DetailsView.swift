@@ -36,7 +36,7 @@ struct DetailsView: View {
             }
             
             Section(header: Text("Save").font(.title)) {
-                if LevelStorage.current.contains(name) {
+                if Storage.current.contains(name) {
                     Text("Warning! Saving will overwrite a previous save!")
                         .italic()
                         .foregroundColor(.red)
@@ -55,7 +55,7 @@ struct DetailsView: View {
                 }
                 else {
                     Button("Save as \"\(name)\".") {
-                        LevelStorage.current.save(
+                        Storage.current.save(
                             LevelModel(
                                 name: self.name,
                                 floors: self.floors,

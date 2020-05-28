@@ -57,9 +57,7 @@ public class PlayerSkin: ExpressibleByStringLiteral {
         self.frame = 0
     }
     
-    
     func animate(_ node: PlayerNode) {
-        print("animating!")
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20.0, repeats: true) { (timer) in
             node.texture = self.next()

@@ -11,10 +11,12 @@ import SwiftUI
 struct GameTitle: View {
     @State var string: String
     let dark: Bool
+    let shadow: Bool
     
-    init(_ string: String, dark: Bool = false) {
+    init(_ string: String, dark: Bool = false, shadow: Bool = false) {
         self._string = State(initialValue: string)
         self.dark = dark
+        self.shadow = shadow
     }
     
     private var text: String {
@@ -26,7 +28,7 @@ struct GameTitle: View {
             Text(text)
                 .font(.custom("Being Strong Shadow", size: 64))
                 .foregroundColor(dark ? .black : .white)
-                .shadow(color: Color.black.opacity(dark ? 0 : 0.15), radius: 0, x: 0, y: 10)
+                .shadow(color: Color.black.opacity(dark ? 0 : 0.15), radius: 0, x: 0, y: shadow ? 10 : 0)
             Text(text)
                 .font(.custom("Being Strong Regular", size: 64))
                 .foregroundColor(dark ? .white : .black)
@@ -38,6 +40,8 @@ struct GameTitle_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             GameTitle("Elevators")
+            GameTitle("Level 3", dark: false, shadow: false)
+                .scaleEffect(0.3)
         }
     }
 }

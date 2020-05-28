@@ -27,7 +27,6 @@ class PlayerNode: SKSpriteNode {
         super.init(texture: PlayerSkin.current.next(), color: .clear, size: GameScene.playerSize)
         self.anchorPoint = .init(x: 0.5, y: 0)
         self.zPosition = ZPosition.playerOutside
-        PlayerSkin.current.animate(self)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -36,10 +35,16 @@ class PlayerNode: SKSpriteNode {
 }
 
 extension PlayerNode {
+    override var description: String {
+        "Player \(hash) \(hashValue)"
+    }
+    
+}
+
+extension PlayerNode {
     func move(to slot: Int) {
         let translation = slot - self.slot
         
-//        self.slot = slot
         self.isMoving = true
         
         self.run(
@@ -54,7 +59,7 @@ extension PlayerNode {
                                 },
                                 SKAction
                                     .moveBy(
-                                        x: GameScene.slotWidth * CGFloat(translation / abs(translation)),
+                                        x: (gamescene?.slotWidth ?? 0) * CGFloat(translation / abs(translation)),
                                         y: 0, duration: GameScene.playerSpeed
                                 )
                             ]
@@ -62,7 +67,8 @@ extension PlayerNode {
                         count: abs(translation)
                     ),
                     SKAction.run {
-                        self.isMoving = false  
+                        self.isMoving = false
+                        PlayerSkin.current.set(state: .idle)
                     }
                 ]
             )
@@ -70,37 +76,15 @@ extension PlayerNode {
         
         PlayerSkin.current.set(state: .run)
         PlayerSkin.current.set(direction: translation > 0 ? .right : .left)
-
-//        self.run(
-//            SKAction.sequence(
-//                [
-//                    SKAction.moveBy(
-//                        x: GameScene.slotWidth * CGFloat(translation),
-//                        y: 0,
-//                        duration: TimeInterval(abs(translation)) * GameScene.playerSpeed
-//                    ),
-//                    SKAction.run {
-//                        self.isMoving = false
-//                        PlayerSkin.current.set(state: .idle)
-//                    }
-//                ]
-//            )
-//        )
     }
 }
 
 extension PlayerNode {
     func enter() {
-        // Fadeout,
+        // Fadeout
+        self.isInsideElevator = true
         self.run(
-            SKAction.sequence(
-                [
-                    SKAction.fadeOut(withDuration: GameScene.doorSpeed),
-                    SKAction.run {
-                        self.isInsideElevator = true
-                    }
-                ]
-            )
+            SKAction.fadeOut(withDuration: GameScene.doorSpeed)
         )
     }
     

@@ -11,13 +11,29 @@ import SpriteKit
 
 public class CoinNode: SKSpriteNode {
     
+    static let texture = SKTexture(imageNamed: "coin.png")
+    
     let model: CoinModel
+    
     
     init(model: CoinModel) {
         
         self.model = model
         
-        super.init(texture: nil, color: .yellow, size: GameScene.coinSize)
+        super.init(texture: CoinNode.texture, color: .yellow, size: GameScene.coinSize)
+                
+        self.zPosition = ZPosition.coin
+        
+        self.run(
+            SKAction.repeatForever(
+                SKAction.sequence(
+                    [
+                        SKAction.moveBy(x: 0, y: GameScene.coinSize.height / 2, duration: 1),
+                        SKAction.moveBy(x: 0, y: GameScene.coinSize.height / 2, duration: 1).reversed()
+                    ]
+                )//.with(timing: SKActionTimingMode.easeIn)
+            )
+        )
     }
     
     required init?(coder aDecoder: NSCoder) {

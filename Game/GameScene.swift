@@ -11,23 +11,58 @@ import SpriteKit
 
 final public class GameScene: SKScene, ObservableObject {
     // Model
-    let model: LevelModel
+    var model: LevelModel {
+        didSet {
+            self.reload()
+        }
+    }
     // Data
-    let playerNode = PlayerNode(floor: 1)
+    var playerNode: PlayerNode!
     var didSucceedLongTouch = false
     var isTouching = false
     // State
-    @Published var hasEnded: Bool = false
+    @Published var isPlaying: Bool = false {
+        didSet {
+            if isPlaying {
+                self.startWave()
+            }
+        }
+    }
     @Published var hasWon: Bool = false
+    @Published var hasLost: Bool = false
     
     init(model: LevelModel) {
         self.model = model
         
         super.init(size: UIScreen.main.bounds.size)
+        
+        self.backgroundColor = .clear
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError()
+    }
+}
+
+// Setup
+extension GameScene {
+    
+    public func reload() {
+        self.removeAllChildren()
+        self.setupPlayer()
+        self.render()
+        self.clean()
+        self.setupCamera()
+        self.setupControls()
+        self.updateTarget()
+        self.hasWon = false
+        self.hasLost = false
+        self.isPlaying = false
+        print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
+    }
+    
+    public override func didMove(to view: SKView) {
+        self.reload()
     }
 }
 
@@ -115,18 +150,6 @@ extension GameScene {
 }
 
 extension GameScene {
-    public override func sceneDidLoad() {
-        self.render()
-        self.clean()
-        self.setupPlayer()
-        self.setupCamera()
-        self.startWave()
-        self.updateTarget()
-        print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
-    }
-}
-
-extension GameScene {
     var maxSlot: Int {
         model.slots - 1
     }
@@ -143,21 +166,21 @@ extension GameScene {
     static let doorSpeed: TimeInterval = 0.3
     static let waveSpeed: TimeInterval = 3.0
     static let cameraSpeed: TimeInterval = 0.25
-    static let elevatorSpace: CGFloat = 20.0
+    static let padding: CGFloat = 16.0
 }
 
 // Size
 extension GameScene {
     static var floorSize: CGSize {
         return CGSize(
-            width: UIScreen.main.bounds.size.width,
+            width: UIScreen.main.bounds.size.width - GameScene.padding * 2,
             height: UIScreen.main.bounds.size.height / GameScene.maxFloorsShown
         )
     }
     
     static var floorBaseSize: CGSize {
         return CGSize(
-            width: UIScreen.main.bounds.width,
+            width: GameScene.floorSize.width,
             height: UIScreen.main.bounds.size.height / GameScene.maxFloorsShown / 8
         )
     }
@@ -190,12 +213,8 @@ extension GameScene {
         )
     }
     
-    static var slotWidth: CGFloat {
-        return elevatorSize.width + 20.0
-    }
-    
     static var bottomSpace: CGFloat {
-        return UIScreen.main.bounds.size.height / 2
+        return UIScreen.main.bounds.size.height / 3
     }
     
     static func cableSize(of length: Int) -> CGSize {
@@ -204,19 +223,29 @@ extension GameScene {
             height: floorSize.height * CGFloat(length) - elevatorSize.height - GameScene.floorBaseSize.height
         )
     }
+    
+    static var finishLineSize: CGSize {
+        return CGSize(
+            width: UIScreen.main.bounds.width,
+            height: GameScene.floorSize.height / 5
+        )
+    }
 }
 
 public extension GameScene {
+    
+    var slotWidth: CGFloat {
+        ((GameScene.floorSize.width - GameScene.padding * 2) / CGFloat(self.model.slots))
+    }
+    
     func elevatorXPosition(at slot: Int) -> CGFloat {
         var x: CGFloat = 0
         
-        x += GameScene.floorSize.width / 2
-        x -= (CGFloat(self.model.slots) / 2) * GameScene.elevatorSize.width
-        x -= (CGFloat(self.model.slots / 2)) * GameScene.elevatorSpace
-        
-        x += GameScene.elevatorSize.width / 2
-        x += GameScene.elevatorSize.width * CGFloat(slot)
-        x += GameScene.elevatorSpace * CGFloat(slot)
+        x += UIScreen.main.bounds.midX
+        x -= (GameScene.floorSize.width) / 2
+        x += GameScene.padding
+        x += slotWidth / 2
+        x += slotWidth * CGFloat(slot)
         
         return x
     }
@@ -299,7 +328,10 @@ fileprivate extension GameScene {
     }
     
     func load(_ floor: Int) {
-        let node = FloorNode(floor: floor)
+        
+        print("loading", floor, floor == model.floors)
+        
+        let node = FloorNode(floor: floor, isFinal: floor == model.floors)
         
         node.position.y = floorYPosition(at: floor)
         
@@ -310,7 +342,7 @@ fileprivate extension GameScene {
         let node = CoinNode(model: model)
         
         node.position.x = elevatorXPosition(at: model.slot)
-        node.position.y = elevatorYPosition(at: model.floor)
+        node.position.y = elevatorYPosition(at: model.floor) + GameScene.coinSize.height
         
         self.addChild(node)
     }
@@ -344,7 +376,7 @@ fileprivate extension GameScene {
         for coin in model.coins where rendered.contains(coin.floor) {
             if let node = self.coin(for: coin) {
                 node.position.x = elevatorXPosition(at: coin.slot)
-                node.position.y = elevatorYPosition(at: coin.floor)
+                node.position.y = elevatorYPosition(at: coin.floor) + GameScene.coinSize.height
             } else {
                 self.load(coin)
             }
@@ -389,6 +421,8 @@ fileprivate extension GameScene {
 extension GameScene {
     func setupPlayer() {
         // Setup x Position
+        self.playerNode = PlayerNode(floor: 1)
+        
         if let first = self.elevators(on: 1).first {
             playerNode.slot = first.slot
         }
@@ -397,6 +431,8 @@ extension GameScene {
         playerNode.position.y = playerYPosition()
         
         self.addChild(playerNode)
+        
+        PlayerSkin.current.animate(playerNode)
     }
     
     func playerYPosition() -> CGFloat {
@@ -409,9 +445,13 @@ extension GameScene {
 }
 
 extension GameScene {
-    func right() {
-        guard !playerNode.isInsideElevator, !playerNode.isMoving else {
+    @objc func right() {
+        guard !playerNode.isInsideElevator, !playerNode.isMoving, !hasWon, !hasLost else {
             return
+        }
+        
+        if !isPlaying {
+            isPlaying = true
         }
         
         var range = Array(playerNode.slot ..< model.slots)
@@ -429,9 +469,13 @@ extension GameScene {
         self.playerNode.move(to: slot)
     }
     
-    func left() {
-        guard !playerNode.isInsideElevator, !playerNode.isMoving else {
+    @objc func left() {
+        guard !playerNode.isInsideElevator, !playerNode.isMoving, !hasWon, !hasLost else {
             return
+        }
+        
+        if !isPlaying {
+            isPlaying = true
         }
         
         let range = Array(0 ..< playerNode.slot).reversed() as [Int]
@@ -446,10 +490,10 @@ extension GameScene {
     }
 }
 extension GameScene {
-    func ride() {
+    @objc func ride() {
         // Player cannot be inside a elevator.
         // Player must be on a elevator
-        guard !playerNode.isInsideElevator, let elevator = playerElevator() else {
+        guard !playerNode.isInsideElevator, !playerNode.isMoving, let elevator = playerElevator(), !hasWon, !hasLost else {
             return
         }
         
@@ -503,7 +547,12 @@ extension GameScene {
                         self.playerNode.exit()
                     },
                     SKAction.run {
-                        self.startWave()
+                        if self.playerNode.floor == self.model.floors {
+                            self.hasWon = true
+                            self.moveCameraToPlayer()
+                        } else {
+                            self.isPlaying = true
+                        }
                     }
                 ]
             )
@@ -513,46 +562,45 @@ extension GameScene {
 
 
 extension GameScene {
-    
-    static let moveFeedback = UIImpactFeedbackGenerator(style: .light)
-    static let rideFeedback = UIImpactFeedbackGenerator(style: .heavy)
-    
-    func attemptLongTouch(threshold: TimeInterval = 0.3) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + threshold) {
-            if self.isTouching && !self.playerNode.isInsideElevator && !self.playerNode.isMoving {
-                // Ignore next touch end.
-                self.didSucceedLongTouch = true
-                // Give user feedback
-                GameScene.rideFeedback.impactOccurred()
-                // Enter/Exit
-                self.ride()
-            }
-        }
-    }
-    
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if !isTouching {
-            self.isTouching.toggle()
-            self.attemptLongTouch()
-        }
-    }
-    
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.isTouching = false
-        
-        if !self.didSucceedLongTouch, let touch = touches.first {
-            // Apply feedback
-            GameScene.moveFeedback.impactOccurred()
-            // Move
-            if touch.location(in: self).x < frame.midX {
-                self.left()
-            } else {
-                self.right()
-            }
-        }
-        
-        self.didSucceedLongTouch = false
-    }
+//    static let moveFeedback = UIImpactFeedbackGenerator(style: .light)
+//    static let rideFeedback = UIImpactFeedbackGenerator(style: .heavy)
+//
+//    func attemptLongTouch(threshold: TimeInterval = 0.3) {
+//        DispatchQueue.main.asyncAfter(deadline: .now() + threshold) {
+//            if self.isTouching && !self.playerNode.isInsideElevator && !self.playerNode.isMoving {
+//                // Ignore next touch end.
+//                self.didSucceedLongTouch = true
+//                // Give user feedback
+//                GameScene.rideFeedback.impactOccurred()
+//                // Enter/Exit
+//                self.ride()
+//            }
+//        }
+//    }
+//
+//    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        if !isTouching {
+//            self.isTouching.toggle()
+//            self.attemptLongTouch()
+//        }
+//    }
+//
+//    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        self.isTouching = false
+//
+//        if !self.didSucceedLongTouch, let touch = touches.first {
+//            // Apply feedback
+//            GameScene.moveFeedback.impactOccurred()
+//            // Move
+//            if touch.location(in: self).x < frame.midX {
+//                self.left()
+//            } else {
+//                self.right()
+//            }
+//        }
+//
+//        self.didSucceedLongTouch = false
+//    }
 }
 
 // Camera
@@ -582,6 +630,16 @@ extension GameScene {
 
 extension GameScene {
     
+    func moveCameraToPlayer() {
+        self.camera?.run(
+            SKAction.moveTo(y: playerNode.position.y, duration: GameScene.waveSpeed).with(timing: .easeIn)
+        )
+    }
+    
+    var isWaving: Bool {
+        return camera?.action(forKey: "wave") != nil
+    }
+    
     func startWave() {
         self.camera?.run(
             .sequence(
@@ -601,7 +659,7 @@ extension GameScene {
                         self.elevatorNodes.forEach { (elevatorNode) in
                             elevatorNode.close()
                         }
-                        self.hasEnded = true
+                        self.hasLost = true
                     }
                 ]
             ),
@@ -612,7 +670,6 @@ extension GameScene {
     // When the player rides, it should cancel
     func stopWave() {
         camera?.removeAction(forKey: "wave")
-        //        camera?.run(SKAction.scale(to: 1.0, duration: GameScene.waveSpeed))
     }
 }
 
@@ -624,31 +681,42 @@ extension GameScene {
             let target = targetNode(for: model)?.overlay,
             let origin = originNode(for: model)?.overlay,
             let cable = cableNode(for: model)
-        else {
+            else {
                 return
         }
         
-        let slot = model.slot
-        
         [target, origin, cable].forEach { (node) in
             node.run(
-                SKAction.repeatForever(
-                    SKAction
-                        .sequence(
-                            [
-                                SKAction.fadeAlpha(by: -0.5, duration: 0.5),
-                                SKAction.fadeAlpha(to: 1.0, duration: 0.5),
-                                SKAction.run {
-                                    if self.playerElevator()?.slot != slot {
-                                        node.removeAction(forKey: "target")
-                                    }
-                                }
-                            ]
-                    ).with(timing: .easeInEaseOut)
-                ),
+                SKAction
+                    .sequence(
+                        [
+                            SKAction.scale(to: 1.1, duration: 0.15),
+                            SKAction.scale(to: 1.0, duration: 0.15),
+                        ]
+                ).with(timing: .easeInEaseOut),
                 withKey: "target"
             )
         }
+    }
+}
+
+extension GameScene {
+    func setupControls() {
+        // Left/Right
+        let swipe = UISwipeGestureRecognizer.Direction.self
+        
+        [(swipe.left, #selector(self.left)), (swipe.right, #selector(self.right))].forEach { (direction, handler) in
+            let recognizer = UISwipeGestureRecognizer(target: self, action: handler)
+            
+            recognizer.direction = direction
+            
+            self.view?.addGestureRecognizer(recognizer)
+        }
+        
+        // Ride
+        let hold = UILongPressGestureRecognizer(target: self, action: #selector(self.ride))
+        
+        self.view?.addGestureRecognizer(hold)
     }
 }
 
