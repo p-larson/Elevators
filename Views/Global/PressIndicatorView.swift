@@ -18,10 +18,6 @@ struct PressIndicatorView: View {
             Text("Level \(model.number)")
                 .font(.custom("Futura Medium", size: 48))
                 .foregroundColor(Color.white.opacity(0.8))
-            Text("Tap to Play")
-                .font(.custom("Futura Medium", size: 24))
-                .foregroundColor(Color.white.opacity(0.5))
-                .fixedSize()
             Text("👆")
                 .font(.system(size: 64))
                 .offset(x: 0, y: self.animating ? -16 : 0)
@@ -34,7 +30,6 @@ struct PressIndicatorView: View {
             )
         }
         .animation(nil)
-        .allowsHitTesting(false)
     }
 }
 

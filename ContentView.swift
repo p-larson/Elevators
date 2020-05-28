@@ -1,23 +1,28 @@
+////
+////  ContentView.swift
+////  Elevators
+////
+////  Created by Peter Larson on 5/14/20.
+////  Copyright © 2020 Peter Larson. All rights reserved.
+////
 //
-//  ContentView.swift
-//  Elevators
+//import SwiftUI
 //
-//  Created by Peter Larson on 5/14/20.
-//  Copyright © 2020 Peter Larson. All rights reserved.
+//struct ContentView: View {
 //
-
-import SwiftUI
-
-struct ContentView: View {
-
-    var body: some View {
-        Color.red
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .previewDevice("iPhone 11")
-    }
-}
+//    var body: some View {
+//        ZStack {
+//            GameView(model: .demo)
+//            Color.blue.frame(height: 100).onTapGesture {
+//                print("blue")
+//            }.allowsHitTesting(false)
+//        }
+//    }
+//}
+//
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ContentView()
+//            .previewDevice("iPhone 11")
+//    }
+//}

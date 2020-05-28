@@ -8,23 +8,35 @@
 
 import SwiftUI
 
-struct SwipeView: View {
+struct SwipeGesture: Gesture {
     
-    var swipes: some Gesture {
-        DragGesture()
-        .onChanged({ value in
-            value.
-        })
+    let direction: Direction
+    
+    enum Direction {
+        case left, right, up, down
+        
+        func translation(_ value: DragGesture.Value) -> CGFloat {
+            switch self {
+            case .left, .right:
+                return abs(value.translation.width)
+            case .up, .down:
+                return abs(value.translation.height)
+            }
+        }
     }
     
-    var body: some View {
-        Color.red.edgesIgnoringSafeArea(.all)
-            .gesture(swipes)
+    var body: some Gesture {
+        DragGesture(
+            minimumDistance: CGFloat(UIScreen.main.bounds.width / 25),
+            coordinateSpace: .local
+        ).onChanged({ (value) in
+            print(self.direction.translation(value))
+        })
     }
 }
 
-struct SwipeGestureTestView: PreviewProvider {
+struct SwipeGesturePreviews: PreviewProvider {
     static var previews: some View {
-        SwipeGesture()
+        Color.red.gesture(SwipeGesture(direction: .left))
     }
 }

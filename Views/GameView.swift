@@ -12,7 +12,7 @@ import SpriteKit
 struct GameView: View {
     // Game
     @ObservedObject var scene: GameScene
-        
+    
     // Sub Views
     
     @State var isAnimating: Bool = false
@@ -38,14 +38,16 @@ struct GameView: View {
     var menu: some View {
         ZStack {
             if !scene.isPlaying || scene.hasWon || scene.hasLost {
-                VStack(spacing: 8) {
+                VStack {
                     if scene.hasLost {
                         Spacer()
                         Text("Level Lost")
                             .foregroundColor(.white)
                             .font(.custom("Futura Bold", size: 48))
+                        Spacer()
                     }
-                    
+                }
+                VStack(spacing: 8) {
                     Spacer()
                     HStack {
                         if developer {
@@ -146,7 +148,7 @@ struct GameView: View {
                 }
                 .buttonPadding(value: 5)
                 .padding(.horizontal, 16)
-                .font(.custom("Futura Bold", size: 24))
+                .font(.custom("Futura Bold", size: 16))
                 .foregroundColor(.white)
                 .zIndex(2)
                 .transition(AnyTransition.move(edge: .bottom).animation(.linear))
@@ -175,31 +177,22 @@ struct GameView: View {
         }
     }
     
-    var body: some View {
+    var gameStateViews: some View {
         ZStack {
-            GameBackground()
-            GameContainerView(
-                model: model
-            )
-                .edgesIgnoringSafeArea(.all)
-                .zIndex(0)
-                .onAppear {
-                    withAnimation {
-                        self.scene.isPlaying = false
-                        self.showLevelNumber = true
-                    }
-            }
-                
-            .blur(radius: scene.hasLost ? 10.0 : 0)
-            
             if !scene.isPlaying {
                 VStack {
                     Spacer()
                     PressIndicatorView(model: $model)
-                        .transition(.opacity)
+                    .transition(.opacity)
                 }
                 .zIndex(1)
-                .allowsHitTesting(false)
+                .onTapGesture {
+                    withAnimation {
+                        self.scene.isPlaying = true
+                    }
+                    
+                    print("tap")
+                }
             }
             
             if scene.hasWon {
@@ -212,31 +205,51 @@ struct GameView: View {
                     
                 }
             }
+        }
+    }
+    
+    var body: some View {
+        ZStack {
+            GameBackground()
+                .zIndex(0)
+            GameContainerView(model: model)
+                .edgesIgnoringSafeArea(.all)
+                .zIndex(1)
+                .blur(radius: scene.hasLost ? 10.0 : 0)
+                .onAppear {
+                    withAnimation {
+                        self.scene.isPlaying = false
+                        self.showLevelNumber = true
+                    }
+                }
+            
+            self.gameStateViews
+                .zIndex(2)
             
             self.menu
-                .zIndex(5)
-            
+                .zIndex(3)
+
             ConfettiView(isEmitting: scene.hasWon)
-                .zIndex(6)
-            
+                .zIndex(4)
+
             self.screens
-                .zIndex(7)
-            
+                .zIndex(5)
+
             CoinCounterView()
-                .zIndex(8)
-            
+                .zIndex(6)
+
             if showTransition {
                 TransitionView(
                     showTransition: $showTransition,
                     isTransitioning: $isTransitioning,
                     perform: $transition
                 )
-                    .zIndex(9)
+                    .zIndex(7)
             }
-            
+
             if showDeveloperView {
                 DeveloperView(isShowing: $showDeveloperView)
-                    .zIndex(10)
+                    .zIndex(8)
             }
         }
         .animation(.linear)
