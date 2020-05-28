@@ -2,6 +2,7 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Sound FX
 - [ ] Character Selector
 - [ ] Settings
 - [ ] Optimize Game Graphics (high energy usage).
