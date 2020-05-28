@@ -2,6 +2,13 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Random Unlock Screen.
+- [ ] Fill In-App Purchases Template.
+- [ ] Implement Functionality to Daily Rewards.
+- [ ] Add Functionality to Random Unlock.
+- [ ] Add Functionality to Picking Player.
+- [ ] Free Coins Page / Credits / ??? Implement transitioning between.
+- [x] Allow Move/Enter to Start Game (override tap to start).
 - [ ] Sound FX
 - [ ] Character Selector
 - [ ] Settings
@@ -15,8 +22,8 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [x] Fix Elevator Placement ?
 - [x] GameStorage (load/save)
 - [x] Game Model
-- [ ] Coins
-- [ ] Time / Stars / Move Count / Achievements      Maybe not?
+- [x] Coins
+- [ ] ~~Time / Stars / Move Count / Achievements      Maybe not?~~
 - [x] Player Left/Right
 - [x] Player Enter/Exit
 - [x] Animate Player Left/Right
