@@ -11,7 +11,7 @@ import Foundation
 public class Storage: ObservableObject {
     public static let current = Storage()
     
-    private let storage = UserDefaults()
+    let storage = UserDefaults()
     
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()

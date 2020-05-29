@@ -56,14 +56,19 @@ struct Graphics {
             )
             context.setFillColor(style.backdrop.cgColor)
             context.fill(
-                CGRect(x: 0, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 8, width: Graphics.elevatorSize.width, height: Graphics.elevatorSize.height / 5)
+                CGRect(
+                    x: 0,
+                    y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 8,
+                    width: Graphics.elevatorSize.width,
+                    height: Graphics.elevatorSize.height / 5
+                )
             )
-            context.clear(
-                CGRect(x: 0, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width, height: Graphics.elevatorSize.height / 40)
-            )
-            context.fill(
-                CGRect(x: Graphics.elevatorSize.width / 20, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width * 0.9, height: Graphics.elevatorSize.height / 40)
-            )
+//            context.clear(
+//                CGRect(x: 0, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width, height: Graphics.elevatorSize.height / 40)
+//            )
+//            context.fill(
+//                CGRect(x: Graphics.elevatorSize.width / 20, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width * 0.9, height: Graphics.elevatorSize.height / 40)
+//            )
         }
     }
     
@@ -76,19 +81,53 @@ struct Graphics {
             context.setFillColor(style.door.cgColor)
             context.fill(CGRect(origin: .zero, size: Graphics.elevatorSize))
             context.setFillColor(style.padding.cgColor)
-            context.fill(CGRect(x: Graphics.elevatorSize.width / 2 - space / 2 - padding, y: 0, width: space + padding * 2, height: Graphics.elevatorSize.height))
-            context.clear(CGRect(x: Graphics.elevatorSize.width / 2 - space / 2, y: 0, width: space, height: Graphics.elevatorSize.height))
+            context.fill(
+                CGRect(
+                    x: Graphics.elevatorSize.width / 2 - space / 2 - padding,
+                    y: 0,
+                    width: space + padding * 2,
+                    height: Graphics.elevatorSize.height
+                )
+            )
+            // Clear Door Space
+            context.clear(CGRect(x: Graphics.elevatorSize.width / 2 - space / 2, y: 0, width: space, height: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 5))
             // Frame
             context.setStrokeColor(style.frame.cgColor)
             context.setLineWidth(Graphics.elevatorSize.width / 8)
             context.addLines(between:
-                [.init(x: Graphics.elevatorSize.width / 16, y: Graphics.elevatorSize.height  - Graphics.elevatorSize.width / 16),
-                                .init(x: Graphics.elevatorSize.width / 16, y: Graphics.elevatorSize.width / 16),
-                                .init(x: Graphics.elevatorSize.width - Graphics.elevatorSize.width / 16, y: Graphics.elevatorSize.width / 16),
-                                .init(x: Graphics.elevatorSize.width - Graphics.elevatorSize.width / 16, y: Graphics.elevatorSize.height - Graphics.elevatorSize.width / 16)]
+                [
+                    .init(
+                        x: Graphics.elevatorSize.width / 16,
+                        y: Graphics.elevatorSize.height
+                    ),
+                    .init(
+                        x: Graphics.elevatorSize.width / 16,
+                        y: Graphics.elevatorSize.width / 16
+                    ),
+                    .init(
+                        x: Graphics.elevatorSize.width - Graphics.elevatorSize.width / 16,
+                        y: Graphics.elevatorSize.width / 16
+                    ),
+                    .init(
+                        x: Graphics.elevatorSize.width - Graphics.elevatorSize.width / 16,
+                        y: Graphics.elevatorSize.height
+                    )
+                ]
             )
             context.strokePath()
-            context.clear(CGRect(x: 0, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width, height: Graphics.elevatorSize.height / 20))
+            
+            // Bottom Cut for Backdrop.
+            
+            let bottomCut = Graphics.elevatorSize.height / 20
+            
+            context.clear(
+                CGRect(
+                    x: 0,
+                    y: Graphics.elevatorSize.height - bottomCut,
+                    width: Graphics.elevatorSize.width,
+                    height: bottomCut
+                )
+            )
         }
     }
     

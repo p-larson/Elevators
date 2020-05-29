@@ -16,6 +16,7 @@ struct ShopView: View {
     @Binding var isShowing: Bool
     @State var page = 0
     @State var presented = false
+    @State var showCredits = false
     
     let coinUnlockables = (0 ..< 32).map { _ in
         PlayerOutfit.chef
@@ -32,6 +33,13 @@ struct ShopView: View {
     var adPages: Range<Int> {
         return coinPages.upperBound ..< coinPages.upperBound + Int((Double(adUnlockables.count) / 16.0).rounded(.up))
     }
+    
+    let purchasables: [ShopItem] = [
+        ShopItem(price: 0.99, type: .coin, count: 100, id: UUID()),
+        ShopItem(price: 4.99, type: .coin, count: 1_000, id: UUID()),
+        ShopItem(price: 9.99, type: .coin, count: 3_000, id: UUID()),
+        ShopItem(price: 0.99, type: .ad, count: nil, id: UUID())
+    ]
     
     var pages: ClosedRange<Int> {
         coinPages.lowerBound ... adPages.upperBound
@@ -70,9 +78,11 @@ struct ShopView: View {
         
         return AnyView(
             Grid(0 ..< 4) { index in
-                ZStack {
-                    Color("Coin")
-                }.cornerRadius(8)
+                if self.purchasables.indices.contains(index) {
+                    self.purchasables[index]
+                } else {
+                    EmptyView()
+                }
             }
             .gridStyle(ModularGridStyle(columns: 2, rows: 2, spacing: 8))
         )
@@ -84,6 +94,10 @@ struct ShopView: View {
                 insertion: AnyTransition.opacity.animation(Animation.linear.delay(0.3)),
                 removal: .opacity
         )
+    }
+    
+    var length: CGFloat {
+        min(UIScreen.main.bounds.width, UIScreen.main.bounds.height / 2)
     }
     
     var body: some View {
@@ -110,7 +124,7 @@ struct ShopView: View {
                     Pager(page: $page, data: Array(pages), id: \.self) { index in
                         self.content(page: index)
                             .padding(8)
-                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                            //                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                             .transition(.identity)
                     }
                     .padding()
@@ -120,7 +134,7 @@ struct ShopView: View {
                     .animation(.linear, value: self.page)
                     .animation(Animation.linear.delay(0.3), value: self.presented)
                 }
-                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                .frame(width: length, height: length)
                 
                 HStack {
                     ForEach(pages, id: \.self) { page in
@@ -222,5 +236,6 @@ struct ShopView6_Previews: PreviewProvider {
     static var previews: some View {
         ShopTestView()
             .statusBar(hidden: true)
+            .previewDevice("iPhone 11")
     }
 }

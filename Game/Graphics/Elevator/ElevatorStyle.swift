@@ -31,7 +31,7 @@ public struct ElevatorStyle {
         frame: UIColor(displayP3Red: 226/255, green: 226/255, blue: 226/255, alpha: 1),
         door: UIColor(displayP3Red: 205/255, green: 205/255, blue: 205/255, alpha: 1),
         padding: UIColor(displayP3Red: 1, green: 1, blue: 1, alpha: 1),
-        backdrop: UIColor(displayP3Red: 86/255, green: 86/255, blue: 86/255, alpha: 1),
+        backdrop: UIColor(displayP3Red: 66/255, green: 70/255, blue: 77/255, alpha: 1),
         cable: UIColor(displayP3Red: 0/255, green: 0/255, blue: 0/255, alpha: 1)
     )
     

@@ -56,6 +56,7 @@ extension PlayerNode {
                                 SKAction.run {
                                     self.slot += (translation / abs(translation))
                                     self.gamescene?.updateTarget()
+                                    
                                 },
                                 SKAction
                                     .moveBy(

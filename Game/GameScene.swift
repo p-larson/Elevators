@@ -16,6 +16,8 @@ final public class GameScene: SKScene, ObservableObject {
             self.reload()
         }
     }
+    // Let's try this, why not.
+    var isPanning: Bool = true
     // Data
     var playerNode: PlayerNode!
     var didSucceedLongTouch = false
@@ -283,6 +285,11 @@ fileprivate extension GameScene {
     }
     
     var rendered: Range<Int> {
+        
+        if isPanning {
+            return rendered
+        }
+        
         return playerNode.floor - Int(GameScene.maxFloorsShown.rounded(.up)) ..< playerNode.floor + Int(GameScene.maxFloorsShown.rounded(.up))
     }
     
@@ -560,49 +567,6 @@ extension GameScene {
     }
 }
 
-
-extension GameScene {
-//    static let moveFeedback = UIImpactFeedbackGenerator(style: .light)
-//    static let rideFeedback = UIImpactFeedbackGenerator(style: .heavy)
-//
-//    func attemptLongTouch(threshold: TimeInterval = 0.3) {
-//        DispatchQueue.main.asyncAfter(deadline: .now() + threshold) {
-//            if self.isTouching && !self.playerNode.isInsideElevator && !self.playerNode.isMoving {
-//                // Ignore next touch end.
-//                self.didSucceedLongTouch = true
-//                // Give user feedback
-//                GameScene.rideFeedback.impactOccurred()
-//                // Enter/Exit
-//                self.ride()
-//            }
-//        }
-//    }
-//
-//    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        if !isTouching {
-//            self.isTouching.toggle()
-//            self.attemptLongTouch()
-//        }
-//    }
-//
-//    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        self.isTouching = false
-//
-//        if !self.didSucceedLongTouch, let touch = touches.first {
-//            // Apply feedback
-//            GameScene.moveFeedback.impactOccurred()
-//            // Move
-//            if touch.location(in: self).x < frame.midX {
-//                self.left()
-//            } else {
-//                self.right()
-//            }
-//        }
-//
-//        self.didSucceedLongTouch = false
-//    }
-}
-
 // Camera
 extension GameScene {
     
@@ -717,6 +681,21 @@ extension GameScene {
         let hold = UILongPressGestureRecognizer(target: self, action: #selector(self.ride))
         
         self.view?.addGestureRecognizer(hold)
+    }
+}
+
+/// Level Panning
+extension GameScene {
+    func startPanningLevel() {
+        camera?.position.y = floorYPosition(at: model.floors)
+
+        camera?.run(
+            .moveTo(y: floorYPosition(at: 1), duration: TimeInterval(model.floors) * GameScene.floorSpeed),
+            completion: {
+                self.isPanning = false
+                self.clean()
+            }
+        )
     }
 }
 
