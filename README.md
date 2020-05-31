@@ -2,6 +2,8 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Todo
+- [ ] Added Panning to start of game
+- [x] REOPTIMIZED Game, (all I did was toggle gpu frame capture, reduced memory to 20% of original :-])
 - [ ] Random Unlock Screen.
 - [ ] Fill In-App Purchases Template.
 - [ ] Implement Functionality to Daily Rewards.
