@@ -1,6 +1,19 @@
 # Elevators
 Swift-5, SwiftUI/SpriteKit, iOS App
 
+# Characters
+- [ ] Soda Can Man (I bet he's from Minnesoda)
+- [ ] Sushi (寿司)
+- [ ] Evan (Huge Virgin)
+- [ ] Peter (Very cool.)
+- [ ] Firefighter (Don't invite this man to a cookout)
+- [x] Goose (Quack)
+- [ ] Orange (Orange, with extra pulp)
+- [ ] Banana (🍌🦍🥵)
+- [ ] Ninja
+- [ ] Evolving Fish (He do be walking)
+- [ ] 
+
 # Todo
 - [x] Add Panning to start of game
 - [x] REOPTIMIZED Game, (all I did was toggle gpu frame capture, reduced memory to 20% of original :-])
