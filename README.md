@@ -10,8 +10,19 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [x] Goose (Quack)
 - [ ] Orange (Orange, with extra pulp)
 - [ ] Banana (🍌🦍🥵)
-- [ ] Ninja
+- [ ] Ninja (I bet he has blue hair)
 - [ ] Evolving Fish (He do be walking)
+- [ ] Astronaut
+- [ ] Cheeseman (Wisconsin sucks)
+- [ ] Stephen (Crafty)
+- [ ] Corona Man 2020 (Like's to ruin things)
+- [ ] Karen (...)
+- [ ] Ice Cube (Not the Rapper)
+- [ ] Taco (me gusta mucho)
+- [ ] Cowboy
+- [ ] Alien 
+- [ ] Upset Cat
+- [ ] Unlucky Brad
 - [ ] 
 
 # Todo
