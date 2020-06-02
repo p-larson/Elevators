@@ -6,6 +6,7 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] Sushi (寿司)
 - [ ] Evan (smells nice)
 - [ ] Peter (is tall)
+- [ ] Scuba Steve (swims)
 - [x] Firefighter (Don't invite this man to a cookout)
 - [x] Goose (Quack)
 - [x] Orange (Orange, with extra pulp)
