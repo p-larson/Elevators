@@ -1,8 +1,37 @@
 # Elevators
 Swift-5, SwiftUI/SpriteKit, iOS App
 
+# Characters
+- [ ] Soda Can Man (I bet he's from Minnesoda)
+- [ ] Sushi (寿司)
+- [ ] Evan (smells nice)
+- [ ] Peter (is tall)
+- [ ] Scuba Steve (swims)
+- [x] Firefighter (Don't invite this man to a cookout)
+- [x] Goose (Quack)
+- [x] Orange (Orange, with extra pulp)
+- [x] Strawberry (gmo certified)
+- [ ] Banana (🍌🦍🥵)
+- [ ] Ninja (I bet he has blue hair)
+- [ ] Evolving Fish (He do be walking)
+- [ ] Astronaut
+- [ ] Cheeseman (Wisconsin sucks)
+- [ ] Stephen (Crafty)
+- [ ] Corona Man 2020 (Like's to ruin things)
+- [ ] Karen (...)
+- [ ] Ice Cube (Not the Rapper)
+- [ ] Taco (me gusta mucho)
+- [ ] Cowboy
+- [ ] Alien 
+- [ ] Upset Cat
+- [ ] Unlucky Brad
+- [ ] 
+
 # Todo
-- [ ] Random Unlock Screen.
+- [ ] Random Unlock functionality
+- [x] Add Panning to start of game
+- [x] REOPTIMIZED Game, (all I did was toggle gpu frame capture, reduced memory to 20% of original :-])
+- [x] Random Unlock Screen.
 - [ ] Fill In-App Purchases Template.
 - [ ] Implement Functionality to Daily Rewards.
 - [ ] Add Functionality to Random Unlock.
@@ -10,10 +39,10 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] Free Coins Page / Credits / ??? Implement transitioning between.
 - [x] Allow Move/Enter to Start Game (override tap to start).
 - [ ] Sound FX
-- [ ] Character Selector
+- [x] Character Selector
 - [ ] Settings
 - [x] Optimize Game Graphics (high energy usage). It's pretty good right now
-- [ ] End Game (Win/Loose)
+- [x] End Game (Win/Loose)
 - [x] Reposition/Size Cable (Above bottom elevator and below top elevator)
 - [x] Cable Selected Animation
 - [x] Fix JSON for LevelModel (elevators/coins not encoding)
