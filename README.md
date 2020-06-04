@@ -2,6 +2,7 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Characters
+- [ ] 3D Scroll
 - [ ] Soda Can Man (I bet he's from Minnesoda)
 - [ ] Sushi (寿司)
 - [ ] Evan (smells nice)
