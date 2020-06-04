@@ -11,7 +11,9 @@ import SpriteKit
 
 public class PlayerSkin: ExpressibleByStringLiteral {
     
-    public static var current: PlayerSkin = "chef"
+    fileprivate weak var node: PlayerNode? = nil
+    
+    public static var current: PlayerSkin = "orange"
     
     public typealias StringLiteralType = String
     
@@ -30,26 +32,41 @@ public class PlayerSkin: ExpressibleByStringLiteral {
     
     private var frame = 0
     
-    public func next() -> SKTexture {
+    public func nextTexture() -> SKTexture {
         if frame < 14 {
             frame += 1
         } else {
             frame = 1
         }
         
-        let name = "\(outfit.rawValue).\(state).\(direction).\(frame)"
+        var name: String!
+        
+        if outfit.isSymmetric {
+            name = "\(outfit.rawValue)-\(state)-\(frame)"
+        } else {
+            name = "\(outfit.rawValue)-\(state)-\(direction)-\(frame)"
+        }
         
         if skins[name] == nil {
             skins[name] = SKTexture(imageNamed: name)
         }
                 
         return skins[name]!
-        
     }
     
     func set(direction: PlayerDirection) {
         self.direction = direction
         self.frame = 0
+        
+        if outfit.isSymmetric {
+            if direction == .left {
+                self.node?.xScale = -1
+            }
+            
+            else if direction == .right {
+                self.node?.xScale = 1
+            }
+        }
     }
     
     func set(state: PlayerState) {
@@ -58,9 +75,10 @@ public class PlayerSkin: ExpressibleByStringLiteral {
     }
     
     func animate(_ node: PlayerNode) {
+        self.node = node
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20.0, repeats: true) { (timer) in
-            node.texture = self.next()
+            node.texture = self.nextTexture()
         }
     }
 }

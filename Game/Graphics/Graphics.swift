@@ -90,7 +90,14 @@ struct Graphics {
                 )
             )
             // Clear Door Space
-            context.clear(CGRect(x: Graphics.elevatorSize.width / 2 - space / 2, y: 0, width: space, height: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 5))
+            context.clear(
+                CGRect(
+                    x: Graphics.elevatorSize.width / 2 - space / 2,
+                    y: 0,
+                    width: space,
+                    height: Graphics.elevatorSize.height
+                )
+            )
             // Frame
             context.setStrokeColor(style.frame.cgColor)
             context.setLineWidth(Graphics.elevatorSize.width / 8)

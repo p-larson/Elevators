@@ -12,14 +12,15 @@ import Grid
 
 struct ShopView: View {
     
-    
     @Binding var isShowing: Bool
+    @State var selection = 0
     @State var page = 0
     @State var presented = false
     @State var showCredits = false
+    @State var showRandomUnlock = false
     
     let coinUnlockables = (0 ..< 32).map { _ in
-        PlayerOutfit.chef
+        PlayerOutfit.goose
     }
     
     var coinPages: Range<Int> {
@@ -27,7 +28,7 @@ struct ShopView: View {
     }
     
     let adUnlockables = (0 ..< 16).map { _ in
-        return PlayerOutfit.chef
+        return PlayerOutfit.orange
     }
     
     var adPages: Range<Int> {
@@ -45,8 +46,14 @@ struct ShopView: View {
         coinPages.lowerBound ... adPages.upperBound
     }
     
+    func showSelector(on page: Int) -> Bool {
+        return (selection / (gridLength * gridLength)) == page
+    }
+    
+    let gridLength = 3
+    
     var gridRange: Range<Int> {
-        0 ..< 16
+        0 ..< gridLength * gridLength
     }
     
     var cell: some View {
@@ -59,19 +66,49 @@ struct ShopView: View {
         }
     }
     
-    func content(page: Int) -> some View {
-        if coinPages.contains(page) {
-            return AnyView(
-                Grid(gridRange) { index in
-                    self.cell
-                }
+    func player(at index: Int) -> some View {
+        ZStack {
+            Color("shop-tile")
+                .cornerRadius(8)
+            Text("\(index)")
+                .foregroundColor(Color("shop-text"))
+                .scaleEffect(2.0)
+        }.onTapGesture {
+            self.selection = index
+        }
+    }
+    
+    typealias PrefernceTransformer = (GridItemBoundsPreferencesKey.Value) -> AnyView
+    
+    func selection(on page: Int) -> PrefernceTransformer {
+        return { (value) in
+            AnyView(
+                ZStack {
+                    if self.showSelector(on: page) {
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(lineWidth: 4)
+                            .foregroundColor(.white)
+                            .frame(
+                                width: value[self.selection % (self.gridLength * self.gridLength)].width,
+                                height: value[self.selection % (self.gridLength * self.gridLength)].height
+                        )
+                            .position(
+                                x: value[self.selection % (self.gridLength * self.gridLength)].midX,
+                                y: value[self.selection % (self.gridLength * self.gridLength)].midY
+                        )
+                    } else {
+                        EmptyView()
+                    }
+                }.animation(nil)
             )
         }
-        
-        if adPages.contains(page) {
+    }
+    
+    func content(page: Int) -> some View {
+        if coinPages.contains(page) || adPages.contains(page) {
             return AnyView(
                 Grid(gridRange) { index in
-                    self.cell
+                    self.player(at: index + page * (self.gridLength * self.gridLength))
                 }
             )
         }
@@ -97,7 +134,23 @@ struct ShopView: View {
     }
     
     var length: CGFloat {
-        min(UIScreen.main.bounds.width, UIScreen.main.bounds.height / 2)
+        min(UIScreen.main.bounds.width, UIScreen.main.bounds.height / 2) - 32
+    }
+    
+    var randomUnlockView: some View {
+        ZStack {
+            if showRandomUnlock {
+                UnlockElevatorView(isShowing: $showRandomUnlock)
+            }
+        }
+    }
+    
+    var creditsView: some View {
+        ZStack {
+            if showCredits {
+                CreditsView(isShowing: $showCredits)
+            }
+        }
     }
     
     var body: some View {
@@ -107,7 +160,7 @@ struct ShopView: View {
             
             VStack {
                 Spacer()
-                VStack {
+                VStack(spacing: 0) {
                     Image("chef.idle.right.1")
                         .resizable()
                         .scaledToFit()
@@ -115,26 +168,28 @@ struct ShopView: View {
                             width: UIScreen.main.bounds.height / 8,
                             height: UIScreen.main.bounds.height / 8
                     )
-                    Text("Chef")
-                    Text("1/128 Collected")
-                        .brightness(-0.5)
+                    HStack {
+                        Text("Chef")
+                        Spacer()
+                        Text("\(self.selection)/128 Collected")
+                            .brightness(-0.5)
+                    }.padding(.horizontal, 32)
                 }.font(.custom("Futura Medium", size: 16))
                 
                 Group {
                     Pager(page: $page, data: Array(pages), id: \.self) { index in
                         self.content(page: index)
-                            .padding(8)
-                            //                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                            .overlayPreferenceValue(GridItemBoundsPreferencesKey.self, self.selection(on: index))
                             .transition(.identity)
                     }
-                    .padding()
+                    .itemAspectRatio(1.0, alignment: .center)
                     .itemSpacing(16)
-                    .alignment(.center)
+                    .interactive(0.9)
                     .opacity(self.presented ? 1.0 : 0.0)
                     .animation(.linear, value: self.page)
                     .animation(Animation.linear.delay(0.3), value: self.presented)
                 }
-                .frame(width: length, height: length)
+                .frame(height: UIScreen.main.bounds.height / 3)
                 
                 HStack {
                     ForEach(pages, id: \.self) { page in
@@ -161,6 +216,9 @@ struct ShopView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
+                    .onButtonPress {
+                        self.showRandomUnlock = true
+                    }
                 } else if adPages.contains(page) {
                     GameButton {
                         HStack {
@@ -192,6 +250,9 @@ struct ShopView: View {
                     .foregroundColor(.red)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
+                    .onButtonPress {
+                        self.showCredits = true
+                    }
                 }
                 Spacer()
                 Button("Done") {
@@ -200,7 +261,7 @@ struct ShopView: View {
                 .brightness(-0.5)
                 .opacity(0.5)
             }
-            .gridStyle(ModularGridStyle(columns: 4, rows: 4, spacing: 8))
+            .gridStyle(ModularGridStyle(columns: 3, rows: 3, spacing: 8))
             .font(.custom("Futura Bold", size: 32))
             .foregroundColor(.white)
             .onAppear {
@@ -208,7 +269,14 @@ struct ShopView: View {
                     self.presented = true
                 }
             }
+            
+            self.randomUnlockView
+                .zIndex(2)
+            
+            self.creditsView
+            
         }
+        .transition(.opacity)
     }
 }
 

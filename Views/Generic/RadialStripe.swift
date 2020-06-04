@@ -8,11 +8,20 @@
 
 import SwiftUI
 
-struct RadialStripes: ViewModifier {
+struct RadialStripes: View {
     
     @State var animating = false
     
-    var stripes: some View {
+    func radial(_ length: CGFloat) -> some View {
+        RadialGradient(
+            gradient: Gradient(colors: [Color.white, Color.clear]),
+            center: .center,
+            startRadius: 0,
+            endRadius: length
+        )
+    }
+    
+    var body: some View {
         GeometryReader { reader in
             Path { path in
                 let center = CGPoint(x: reader.size.width / 2, y: reader.size.height / 2)
@@ -30,10 +39,8 @@ struct RadialStripes: ViewModifier {
                     path.closeSubpath()
                 }
             }
-        
-            .blendMode(.lighten)
-            .opacity(0.02)
-            .blur(radius: 5)
+            .foregroundColor(.white)
+            .blendMode(.saturation)
             .onAppear(perform: {
                 withAnimation {
                     self.animating = true
@@ -42,12 +49,10 @@ struct RadialStripes: ViewModifier {
             .rotationEffect(Angle.degrees(self.animating ? 0 : 30))
             .animation(Animation.linear(
                     duration: 1
-            ).repeatForever(autoreverses: false), value: self.animating)
-        }
-    }
-    
-    func body(content: Content) -> some View {
-        content.background(stripes)
+            )
+            .repeatForever(autoreverses: false), value: self.animating)
+            .mask(self.radial(max(reader.size.height, reader.size.width) / 2))
+        }.edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -60,9 +65,8 @@ struct RadialStripe_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             GameBackground()
-            
+            RadialStripes()
             Image("chef.idle.right.1")
-                .modifier(RadialStripes())
         }
     }
 }

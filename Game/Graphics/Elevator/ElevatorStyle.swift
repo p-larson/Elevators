@@ -27,12 +27,12 @@ public struct ElevatorStyle {
     }
     
     static let demo = ElevatorStyle(
-        background: UIColor(displayP3Red: 130/255, green: 130/255, blue: 130/255, alpha: 1),
-        frame: UIColor(displayP3Red: 226/255, green: 226/255, blue: 226/255, alpha: 1),
-        door: UIColor(displayP3Red: 205/255, green: 205/255, blue: 205/255, alpha: 1),
-        padding: UIColor(displayP3Red: 1, green: 1, blue: 1, alpha: 1),
-        backdrop: UIColor(displayP3Red: 66/255, green: 70/255, blue: 77/255, alpha: 1),
-        cable: UIColor(displayP3Red: 0/255, green: 0/255, blue: 0/255, alpha: 1)
+        background: #colorLiteral(red: 0.5098039216, green: 0.5098039216, blue: 0.5098039216, alpha: 1),
+        frame: #colorLiteral(red: 0.8862745098, green: 0.8862745098, blue: 0.8862745098, alpha: 1),
+        door: #colorLiteral(red: 0.8039215686, green: 0.8039215686, blue: 0.8039215686, alpha: 1),
+        padding: #colorLiteral(red: 0.6000000238, green: 0.6000000238, blue: 0.6000000238, alpha: 1),
+        backdrop: #colorLiteral(red: 0.2588414634, green: 0.2745807927, blue: 0.3003810976, alpha: 1),
+        cable: #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)
     )
     
     static let locked = ElevatorStyle(

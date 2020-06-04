@@ -118,7 +118,7 @@ struct DailyPrizeView: View {
         }
         .font(.custom("Futura Bold", size: 24))
         .padding()
-        .background(Color.white.edgesIgnoringSafeArea(.all).modifier(RadialStripes()))
+        .background(Color.white)
     }
 }
 

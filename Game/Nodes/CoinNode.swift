@@ -15,6 +15,7 @@ public class CoinNode: SKSpriteNode {
     
     let model: CoinModel
     
+    var isCollected = false
     
     init(model: CoinModel) {
         
@@ -41,7 +42,7 @@ public class CoinNode: SKSpriteNode {
     }
 }
 
-fileprivate extension CoinNode {
+public extension CoinNode {
     
     func idle() {
         run(
@@ -57,6 +58,11 @@ fileprivate extension CoinNode {
     }
     
     func collect() {
+        
+        self.isCollected = true
+        
+        Storage.current.coins += 1
+        
         self.run(
             SKAction.sequence(
                 [

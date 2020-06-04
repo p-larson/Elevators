@@ -24,7 +24,7 @@ class PlayerNode: SKSpriteNode {
     
     init(floor: Int = 1) {
         self.floor = floor
-        super.init(texture: PlayerSkin.current.next(), color: .clear, size: GameScene.playerSize)
+        super.init(texture: PlayerSkin.current.nextTexture(), color: .clear, size: GameScene.playerSize)
         self.anchorPoint = .init(x: 0.5, y: 0)
         self.zPosition = ZPosition.playerOutside
     }
@@ -96,6 +96,7 @@ extension PlayerNode {
                     SKAction.fadeIn(withDuration: GameScene.doorSpeed),
                     SKAction.run {
                         self.isInsideElevator = false
+                        self.gamescene?.checkCoins()
                     }
                 ]
             )

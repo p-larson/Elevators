@@ -12,6 +12,8 @@ import SwiftUI
 
 struct CreditsView: View {
     
+    @Binding var isShowing: Bool
+    
     let description = """
 Thank you for downloading our app. We have enjoyed making this game for you, and are happy to have shared our content.
 
@@ -81,7 +83,7 @@ some free coins on us!
 
 struct CreditsView_Previews: PreviewProvider {
     static var previews: some View {
-        CreditsView()
+        CreditsView(isShowing: .constant(false))
             .statusBar(hidden: true)
     }
 }

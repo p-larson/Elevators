@@ -65,6 +65,7 @@ extension GameScene {
     
     public override func didMove(to view: SKView) {
         self.reload()
+        self.startPanningLevel()
     }
 }
 
@@ -149,6 +150,12 @@ extension GameScene {
             child as? CoinNode
         }
     }
+    
+    func playerCoin() -> CoinNode? {
+        coinNodes.first { (node) -> Bool in
+            node.model.floor == playerNode.floor && node.model.slot == playerNode.slot
+        }
+    }
 }
 
 extension GameScene {
@@ -163,7 +170,7 @@ extension GameScene {
 
 extension GameScene {
     static let maxFloorsShown: CGFloat = 8
-    static let floorSpeed: TimeInterval = 0.5
+    static let floorSpeed: TimeInterval = 0.2
     static let playerSpeed: TimeInterval = 0.3
     static let doorSpeed: TimeInterval = 0.3
     static let waveSpeed: TimeInterval = 3.0
@@ -280,6 +287,12 @@ public extension GameScene {
 // Rendering Floors
 fileprivate extension GameScene {
     
+    var currentFarthestElevatorRange: Int {
+        return elevators(on: playerNode.floor).max { (e1, e2) -> Bool in
+            e1.distance < e2.distance
+        }?.distance ?? 0
+    }
+    
     var validFloors: ClosedRange<Int> {
         return (1 ... model.floors)
     }
@@ -287,10 +300,10 @@ fileprivate extension GameScene {
     var rendered: Range<Int> {
         
         if isPanning {
-            return rendered
+            return Range<Int>(validFloors)
         }
         
-        return playerNode.floor - Int(GameScene.maxFloorsShown.rounded(.up)) ..< playerNode.floor + Int(GameScene.maxFloorsShown.rounded(.up))
+        return playerNode.floor - Int(GameScene.maxFloorsShown.rounded(.up)) ..< playerNode.floor + Int(GameScene.maxFloorsShown.rounded(.up)) + currentFarthestElevatorRange
     }
     
     func shouldRender(elevator: ElevatorModel) -> Bool {
@@ -640,6 +653,8 @@ extension GameScene {
 extension GameScene {
     
     func updateTarget() {
+        self.checkCoins()
+        
         guard
             let model = playerElevator(),
             let target = targetNode(for: model)?.overlay,
@@ -690,12 +705,26 @@ extension GameScene {
         camera?.position.y = floorYPosition(at: model.floors)
 
         camera?.run(
-            .moveTo(y: floorYPosition(at: 1), duration: TimeInterval(model.floors) * GameScene.floorSpeed),
+            SKAction.moveTo(
+                y: floorYPosition(at: 1),
+                duration: TimeInterval(model.floors) * GameScene.floorSpeed
+            ).with(timing: SKActionTimingMode.easeInEaseOut),
             completion: {
                 self.isPanning = false
                 self.clean()
             }
         )
+    }
+}
+
+// Coins
+extension GameScene {
+    func checkCoins() {
+        guard let coin = playerCoin(), !coin.isCollected else {
+            return
+        }
+        
+        coin.collect()
     }
 }
 

@@ -27,8 +27,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             print("Could not find specified level!")
         }
         
-        let contentView = GameView(model: model ?? .demo)
-//        let contentView = ContentView()
+//        let contentView = GameView(model: model ?? .demo)
+        let contentView = ShopView(isShowing: .constant(true))
+            .statusBar(hidden: true)
 //        let contentView = SwipeGesturePreviews.previews
         
         // Use a UIHostingController as window root view controller.

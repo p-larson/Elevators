@@ -9,26 +9,34 @@
 import Foundation
 
 public enum PlayerOutfit: String, CaseIterable, Hashable {
-    case chef
+    case firefighter, orange, strawberry, goose
     
     public var description: String {
         switch self {
-        case .chef:
-            return "Glad he's carrying a pan not a knife!"
+//        case .chef:
+//            return "Glad he's carrying a pan not a knife!"
+        case .firefighter:
+            return "He fights fire."
+        case .orange:
+            return "Big pulpe guy"
+        case .strawberry:
+            return "\"GMO Certified\" - Evan - \"No that's Dumb\" - Evan"
+        case .goose:
+            return "If you're going to act like a silly goose, go to the pond."
         }
     }
     
-    public var cost: Int {
+    public var isSymmetric: Bool {
         switch self {
-        case .chef:
-            return 100
+        case .firefighter:
+            return false
+        default:
+            return true
         }
     }
     
     var isUnlocked: Bool {
         switch self {
-        case .chef:
-            return true
         default:
             return UserDefaults.standard.bool(forKey: "outfit.")
         }
