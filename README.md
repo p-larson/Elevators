@@ -28,7 +28,7 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] 
 
 # Todo
-- [ ] Coin Counter Animation
+- [x] Coin Counter Animation
 - [ ] Random Unlock functionality
 - [x] Add Panning to start of game
 - [x] REOPTIMIZED Game, (all I did was toggle gpu frame capture, reduced memory to 20% of original :-])
