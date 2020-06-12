@@ -6,25 +6,20 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] Sushi (寿司)
 - [ ] Evan (smells nice)
 - [ ] Peter (is tall)
-- [ ] Scuba Steve (swims)
+- [x] Scuba Steve (swims)
 - [x] Firefighter (Don't invite this man to a cookout)
 - [x] Goose (Quack)
 - [x] Orange (Orange, with extra pulp)
 - [x] Strawberry (gmo certified)
-- [ ] Banana (🍌🦍🥵)
+- Team Food
+  - [x] Banana (🍌🦍🥵)
+  - [x] Orange
+  - [x] Strawberry
 - [ ] Ninja (I bet he has blue hair)
-- [ ] Evolving Fish (He do be walking)
-- [ ] Astronaut
-- [ ] Cheeseman (Wisconsin sucks)
+- [x] Mailman (corona deliv bonus)
+- [x] Astronaut
 - [ ] Stephen (Crafty)
-- [ ] Corona Man 2020 (Like's to ruin things)
-- [ ] Karen (...)
-- [ ] Ice Cube (Not the Rapper)
-- [ ] Taco (me gusta mucho)
 - [ ] Cowboy
-- [ ] Alien 
-- [ ] Upset Cat
-- [ ] Unlucky Brad
 - [ ] 
 
 # Todo
