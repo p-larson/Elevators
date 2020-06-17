@@ -9,7 +9,8 @@
 import SwiftUI
 
 struct DeveloperView: View {
-        
+    
+    let scene: GameScene
     @Binding var isShowing: Bool
     
     @ObservedObject var saves = Storage.current
@@ -64,8 +65,13 @@ struct DeveloperView: View {
                     }
                 }
                 
+                Section(header: Text("Game Settings").font(.title)) {
+                    GameSettingsView()
+                }
+                
                 Button("Done") {
                     self.isShowing = false
+                    self.scene.reload()
                 }
 
             }
@@ -79,7 +85,10 @@ struct DeveloperView: View {
 
 struct DeveloperView_Previews: PreviewProvider {
     static var previews: some View {
-        DeveloperView(isShowing: .constant(true))
+        DeveloperView(
+            scene: GameScene(model: .demo),
+            isShowing: .constant(true)
+        )
     }
 }
 

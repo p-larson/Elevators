@@ -105,9 +105,10 @@ struct DailyPrizeView: View {
             }
             .foregroundColor(Color("theme-1"))
             .onButtonPress {
+                self.claimed = true
+                self.isShowing = false
+                
                 withAnimation {
-                    self.claimed = true
-                    self.isShowing = false
                     Storage.current.coins += .random(in: 1 ..< 5)
                 }
             }
@@ -118,7 +119,7 @@ struct DailyPrizeView: View {
         }
         .font(.custom("Futura Bold", size: 24))
         .padding()
-        .background(Color.white)
+        .background(Color.white.edgesIgnoringSafeArea(.all))
     }
 }
 

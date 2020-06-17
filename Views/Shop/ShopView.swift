@@ -14,7 +14,7 @@ struct ShopView: View {
     
     @Binding var isShowing: Bool
     @State var selection = 0
-    @State var page = 0
+    @State var page = 2
     @State var presented = false
     @State var showCredits = false
     @State var showRandomUnlock = false
@@ -125,14 +125,6 @@ struct ShopView: View {
         )
     }
     
-    var pagerTransition: AnyTransition {
-        AnyTransition
-            .asymmetric(
-                insertion: AnyTransition.opacity.animation(Animation.linear.delay(0.3)),
-                removal: .opacity
-        )
-    }
-    
     var length: CGFloat {
         min(UIScreen.main.bounds.width, UIScreen.main.bounds.height / 2) - 32
     }
@@ -158,10 +150,10 @@ struct ShopView: View {
             Color("shop")
                 .edgesIgnoringSafeArea(.all)
             
-            VStack {
+            VStack(spacing: 8) {
                 Spacer()
                 VStack(spacing: 0) {
-                    Image("chef.idle.right.1")
+                    Image("orange.idle.right.1")
                         .resizable()
                         .scaledToFit()
                         .frame(
@@ -170,7 +162,6 @@ struct ShopView: View {
                     )
                     HStack {
                         Text("Chef")
-                        Spacer()
                         Text("\(self.selection)/128 Collected")
                             .brightness(-0.5)
                     }.padding(.horizontal, 32)
@@ -180,14 +171,10 @@ struct ShopView: View {
                     Pager(page: $page, data: Array(pages), id: \.self) { index in
                         self.content(page: index)
                             .overlayPreferenceValue(GridItemBoundsPreferencesKey.self, self.selection(on: index))
-                            .transition(.identity)
                     }
                     .itemAspectRatio(1.0, alignment: .center)
                     .itemSpacing(16)
                     .interactive(0.9)
-                    .opacity(self.presented ? 1.0 : 0.0)
-                    .animation(.linear, value: self.page)
-                    .animation(Animation.linear.delay(0.3), value: self.presented)
                 }
                 .frame(height: UIScreen.main.bounds.height / 3)
                 
@@ -198,6 +185,8 @@ struct ShopView: View {
                             .frame(width: 10, height: 10)
                     }
                 }
+                
+                Spacer()
                 
                 if coinPages.contains(page) {
                     GameButton {
@@ -215,7 +204,6 @@ struct ShopView: View {
                         .font(.custom("Futura Bold", size: 16))
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
                     .onButtonPress {
                         self.showRandomUnlock = true
                     }
@@ -235,31 +223,31 @@ struct ShopView: View {
                     }
                     .foregroundColor(Color("ad"))
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                }  else {
+                } else {
                     GameButton {
-                        HStack {
-                            Text("Free Coins")
-                                .frame(height: 32)
-                        }
+                        Text("Free Coins")
                         .foregroundColor(.white)
                         .frame(height: 32)
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .font(.custom("Futura Bold", size: 16))
                     }
-                    .foregroundColor(.red)
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+                    .foregroundColor(.red)
                     .onButtonPress {
                         self.showCredits = true
                     }
                 }
-                Spacer()
-                Button("Done") {
-                    self.isShowing.toggle()
+                GameButton {
+                    Text("Done")
+                        .frame(height: 32)
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .foregroundColor(.black)
+                        .font(.custom("Futura Bold", size: 16))
                 }
-                .brightness(-0.5)
-                .opacity(0.5)
+                .padding(.horizontal, 16)
+                .onButtonPress {
+                    self.isShowing = false
+                }
             }
             .gridStyle(ModularGridStyle(columns: 3, rows: 3, spacing: 8))
             .font(.custom("Futura Bold", size: 32))
@@ -276,7 +264,7 @@ struct ShopView: View {
             self.creditsView
             
         }
-        .transition(.opacity)
+//        .transition(.opacity)
     }
 }
 
@@ -295,8 +283,8 @@ struct ShopTestView: View {
                 ShopView(isShowing: $presented)
             }
         }
-        .transition(.opacity)
-        .animation(Animation.linear)
+//        .transition(.opacity)
+//        .animation(Animation.linear)
     }
 }
 

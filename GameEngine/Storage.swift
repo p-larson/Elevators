@@ -21,6 +21,7 @@ public class Storage: ObservableObject {
     @Published public var coins: Int
     @Published public var streak: Int
     @Published public var recentClaim: Date?
+    @Published public var credits: [String]
     // Save of local models
     private var local: [LevelModel]
     
@@ -120,16 +121,25 @@ public class Storage: ObservableObject {
         self.streak = storage.integer(forKey: "streak")
         self.recentClaim = storage.object(forKey: "recentClaim") as? Date
         self.coins = storage.integer(forKey: "coins")
-
-        if
-            let localData = storage.data(forKey: "levels"),
-            let localSave = try? decoder.decode([LevelModel].self, from: localData),
-            let hardFolder = Bundle.main.urls(forResourcesWithExtension: "txt", subdirectory: nil)
-        {
+        self.credits = storage.stringArray(forKey: "credits") ?? []
+        
+        if let localData = storage.data(forKey: "levels"),
+            let localSave = try? decoder.decode([LevelModel].self, from: localData) {
             levels = localSave
             local = localSave
+        } else {
+            levels = [LevelModel]()
+            local = [LevelModel]()
+        }
+        
+        if
+            let hardFolder = Bundle.main.urls(forResourcesWithExtension: "txt", subdirectory: nil)
+        {
+            
+            print("Attempting to Load \(hardFolder.count) Levels from File.")
             
             for url in hardFolder {
+                print("\(url.lastPathComponent)...")
                 guard
                     let data = try? Data(contentsOf: url),
                     let model = decode(data)
@@ -141,12 +151,6 @@ public class Storage: ObservableObject {
                 
                 levels.append(model)
             }
-        } else {
-            levels = [LevelModel]()
-            local = [LevelModel]()
-            
-            // levels = [.demo]
-            // local = [.demo]
         }
         
         print("Loaded \(levels.count) Levels (\(local.count) Local).")
@@ -164,6 +168,7 @@ public class Storage: ObservableObject {
         storage.set(streak, forKey: "streak")
         storage.set(recentClaim, forKey: "recentClaim")
         storage.set(coins, forKey: "coins")
+        storage.set(credits, forKey: "credits")
         
         do {
             let data = try encoder.encode(local)
@@ -214,5 +219,53 @@ public class Storage: ObservableObject {
         levels.first { (model) -> Bool in
             model.name == name
         }
+    }
+    
+    var settings: GameSettingsModel {
+        get {
+            
+            if let data = storage.data(forKey: "settings"), let value = try? decoder.decode(GameSettingsModel.self, from: data) {
+                // Update GameScene
+                GameScene.maxFloorsShown = value.maxFloorsShown
+                GameScene.floorSpeed = value.floorSpeed
+                GameScene.playerSpeed = value.playerSpeed
+                GameScene.doorSpeed = value.doorSpeed
+                GameScene.waveSpeed = value.waveSpeed
+                GameScene.cameraSpeed = value.cameraSpeed
+                GameScene.padding = value.padding
+                
+                return value
+            } else {
+                return GameSettingsModel()
+            }
+        }
+        
+        set {
+            storage.set(try? encoder.encode(newValue), forKey: "settings")
+                        
+            GameScene.maxFloorsShown = newValue.maxFloorsShown
+            GameScene.floorSpeed = newValue.floorSpeed
+            GameScene.playerSpeed = newValue.playerSpeed
+            GameScene.doorSpeed = newValue.doorSpeed
+            GameScene.waveSpeed = newValue.waveSpeed
+            GameScene.cameraSpeed = newValue.cameraSpeed
+            GameScene.padding = newValue.padding
+        }
+    }
+    
+    func checkCreditsRewards() {
+        credits.removeAll { (username) -> Bool in
+            guard let date = storage.object(forKey: "credit." + username) as? Date else {
+                return false
+            }
+            
+            return (Calendar.current.dateComponents([.day], from: date).day ?? 0) >= 7
+        }
+    }
+    
+    func collect(_ username: String) {
+        self.credits.append(username)
+        
+        storage.set(Date(), forKey: "credit." + username)
     }
 }

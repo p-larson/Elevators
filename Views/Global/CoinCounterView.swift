@@ -27,25 +27,49 @@ struct CoinCounterView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.5)
                         .font(.custom("Futura Medium", size: CoinCounterView.length))
-                        .animation(nil)
                         .fixedSize()
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
                 .background(Capsule().foregroundColor(.white)
                 .shadow(color: Color.black.opacity(0.15), radius: 0, x: 0, y: 5))
-            }.frame(height: 32).padding(.horizontal, 16)
+                .transition(
+                    AnyTransition
+                        .asymmetric(
+                            insertion: AnyTransition.scale(scale: 1.2),
+                            removal: AnyTransition.scale(scale: 1.0)
+                    )
+                )
+                .animation(.linear)
+                .id(self.storage.coins.description)
+            }
+            .frame(height: 32)
+            .padding(.horizontal, 16)
             
             Spacer()
+        }.statusBar(hidden: true)
+    }
+}
+
+struct CoinCounterTestView: View {
+    
+    var body: some View {
+        ZStack {
+            CoinCounterView()
+            Button("+") {
+                withAnimation {
+                    Storage.current.coins += 1
+                }
+            }
         }
     }
 }
 
-struct OverlayDisplayView_Previews: PreviewProvider {
+struct CoinCounterPreviews: PreviewProvider {
     static var previews: some View {
         ZStack {
             GameBackground()
-            CoinCounterView()
+            CoinCounterTestView()
         }.previewDevice("iPhone 11")
     }
 }

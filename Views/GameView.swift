@@ -10,31 +10,29 @@ import SwiftUI
 import SpriteKit
 
 struct GameView: View {
-    // Game
+    // GameScene
     @ObservedObject var scene: GameScene
-    
     // Sub Views
-    
     @State var isAnimating: Bool = false
     @State var isCollectingDailyPrize = false
     @State var isShopping = false
     @State var showLevelNumber = false
-    
     // Transition View Management
     @State var showTransition = false
     @State var isTransitioning = false
     @State var transition: (() -> Void)? = nil
-    
+    // Developer (For Debugging)
     @State var developer = true
     @State var showDeveloperView = false
-    
+    // Game Model
     @State var model: LevelModel
-    
+    // Initializer with Model
     init(model: LevelModel) {
         self._model = State(initialValue: model)
         self._scene = ObservedObject(initialValue: GameScene(model: model))
     }
-    
+    // Menu
+    // 
     var menu: some View {
         ZStack {
             if !scene.isPlaying || scene.hasWon || scene.hasLost {
@@ -51,25 +49,25 @@ struct GameView: View {
                     Spacer()
                     HStack {
                         if developer {
+                            // Developer Button
                             GameButton {
                                 Text("👾")
                             }.onButtonPress {
-                                withAnimation(.linear) {
-                                    self.showDeveloperView = true
-                                }
+                                self.showDeveloperView = true
+                                
                             }
                         }
                         Spacer()
+                        // Daily Prize Button
                         GameButton {
                             Text("🎁")
                         }.onButtonPress {
-                            withAnimation(.linear) {
-                                self.isCollectingDailyPrize = true
-                                self.showLevelNumber = false
-                            }
+                            self.isCollectingDailyPrize = true
+                            self.showLevelNumber = false
                         }
                     }
                     HStack {
+                        // Previous Level Button
                         GameButton {
                             Text("👈")
                         }.onButtonPress {
@@ -79,13 +77,11 @@ struct GameView: View {
                         }.disabled(isTransitioning)
                         Spacer()
                         
+                        // Shop Button
                         GameButton {
                             Text("🛒")
                         }.onButtonPress {
-                            withAnimation {
-                                self.isShopping = true
-                                self.showLevelNumber = false
-                            }
+                            self.isShopping = true
                         }
                     }
                     
@@ -179,21 +175,21 @@ struct GameView: View {
     
     var gameStateViews: some View {
         ZStack {
-            if !scene.isPlaying {
-                VStack {
-                    Spacer()
-                    PressIndicatorView(model: $model)
-                    .transition(.opacity)
-                }
-                .zIndex(1)
-                .onTapGesture {
-                    withAnimation {
-                        self.scene.isPlaying = true
-                    }
-                    
-                    print("tap")
-                }
-            }
+            //            if !scene.isPlaying {
+            //                VStack {
+            //                    Spacer()
+            //                    PressIndicatorView(model: $model)
+            //                        .transition(.opacity)
+            //                }
+            //                .zIndex(1)
+            //                .onTapGesture {
+            //                    withAnimation {
+            //                        self.scene.isPlaying = true
+            //                    }
+            //
+            //                    print("tap")
+            //                }
+            //            }
             
             if scene.hasWon {
                 VStack {
@@ -206,6 +202,7 @@ struct GameView: View {
                 }
             }
         }
+        //        .transition(.opacity)
     }
     
     var body: some View {
@@ -216,28 +213,31 @@ struct GameView: View {
                 .edgesIgnoringSafeArea(.all)
                 .zIndex(1)
                 .blur(radius: scene.hasLost ? 10.0 : 0)
+                // 3d scroll
+                //.rotation3DEffect(self.scene.isPlayerRiding ? .degrees(3 * (self.scene.isSendingElevator ? -1 : 1)) : .degrees(0), axis: (1, 0, 0))
+                //.animation(.linear(duration: 0.1), value: self.scene.isPlayerRiding)
                 .onAppear {
                     withAnimation {
                         self.scene.isPlaying = false
                         self.showLevelNumber = true
                     }
-                }
+            }
             
             self.gameStateViews
                 .zIndex(2)
             
             self.menu
                 .zIndex(3)
-
+            
             ConfettiView(isEmitting: scene.hasWon)
                 .zIndex(4)
-
+            
             self.screens
                 .zIndex(5)
-
+            
             CoinCounterView()
                 .zIndex(6)
-
+            
             if showTransition {
                 TransitionView(
                     showTransition: $showTransition,
@@ -246,14 +246,12 @@ struct GameView: View {
                 )
                     .zIndex(7)
             }
-
+            
             if showDeveloperView {
-                DeveloperView(isShowing: $showDeveloperView)
+                DeveloperView(scene: self.scene, isShowing: $showDeveloperView)
                     .zIndex(8)
             }
         }
-        .animation(.linear)
-        .transition(.opacity)
         .environmentObject(scene)
         .statusBar(hidden: true)
         .font(.custom("Futura Medium", size: 32))

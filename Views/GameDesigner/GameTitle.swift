@@ -2,9 +2,11 @@
 //  GameTitle.swift
 //  Elevators
 //
-//  Created by Peter Larson on 4/6/20.
+//  Created by Peter Larson on 3/28/20.
 //  Copyright © 2020 Peter Larson. All rights reserved.
 //
+
+import SwiftUI
 
 import SwiftUI
 
@@ -40,9 +42,10 @@ struct GameTitle_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             GameTitle("Elevators")
-            GameTitle("Level 3", dark: false, shadow: false)
-                .scaleEffect(0.3)
+                .foregroundColor(Color("HelathyWater-1"))
+            GameTitle("Elevators", dark: true)
+                .foregroundColor(Color("HelathyWater-1"))
+                .background(Color.black)
         }
     }
 }
-

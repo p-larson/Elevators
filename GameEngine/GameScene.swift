@@ -27,11 +27,15 @@ final public class GameScene: SKScene, ObservableObject {
         didSet {
             if isPlaying {
                 self.startWave()
+                self.clearIndicators()
             }
         }
     }
     @Published var hasWon: Bool = false
     @Published var hasLost: Bool = false
+    
+    @Published var isSendingElevator = false
+    @Published var isPlayerRiding = false
     
     init(model: LevelModel) {
         self.model = model
@@ -56,6 +60,7 @@ extension GameScene {
         self.clean()
         self.setupCamera()
         self.setupControls()
+        self.setupPressIndicator()
         self.updateTarget()
         self.hasWon = false
         self.hasLost = false
@@ -168,14 +173,14 @@ extension GameScene {
     }
 }
 
-extension GameScene {
-    static let maxFloorsShown: CGFloat = 8
-    static let floorSpeed: TimeInterval = 0.2
-    static let playerSpeed: TimeInterval = 0.3
-    static let doorSpeed: TimeInterval = 0.3
-    static let waveSpeed: TimeInterval = 3.0
-    static let cameraSpeed: TimeInterval = 0.25
-    static let padding: CGFloat = 16.0
+public extension GameScene {
+    static var maxFloorsShown: CGFloat = 8
+    static var floorSpeed: TimeInterval = 0.2
+    static var playerSpeed: TimeInterval = 0.2
+    static var doorSpeed: TimeInterval = 0.15
+    static var waveSpeed: TimeInterval = 2.0
+    static var cameraSpeed: TimeInterval = 0.15
+    static var padding: CGFloat = 16.0
 }
 
 // Size
@@ -525,11 +530,12 @@ extension GameScene {
         case elevator.bottom:
             target = elevator.top
             origin = elevator.bottom
-            
+            isSendingElevator = true
             break
         case elevator.top:
             target = elevator.bottom
             origin = elevator.top
+            isSendingElevator = false
             break
         default:
             return
@@ -552,6 +558,9 @@ extension GameScene {
                             elevatorNode.close()
                         }
                     },
+                    SKAction.run {
+                        self.isPlayerRiding = true
+                    },
                     SKAction.moveTo(
                         y: self.cameraOrigin.y + self.cameraYTranslation(distance: distance),
                         duration: cameraSpeed
@@ -559,6 +568,7 @@ extension GameScene {
                     SKAction.run(duration: GameScene.doorSpeed) {
                         self.playerNode.floor = target
                         self.playerNode.position.y = self.playerYPosition()
+                        self.isPlayerRiding = false
                         self.render() // Opens the target Elevator
                         self.clean()
                         self.camera?.position = self.cameraOrigin
@@ -569,7 +579,7 @@ extension GameScene {
                     SKAction.run {
                         if self.playerNode.floor == self.model.floors {
                             self.hasWon = true
-                            self.moveCameraToPlayer()
+                            // self.moveCameraToPlayer()
                         } else {
                             self.isPlaying = true
                         }
@@ -725,6 +735,81 @@ extension GameScene {
         }
         
         coin.collect()
+    }
+}
+
+extension GameScene {
+    
+    func clearIndicators() {
+        [indicatorLabel, indicatorEmoji].forEach { node in
+            node?.run(SKAction.sequence([SKAction.fadeOut(withDuration: 0.3)]), completion: {
+                node?.removeFromParent()
+            })
+        }
+    }
+    
+    var indicatorLabel: SKNode? {
+        get {
+            childNode(withName: "indicatorLabel")
+        }
+        
+        set {
+            newValue?.name = "indicatorLabel"
+            
+            if let node = newValue, node.parent == nil {
+                self.addChild(node)
+            }
+        }
+    }
+    
+    var indicatorEmoji: SKNode? {
+        get {
+            childNode(withName: "indicatorEmoji")
+    
+        }
+        
+        set {
+            newValue?.name = "indicatorEmoji"
+            
+            if let node = newValue, node.parent == nil {
+                self.addChild(node)
+            }
+        }
+    }
+    
+    func setupPressIndicator() {
+        indicatorLabel = SKLabelNode(fontNamed: "Futura Medium")
+        indicatorEmoji = SKLabelNode(text: "👆")
+        
+        do {
+            let label = indicatorLabel as! SKLabelNode
+            
+            label.fontSize = 48
+            label.text = "Level \(model.number)"
+            label.position.y = floorYPosition(at: 0) - 24 + GameScene.floorSize.height / 2
+            label.position.x = frame.midX
+            label.zPosition = 1
+        }
+        
+        do {
+            let emoji = indicatorEmoji as! SKLabelNode
+            
+            emoji.position.y = indicatorLabel!.position.y - 80
+            emoji.zPosition = 2
+            emoji.fontSize = 64
+            emoji.position.x = frame.midX
+            
+            emoji.run(
+                SKAction.repeatForever(
+                    .sequence(
+                        [
+                            SKAction.moveBy(x: 0, y: 16, duration: 0.5),
+                            SKAction.moveBy(x: 0, y: -16, duration: 0.5)
+                        ]
+                    )
+                ).with(timing: .easeInEaseOut)
+            )
+        }
     }
 }
 
