@@ -15,17 +15,22 @@ Swift-5, SwiftUI/SpriteKit, iOS App
   - [x] Banana (🍌🦍🥵)
   - [x] Orange
   - [x] Strawberry
+  - [x] Pineapple
 - [x] Construction Woman
 - [ ] Ninja (I bet he has blue hair)
 - [x] Mailman (corona deliv bonus)
 - [x] Astronaut
+- [x] Astronaut Woman
 - [ ] Stephen (Crafty)
 - [ ] Cowboy
 - [ ] 
 
 # Todo
-- [ ] 
-- [ ] Hold to enter elevator change to tap
+- Design Thoughts
+  - [ ] Possible deeper gradient on main play screen - feels a bit flat
+  - [ ] Elevator line connector color tweak from the deep black to a lighter color...
+- [ ] On level completion, missing coins collected field
+- [ ] Hold to enter elevator is a bit slow: change enter to tap
 ~~- [ ] 3d scroll on ride~~ Too rocky
 - [x] Coin Counter Animation
 - [ ] Random Unlock functionality
