@@ -3,8 +3,8 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Characters
 - Designs
- - [ ] App Icon in all sizes
- - [ ] Loading screen logo animation
+  - [ ] App Icon in all sizes
+  - [ ] Loading screen logo animation
 - [ ] Soda Can Man (I bet he's from Minnesoda)
 - [ ] Sushi (寿司)
 - [x] Evan (smells nice)
