@@ -1,16 +1,11 @@
 # Elevators
 Swift-5, SwiftUI/SpriteKit, iOS App
 
-# Designing
-- [ ] App Icon
-- [ ] Launch Screen
-
 # Characters
 - [ ] Soda Can Man (I bet he's from Minnesoda)
 - [ ] Sushi (寿司)
-- [ ] Evan (smells nice)
-- [ ] Peter (is tall)
-- [x] Girl
+- [x] Evan (smells nice)
+- [x] Peter (is tall)
 - [x] Scuba Steve (swims)
 - [x] Firefighter (Don't invite this man to a cookout)
 - [x] Goose (Quack)
@@ -20,6 +15,7 @@ Swift-5, SwiftUI/SpriteKit, iOS App
   - [x] Banana (🍌🦍🥵)
   - [x] Orange
   - [x] Strawberry
+- [x] Construction Woman
 - [ ] Ninja (I bet he has blue hair)
 - [x] Mailman (corona deliv bonus)
 - [x] Astronaut
@@ -28,8 +24,8 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] 
 
 # Todo
-- [ ] 1 use elevators
-- [ ] Tap instead of long press to ride
+- [ ] 
+- [ ] Hold to enter elevator change to tap
 ~~- [ ] 3d scroll on ride~~ Too rocky
 - [x] Coin Counter Animation
 - [ ] Random Unlock functionality
