@@ -1,6 +1,10 @@
 # Elevators
 Swift-5, SwiftUI/SpriteKit, iOS App
 
+# Designing
+- [ ] App Icon
+- [ ] Launch Screen
+
 # Characters
 - [ ] Soda Can Man (I bet he's from Minnesoda)
 - [ ] Sushi (寿司)
@@ -23,6 +27,8 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 - [ ] 
 
 # Todo
+- [ ] 1 use elevators
+- [ ] Tap instead of long press to ride
 ~~- [ ] 3d scroll on ride~~ Too rocky
 - [x] Coin Counter Animation
 - [ ] Random Unlock functionality
