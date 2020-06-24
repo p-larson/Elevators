@@ -13,7 +13,7 @@ public class PlayerSkin: ExpressibleByStringLiteral {
     
     fileprivate weak var node: PlayerNode? = nil
     
-    public static var current: PlayerSkin = "orange"
+    public static var current: PlayerSkin = "strawberry"
     
     public typealias StringLiteralType = String
     

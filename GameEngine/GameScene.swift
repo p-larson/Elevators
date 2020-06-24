@@ -174,11 +174,11 @@ extension GameScene {
 }
 
 public extension GameScene {
-    static var maxFloorsShown: CGFloat = 8
+    static var maxFloorsShown: CGFloat = 6
     static var floorSpeed: TimeInterval = 0.2
     static var playerSpeed: TimeInterval = 0.2
     static var doorSpeed: TimeInterval = 0.15
-    static var waveSpeed: TimeInterval = 2.0
+    static var waveSpeed: TimeInterval = 3.0
     static var cameraSpeed: TimeInterval = 0.15
     static var padding: CGFloat = 16.0
 }
@@ -208,8 +208,8 @@ extension GameScene {
     
     static var elevatorSize: CGSize {
         return CGSize(
-            width: (GameScene.floorSize.height - GameScene.floorBaseSize.height) * (9/15),
-            height: (GameScene.floorSize.height - GameScene.floorBaseSize.height)
+            width: (GameScene.floorSize.height - GameScene.floorBaseSize.height) * (7/12),
+            height: (GameScene.floorSize.height - GameScene.)
         ).applying(.init(scaleX: 0.7, y: 0.7))
     }
     
@@ -461,7 +461,7 @@ extension GameScene {
     }
     
     func playerYPosition() -> CGFloat {
-        var y: CGFloat = -3.25 // TODO: Images have a weird spacing, needs to be removed in final builds
+        var y: CGFloat = 0 // TODO: Images have a weird spacing, needs to be removed in final builds
         
         y += elevatorYPosition(at: playerNode.floor)
         
@@ -485,13 +485,11 @@ extension GameScene {
             range.removeFirst()
         }
         
-        guard let slot = range.first(where: { (slot) -> Bool in
-            elevator(at: slot, on: playerNode.floor) != nil
-        }) else {
+        guard !range.isEmpty else {
             return
         }
         
-        self.playerNode.move(to: slot)
+        self.playerNode.move(right: true)
     }
     
     @objc func left() {
@@ -505,13 +503,11 @@ extension GameScene {
         
         let range = Array(0 ..< playerNode.slot).reversed() as [Int]
         
-        guard let slot = range.first(where: { (slot) -> Bool in
-            elevator(at: slot, on: playerNode.floor) != nil
-        }) else {
+        guard !range.isEmpty else {
             return
         }
         
-        self.playerNode.move(to: slot)
+        self.playerNode.move(right: false)
     }
 }
 extension GameScene {
@@ -647,6 +643,7 @@ extension GameScene {
                             elevatorNode.close()
                         }
                         self.hasLost = true
+                        self.sandbag()
                     }
                 ]
             ),
@@ -657,6 +654,26 @@ extension GameScene {
     // When the player rides, it should cancel
     func stopWave() {
         camera?.removeAction(forKey: "wave")
+    }
+}
+
+extension GameScene {
+    func sandbag() {
+        elevatorNodes.forEach { (node) in
+            if let texture = node.background.texture {
+                node.physicsBody = SKPhysicsBody(texture: texture, size: node.background.size)
+            }
+        }
+        
+        floorNodes.forEach { (node) in
+            node.physicsBody = SKPhysicsBody(rectangleOf: GameScene.floorSize)
+        }
+        
+        cableNodes.forEach { (node) in
+            node.physicsBody = SKPhysicsBody(rectangleOf: GameScene.floorSize)
+        }
+        
+        playerNode.physicsBody = SKPhysicsBody(texture: playerNode.texture!, size: playerNode.size)
     }
 }
 
@@ -704,6 +721,8 @@ extension GameScene {
         
         // Ride
         let hold = UILongPressGestureRecognizer(target: self, action: #selector(self.ride))
+        
+        hold.minimumPressDuration = 0.2
         
         self.view?.addGestureRecognizer(hold)
     }

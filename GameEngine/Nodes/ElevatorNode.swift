@@ -10,7 +10,8 @@ import Foundation
 import SpriteKit
 
 class ElevatorNode: SKNode {
-    fileprivate var background: SKSpriteNode!
+    
+    public var background: SKSpriteNode!
     fileprivate var _overlay: SKSpriteNode!
     
     public var overlay: SKNode {

@@ -32,6 +32,8 @@ struct GameContainerView: UIViewRepresentable {
         // Let the user start the game
         view.isUserInteractionEnabled = true
         
+        view.showsPhysics = true
+        
         return view
     }
     

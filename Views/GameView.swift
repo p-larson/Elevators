@@ -21,6 +21,8 @@ struct GameView: View {
     @State var showTransition = false
     @State var isTransitioning = false
     @State var transition: (() -> Void)? = nil
+    // Loading Screen
+    @State var isLoading = true
     // Developer (For Debugging)
     @State var developer = true
     @State var showDeveloperView = false
@@ -175,22 +177,6 @@ struct GameView: View {
     
     var gameStateViews: some View {
         ZStack {
-            //            if !scene.isPlaying {
-            //                VStack {
-            //                    Spacer()
-            //                    PressIndicatorView(model: $model)
-            //                        .transition(.opacity)
-            //                }
-            //                .zIndex(1)
-            //                .onTapGesture {
-            //                    withAnimation {
-            //                        self.scene.isPlaying = true
-            //                    }
-            //
-            //                    print("tap")
-            //                }
-            //            }
-            
             if scene.hasWon {
                 VStack {
                     Text("Level \(model.number) Complete!")
@@ -202,7 +188,6 @@ struct GameView: View {
                 }
             }
         }
-        //        .transition(.opacity)
     }
     
     var body: some View {
@@ -213,9 +198,6 @@ struct GameView: View {
                 .edgesIgnoringSafeArea(.all)
                 .zIndex(1)
                 .blur(radius: scene.hasLost ? 10.0 : 0)
-                // 3d scroll
-                //.rotation3DEffect(self.scene.isPlayerRiding ? .degrees(3 * (self.scene.isSendingElevator ? -1 : 1)) : .degrees(0), axis: (1, 0, 0))
-                //.animation(.linear(duration: 0.1), value: self.scene.isPlayerRiding)
                 .onAppear {
                     withAnimation {
                         self.scene.isPlaying = false
@@ -250,6 +232,13 @@ struct GameView: View {
             if showDeveloperView {
                 DeveloperView(scene: self.scene, isShowing: $showDeveloperView)
                     .zIndex(8)
+            }
+            
+            if isLoading {
+                LoadingView(isShowing: $isLoading)
+                    .transition(.opacity)
+                    .animation(.linear)
+                    .zIndex(10)
             }
         }
         .environmentObject(scene)

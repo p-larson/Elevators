@@ -12,27 +12,54 @@ import Grid
 
 struct ShopView: View {
     
+    @ObservedObject var storage = Storage.current
+    
     @Binding var isShowing: Bool
     @State var selection = 0
-    @State var page = 2
+    @State var page = 0
     @State var presented = false
     @State var showCredits = false
     @State var showRandomUnlock = false
     
-    let coinUnlockables = (0 ..< 32).map { _ in
-        PlayerOutfit.goose
+    init(isShowing: Binding<Bool>) {
+        self._isShowing = isShowing
+        
+        // Set the selection to the index of the current outfit.
+        
+        coinUnlockables.enumerated().forEach { (index, outfit) in
+            if outfit == self.storage.outfit {
+                self._selection = State(initialValue: index)
+            }
+        }
+        
+        adUnlockables.enumerated().forEach { (index, outfit) in
+            if outfit == self.storage.outfit {
+                self._selection = State(initialValue: index + (index % gridRange.count) * gridRange.count)
+            }
+        }
     }
+    
+    let coinUnlockables = [
+        PlayerOutfit.orange,
+        PlayerOutfit.goose,
+        PlayerOutfit.strawberry,
+        PlayerOutfit.firefighter,
+        PlayerOutfit.spaceman,
+        PlayerOutfit.spaceman2,
+        PlayerOutfit.spacewoman,
+        PlayerOutfit.camperlady,
+        PlayerOutfit.pinneapple,
+        PlayerOutfit.scuba
+    ]
     
     var coinPages: Range<Int> {
-        return 0 ..< (Int((Double(coinUnlockables.count) / 16.0).rounded(.up)))
+        return 0 ..< max(1, Int((Double(coinUnlockables.count) / Double(gridRange.count)).rounded(.up)))
     }
     
-    let adUnlockables = (0 ..< 16).map { _ in
-        return PlayerOutfit.orange
-    }
+    let adUnlockables = [PlayerOutfit]()
     
     var adPages: Range<Int> {
-        return coinPages.upperBound ..< coinPages.upperBound + Int((Double(adUnlockables.count) / 16.0).rounded(.up))
+        return coinPages.upperBound ..< coinPages.upperBound + max(1, Int((Double(adUnlockables.count) / Double(gridRange.count)).rounded(.up)))
     }
     
     let purchasables: [ShopItem] = [
@@ -54,28 +81,6 @@ struct ShopView: View {
     
     var gridRange: Range<Int> {
         0 ..< gridLength * gridLength
-    }
-    
-    var cell: some View {
-        ZStack {
-            Color("shop-tile")
-                .cornerRadius(8)
-            Text("?")
-                .foregroundColor(Color("shop-text"))
-                .scaleEffect(2.0)
-        }
-    }
-    
-    func player(at index: Int) -> some View {
-        ZStack {
-            Color("shop-tile")
-                .cornerRadius(8)
-            Text("\(index)")
-                .foregroundColor(Color("shop-text"))
-                .scaleEffect(2.0)
-        }.onTapGesture {
-            self.selection = index
-        }
     }
     
     typealias PrefernceTransformer = (GridItemBoundsPreferencesKey.Value) -> AnyView
@@ -104,11 +109,31 @@ struct ShopView: View {
         }
     }
     
+    func item(on page: Int, index: Int) -> some View {
+        var outfit: PlayerOutfit? = nil
+        
+        let pagedIndex = page * gridRange.count + index
+        
+        if coinPages.contains(page) {
+            outfit = coinUnlockables.safe(index: pagedIndex)
+        } else if adPages.contains(page) {
+            outfit = adUnlockables.safe(index: pagedIndex)
+        }
+        
+        return PlayerOutfitView(outfit: outfit)
+            .onTapGesture {
+                if let outfit = outfit, outfit.isUnlocked {
+                    self.storage.outfit = outfit
+                    self.selection = index + page * self.gridRange.count
+                }
+            }
+    }
+    
     func content(page: Int) -> some View {
         if coinPages.contains(page) || adPages.contains(page) {
             return AnyView(
                 Grid(gridRange) { index in
-                    self.player(at: index + page * (self.gridLength * self.gridLength))
+                    return self.item(on: page, index: index)
                 }
             )
         }
@@ -153,15 +178,13 @@ struct ShopView: View {
             VStack(spacing: 8) {
                 Spacer()
                 VStack(spacing: 0) {
-                    Image("orange.idle.right.1")
-                        .resizable()
-                        .scaledToFit()
+                    PlayerOutfitView()
                         .frame(
-                            width: UIScreen.main.bounds.height / 8,
-                            height: UIScreen.main.bounds.height / 8
-                    )
+                            width: UIScreen.main.bounds.width / 3,
+                            height: UIScreen.main.bounds.width / 3
+                        )
                     HStack {
-                        Text("Chef")
+                        Text("\(self.storage.outfit.name)")
                         Text("\(self.selection)/128 Collected")
                             .brightness(-0.5)
                     }.padding(.horizontal, 32)
@@ -264,7 +287,6 @@ struct ShopView: View {
             self.creditsView
             
         }
-//        .transition(.opacity)
     }
 }
 
@@ -283,8 +305,6 @@ struct ShopTestView: View {
                 ShopView(isShowing: $presented)
             }
         }
-//        .transition(.opacity)
-//        .animation(Animation.linear)
     }
 }
 
@@ -293,5 +313,14 @@ struct ShopView6_Previews: PreviewProvider {
         ShopTestView()
             .statusBar(hidden: true)
             .previewDevice("iPhone 11")
+    }
+}
+
+extension Array {
+    func safe(index: Int) -> Element? {
+        if !indices.contains(index) {
+            return nil
+        }
+        return self[index]
     }
 }

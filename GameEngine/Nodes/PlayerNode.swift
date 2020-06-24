@@ -27,6 +27,7 @@ class PlayerNode: SKSpriteNode {
         super.init(texture: PlayerSkin.current.nextTexture(), color: .clear, size: GameScene.playerSize)
         self.anchorPoint = .init(x: 0.5, y: 0)
         self.zPosition = ZPosition.playerOutside
+        // self.showBoundingBox()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -34,11 +35,54 @@ class PlayerNode: SKSpriteNode {
     }
 }
 
-extension PlayerNode {
-    override var description: String {
-        "Player \(hash) \(hashValue)"
+extension PlayerNode {  
+    
+    var scrunch: SKAction {
+        .scaleY(to: 0.5, duration: 0.1)
     }
     
+    var press: SKAction {
+        .scaleY(to: 1, duration: 0.1)
+    }
+    
+    func stop(_ right: Bool) -> SKAction {
+        .run {
+            self.isMoving = false
+            self.slot += right ? 1 : -1
+            self.gamescene?.updateTarget()
+
+            PlayerSkin.current.set(state: .idle)
+        }
+    }
+    
+    var bounce: SKAction {
+        .sequence(
+            [
+                .moveBy(x: 0, y: frame.height / 5, duration: 0.1),
+                .moveBy(x: 0, y: frame.height / -5, duration: 0.1),
+            ]
+        )
+    }
+    
+    func move(right: Bool) {
+        self.isMoving = true
+        
+        let x = (right ? 1 : -1) * (gamescene?.slotWidth ?? 0)
+
+        PlayerSkin.current.set(state: .idle)
+        PlayerSkin.current.set(direction: right ? .right : .left)
+        
+        self.run(
+            .sequence(
+                [scrunch, .group([bounce, press, .moveBy(x: x, y: 0, duration: GameScene.playerSpeed)]), stop(right)]
+            )
+        )
+    }
+    
+//    func move(to slot: Int) {
+//        // Scrunch
+//
+//    }
 }
 
 extension PlayerNode {

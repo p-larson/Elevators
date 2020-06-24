@@ -12,32 +12,81 @@ struct PlayerOutfitView: View {
     
     @State var image = String()
     
-    let outfit: PlayerOutfit
+    @ObservedObject var storage = Storage.current
+    
+    var outfit: PlayerOutfit?
+    let isAnimated: Bool
+    
+    init() {
+        self.outfit = nil
+        self.isAnimated = true
+    }
+    
+    init(outfit: PlayerOutfit?) {
+        self.outfit = outfit
+        self.isAnimated = false
+        
+        // Set the default image before animation.
+        if let outfit = self.outfit {
+            var name: String!
+            
+            if outfit.isSymmetric {
+                name = "\(outfit.rawValue)-\(PlayerState.idle)-1"
+            } else {
+                name = "\(outfit.rawValue)-\(PlayerState.idle)-\(PlayerDirection.right)-1"
+            }
+
+            self._image = State(initialValue: name)
+        }
+    }
     
     func gif() {
-        
         var frame = 1
         
+        guard self.isAnimated else {
+            return
+        }
+        
         Timer.scheduledTimer(withTimeInterval: 1.0 / 16.0, repeats: true) { (timer) in
+            
             if frame < 14 {
                 frame+=1
             } else {
                 frame = 1
             }
             
-            if self.outfit.isSymmetric {
-                self.image = "\(self.outfit.rawValue)-\(PlayerState.idle)-\(frame)"
+            if self.storage.outfit.isSymmetric {
+                self.image = "\(self.storage.outfit.rawValue)-\(PlayerState.idle)-\(frame)"
             } else {
-                self.image = "\(self.outfit.rawValue)-\(PlayerState.idle)-\(PlayerDirection.right)-\(frame)"
+                self.image = "\(self.storage.outfit.rawValue)-\(PlayerState.idle)-\(PlayerDirection.right)-\(frame)"
             }
         }
     }
     
     var body: some View {
-        Image(self.image)
-            .resizable()
-            .scaledToFit()
-            .onAppear(perform: gif)
+        ZStack {
+            Color("shop-tile")
+                .cornerRadius(8)
+            if outfit == nil && !isAnimated {
+                Text("Coming Soon")
+                    .font(.custom("Futura", size: 16))
+                    .rotationEffect(.init(degrees: -45))
+                    .foregroundColor(.white)
+                    .brightness(-0.5)
+                    .minimumScaleFactor(0.5)
+            }
+            
+            if outfit != nil || isAnimated {
+                Image(self.image)
+                    .resizable()
+                    .scaledToFit()
+                    .onAppear(perform: gif)
+                    .padding()
+                    .brightness((outfit?.isUnlocked ?? false || (isAnimated && storage.outfit.isUnlocked)) ? 0 : -1)
+            }
+        }
+        .frame(minWidth: 0, maxWidth: .infinity)
+        .frame(minHeight: 0, maxHeight: .infinity)
     }
 }
 
@@ -46,11 +95,12 @@ struct PlayerOutfitView_Previews: PreviewProvider {
         ZStack {
             GameBackground()
             ScrollView {
-                PlayerOutfitView(outfit: .goose)
-                PlayerOutfitView(outfit: .orange)
-                PlayerOutfitView(outfit: .strawberry)
-                PlayerOutfitView(outfit: .firefighter)
+                PlayerOutfitView(outfit: nil)
+                ForEach(PlayerOutfit.allCases, id: \.self) { outfit in
+                    PlayerOutfitView(outfit: outfit)
+                }
             }
         }
+    .previewDevice("iPhone X")
     }
 }

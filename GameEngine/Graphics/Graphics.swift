@@ -14,7 +14,8 @@ fileprivate let LOW_GRAPHIC = CGAffineTransform(scaleX: 0.25, y: 0.25)
 
 struct Graphics {
         
-    static let elevatorSize = CGSize(width: 180, height: 300) // Good Resolution, I suppose.
+    //
+    static let elevatorSize = CGSize(width: 140, height: 240) // Good Resolution, I suppose.
     
     public static func draw(size: CGSize, block: @escaping (CGContext) -> Void) -> UIImage {
         return UIGraphicsImageRenderer(size: size).image(actions: { (context) in

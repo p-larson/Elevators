@@ -25,8 +25,8 @@ struct CreditsView: View {
     @ObservedObject var storage = Storage.current
     
     let credits = [
-        Credit(description: "Developed and Programmed by", name: "Peter Larson", username: "p.larson"),
-        Credit(description: "Developed and Graphiced by", name: "Evan Usem", username: "evanusem"),
+        Credit(description: "Designed and Developed by", name: "Peter Larson", username: "p.larson"),
+        Credit(description: "Visually Designed by", name: "Evan Usem", username: "evanusem"),
         Credit(description: "Music by", name: "?", username: "unknown"),
         Credit(description: "Special thanks to our publisher \nfor helping get our game into your hands. We love you guys :)", name: "Ketchapp Studios", username: "ketchapp")
     ]

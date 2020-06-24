@@ -14,3 +14,15 @@ extension SKNode {
         scene as? GameScene
     }
 }
+
+extension SKNode {
+    func showBoundingBox() {
+        let node = SKShapeNode(rect: calculateAccumulatedFrame())
+        
+        node.lineWidth = 2
+        node.strokeColor = .red
+        node.fillColor = .clear
+        
+        self.addChild(node)
+    }
+}
