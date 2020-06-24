@@ -2,10 +2,13 @@
 Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Characters
+- Designs
+  - [ ] App Icon in all sizes
+  - [ ] Loading screen logo animation
 - [ ] Soda Can Man (I bet he's from Minnesoda)
 - [ ] Sushi (寿司)
-- [ ] Evan (smells nice)
-- [ ] Peter (is tall)
+- [x] Evan (smells nice)
+- [x] Peter (is tall)
 - [x] Scuba Steve (swims)
 - [x] Firefighter (Don't invite this man to a cookout)
 - [x] Goose (Quack)
@@ -15,14 +18,22 @@ Swift-5, SwiftUI/SpriteKit, iOS App
   - [x] Banana (🍌🦍🥵)
   - [x] Orange
   - [x] Strawberry
+  - [x] Pineapple
+- [x] Construction Woman
 - [ ] Ninja (I bet he has blue hair)
 - [x] Mailman (corona deliv bonus)
 - [x] Astronaut
+- [x] Astronaut Woman
 - [ ] Stephen (Crafty)
 - [ ] Cowboy
 - [ ] 
 
 # Todo
+- Design Thoughts
+  - [ ] Possible deeper gradient on main play screen - feels a bit flat
+  - [ ] Elevator line connector color tweak from the deep black to a lighter color...
+- [ ] On level completion, missing coins collected field
+- [ ] Hold to enter elevator is a bit slow: change enter to tap
 ~~- [ ] 3d scroll on ride~~ Too rocky
 - [x] Coin Counter Animation
 - [ ] Random Unlock functionality
