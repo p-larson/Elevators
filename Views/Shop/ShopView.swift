@@ -205,7 +205,7 @@ struct ShopView: View {
                     ForEach(pages, id: \.self) { page in
                         Circle()
                             .foregroundColor(page == self.page ? .white : .gray)
-                            .frame(width: 10, height: 10)
+                            .frame(width: 8, height: 8)
                     }
                 }
                 

@@ -22,7 +22,9 @@ class ElevatorNode: SKNode {
     
     let floor: Int, slot: Int, target: Int
     
-    public var isOpen: Bool = false
+    var frameNumber = 0
+    
+    public var isOpen: Bool = false, isEnabled = true
     
     init(floor: Int, slot: Int, target: Int) {
         self.background = SKSpriteNode(
@@ -31,7 +33,7 @@ class ElevatorNode: SKNode {
         )
         
         self._overlay = SKSpriteNode(
-            texture: ElevatorSkin.current.elevatorOverlay.first,
+            texture: ElevatorSkin.current.doorFrames.first!,
             size: GameScene.elevatorSize
         )
         
@@ -66,58 +68,105 @@ extension ElevatorNode {
     }
 }
 
+/*
+ 
+ player starts floor = open all, slowly close with kill speed.
+ player picks an elevator = cancel, open time it takes, then close all from spot normal timing.
+ 
+ */
+
+// Opening/Closing
 extension ElevatorNode {
-    func open(wait duration: TimeInterval = 0) {
-        self._overlay.run(
-            SKAction.sequence(
-                [
-                    SKAction.wait(forDuration: duration),
-                    SKAction.scale(to: 1.1, duration: GameScene.doorSpeed / 3),
-                    SKAction.scale(to: 1.0, duration: GameScene.doorSpeed / 3)
-                ]
-            )
+    
+    fileprivate func stopAnimations() {
+        self.removeAction(forKey: "open")
+        self.removeAction(forKey: "close")
+    }
+    
+    fileprivate func _close(duration: TimeInterval, textures: [SKTexture]) -> TimeInterval {
+        
+        // Stop current animations
+        self.stopAnimations()
+        
+        var convertedFrame = Int((Double(self.frameNumber) / Double(ElevatorSkin.doorFramesCount)) * Double(textures.count))
+        let fps = duration / Double(textures.count)
+        
+        guard convertedFrame != 0 else {
+            return 0
+        }
+        
+        // Get number of frames
+        
+        let frameUpdate: SKAction = .run {
+            convertedFrame -= 1
+            self.frameNumber = Int(Double(convertedFrame * ElevatorSkin.doorFramesCount) / Double(textures.count))
+            self._overlay.texture = textures[convertedFrame]
+        }
+        
+        let count = convertedFrame
+        
+        let delay: SKAction = .wait(forDuration: fps)
+        
+        let loop: SKAction = .repeat(.sequence([delay, frameUpdate]), count: count)
+        
+        let exit: SKAction = .run {
+            self.isOpen = false
+        }
+                
+        self.run(.sequence([loop, exit]), withKey: "close")
+        
+        return TimeInterval(count) * fps
+    }
+    
+    // Return the time it takes to complete
+    @discardableResult func waveClose() -> TimeInterval {
+        _close(duration: GameScene.waveSpeed, textures: ElevatorSkin.current.waveFrames)
+    }
+
+    @discardableResult func close() -> TimeInterval {
+        _close(duration: GameScene.doorSpeed, textures: ElevatorSkin.current.doorFrames)
+    }
+    
+    // Try to open
+    func open() {
+        self.stopAnimations()
+        
+        let fps: TimeInterval = GameScene.doorSpeed / TimeInterval(ElevatorSkin.doorFramesCount)
+        let updateFrame: SKAction = .sequence(
+            [
+                SKAction.wait(forDuration: fps),
+                SKAction.run({
+                    self._overlay.texture = ElevatorSkin.current.doorFrames[self.frameNumber]
+                    self.frameNumber += 1
+                })
+            ]
         )
         
-        self._overlay.run(
+        let exit: SKAction = .run {
+            self.isOpen = true
+        }
+        
+        let count: Int = ElevatorSkin.current.doorFrames.count - self.frameNumber
+        
+        self.run(SKAction.sequence([SKAction.repeat(updateFrame, count: count), exit]), withKey: "open")
+    }
+}
+
+extension ElevatorNode {
+    func shimmy() {
+        self.run(
             SKAction.sequence(
                 [
-                    SKAction.wait(forDuration: duration),
-                    SKAction.animate(
-                        with: ElevatorSkin.current.elevatorOverlay,
-                        timePerFrame: GameScene.doorSpeed / Double(ElevatorSkin.current.elevatorOverlay.count)
-                    ),
-                    SKAction.run{
-                        self.isOpen = true
-                    }
+                    SKAction.moveBy(x: 0, y: self.overlay.frame.height / 10, duration: 0.1),
+                    SKAction.moveBy(x: 0, y: -self.overlay.frame.height / 10, duration: 0.1)
                 ]
-            )
+            ).with(timing: SKActionTimingMode.easeInEaseOut)
         )
     }
     
-    func close(wait duration: TimeInterval = 0) {
-        self._overlay.run(
-            SKAction.sequence(
-                [
-                    SKAction.wait(forDuration: duration),
-                    SKAction.scale(to: 1.1, duration: GameScene.doorSpeed / 3),
-                    SKAction.scale(to: 1.0, duration: GameScene.doorSpeed / 3)
-                ]
-            )
-        )
-        
-        self._overlay.run(
-            SKAction.sequence(
-                [
-                    SKAction.wait(forDuration: duration),
-                    SKAction.animate(
-                        with: ElevatorSkin.current.elevatorOverlay.reversed(),
-                        timePerFrame: GameScene.doorSpeed / Double(ElevatorSkin.current.elevatorOverlay.count)
-                    ),
-                    SKAction.run {
-                        self.isOpen = false
-                    }
-                ]
-            )
+    func disable() {
+        self.run(
+            SKAction.fadeAlpha(to: 0.8, duration: 0.1)
         )
     }
 }

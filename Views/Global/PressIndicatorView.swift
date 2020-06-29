@@ -15,7 +15,7 @@ struct PressIndicatorView: View {
     
     var body: some View {
         VStack {
-            Text("Level \(model.number)")
+            Text("Level \(model.id)")
                 .font(.custom("Futura Medium", size: 48))
                 .foregroundColor(Color.white.opacity(0.8))
             Text("👆")

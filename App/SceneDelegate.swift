@@ -24,10 +24,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let model = Storage.current.level(named: "you betcha")
         
         if model == nil {
-            print("Could not find specified level!")
+            print("Could not find predefined level!")
         }
         
         let contentView = GameView(model: model ?? .demo)
+//        let contentView = NodeTestView()
         
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)

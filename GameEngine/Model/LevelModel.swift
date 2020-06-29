@@ -19,7 +19,7 @@ public struct LevelModel: Identifiable, Encodable & Decodable {
     public var coins: [CoinModel]
     public var start: CellModel?
     public var id: Int
-    public var number: Int { id + 1 }
+    
     
     enum CodingKeys: CodingKey {
         case name, floors, slots, elevators, coins, selected, start, id

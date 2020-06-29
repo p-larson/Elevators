@@ -8,11 +8,13 @@
 
 import Foundation
 import SpriteKit
+import Haptica
 
 class PlayerNode: SKSpriteNode {
     var slot: Int = 0
     var floor: Int
     var target: Int? = nil
+    var willEnter = false
     
     fileprivate(set) var isMoving: Bool = false
     
@@ -45,10 +47,9 @@ extension PlayerNode {
         .scaleY(to: 1, duration: 0.1)
     }
     
-    func stop(_ right: Bool) -> SKAction {
+    func stop() -> SKAction {
         .run {
             self.isMoving = false
-            self.slot += right ? 1 : -1
             self.gamescene?.updateTarget()
 
             PlayerSkin.current.set(state: .idle)
@@ -69,62 +70,20 @@ extension PlayerNode {
         
         let x = (right ? 1 : -1) * (gamescene?.slotWidth ?? 0)
 
+        Haptic.impact(.light).generate()
+        
         PlayerSkin.current.set(state: .idle)
         PlayerSkin.current.set(direction: right ? .right : .left)
         
+        self.slot += right ? 1 : -1
+        
         self.run(
             .sequence(
-                [scrunch, .group([bounce, press, .moveBy(x: x, y: 0, duration: GameScene.playerSpeed)]), stop(right)]
+                [scrunch, .group([bounce, press, .moveBy(x: x, y: 0, duration: GameScene.playerSpeed)]), stop(), .run(check)]
             )
         )
     }
     
-//    func move(to slot: Int) {
-//        // Scrunch
-//
-//    }
-}
-
-extension PlayerNode {
-    func move(to slot: Int) {
-        let translation = slot - self.slot
-        
-        self.isMoving = true
-        
-        self.run(
-            SKAction.sequence(
-                [
-                    SKAction.repeat(
-                        SKAction.sequence(
-                            [
-                                SKAction.run {
-                                    self.slot += (translation / abs(translation))
-                                    self.gamescene?.updateTarget()
-                                    
-                                },
-                                SKAction
-                                    .moveBy(
-                                        x: (gamescene?.slotWidth ?? 0) * CGFloat(translation / abs(translation)),
-                                        y: 0, duration: GameScene.playerSpeed
-                                )
-                            ]
-                        ),
-                        count: abs(translation)
-                    ),
-                    SKAction.run {
-                        self.isMoving = false
-                        PlayerSkin.current.set(state: .idle)
-                    }
-                ]
-            )
-        )
-        
-        PlayerSkin.current.set(state: .run)
-        PlayerSkin.current.set(direction: translation > 0 ? .right : .left)
-    }
-}
-
-extension PlayerNode {
     func enter() {
         // Fadeout
         self.isInsideElevator = true
@@ -134,16 +93,28 @@ extension PlayerNode {
     }
     
     func exit() {
+
+        self.isInsideElevator = false
+        
         self.run(
             SKAction.sequence(
                 [
                     SKAction.fadeIn(withDuration: GameScene.doorSpeed),
                     SKAction.run {
-                        self.isInsideElevator = false
                         self.gamescene?.checkCoins()
-                    }
+                    },
+                    // .run(nextActionInQueue)
                 ]
             )
         )
     }
+    
+    func check() {
+        if willEnter {
+            gamescene?.ride()
+        }
+        
+        willEnter = false
+    }
+
 }

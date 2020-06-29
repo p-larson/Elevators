@@ -8,6 +8,7 @@
 
 import Foundation
 import SpriteKit
+import Haptica
 
 final public class GameScene: SKScene, ObservableObject {
     // Model
@@ -20,13 +21,11 @@ final public class GameScene: SKScene, ObservableObject {
     var isPanning: Bool = true
     // Data
     var playerNode: PlayerNode!
-    var didSucceedLongTouch = false
-    var isTouching = false
     // State
     @Published var isPlaying: Bool = false {
         didSet {
             if isPlaying {
-                self.startWave()
+                self.startClosingWave()
                 self.clearIndicators()
             }
         }
@@ -50,6 +49,17 @@ final public class GameScene: SKScene, ObservableObject {
     }
 }
 
+public extension GameScene {
+    static var maxFloorsShown: CGFloat = 6
+    static var floorSpeed: TimeInterval = 0.2
+    static var playerSpeed: TimeInterval = 0.05
+    static var doorSpeed: TimeInterval = 0.15
+    static var waveSpeed: TimeInterval = 3.0
+    static var cameraSpeed: TimeInterval = 0.15
+    static var padding: CGFloat = 16.0
+    static let slots: Int = 5
+}
+
 // Setup
 extension GameScene {
     
@@ -70,7 +80,6 @@ extension GameScene {
     
     public override func didMove(to view: SKView) {
         self.reload()
-        self.startPanningLevel()
     }
 }
 
@@ -88,6 +97,12 @@ extension GameScene {
         }
     }
     
+    func elevatorNode(on floor: Int, at slot: Int) -> ElevatorNode? {
+        elevatorNodes(on: floor).first { (node) -> Bool in
+            node.slot == slot
+        }
+    }
+    
     func originNode(for elevator: ElevatorModel) -> ElevatorNode? {
         elevatorNodes.first { (elevatorNode) -> Bool in
             elevator.floor == elevatorNode.floor && elevator.slot == elevatorNode.slot
@@ -97,6 +112,12 @@ extension GameScene {
     func targetNode(for elevator: ElevatorModel) -> ElevatorNode? {
         elevatorNodes.first { (elevatorNode) -> Bool in
             elevator.target == elevatorNode.floor && elevator.slot == elevatorNode.slot
+        }
+    }
+    
+    func baseElevators(on floor: Int) -> [ElevatorModel] {
+        model.elevators.filter { (elevator) -> Bool in
+            elevator.bottom == floor
         }
     }
     
@@ -120,10 +141,14 @@ extension GameScene {
         }
     }
     
+    func playerElevatorNode() -> ElevatorNode? {
+        elevatorNode(on: playerNode.floor, at: playerNode.slot)
+    }
+    
     func playerElevator() -> ElevatorModel? {
         elevator(at: playerNode.slot, on: playerNode.floor)
     }
-    
+
     var floorNodes: [FloorNode] {
         children.compactMap { (child) -> FloorNode? in
             child as? FloorNode
@@ -173,16 +198,6 @@ extension GameScene {
     }
 }
 
-public extension GameScene {
-    static var maxFloorsShown: CGFloat = 6
-    static var floorSpeed: TimeInterval = 0.2
-    static var playerSpeed: TimeInterval = 0.2
-    static var doorSpeed: TimeInterval = 0.15
-    static var waveSpeed: TimeInterval = 3.0
-    static var cameraSpeed: TimeInterval = 0.15
-    static var padding: CGFloat = 16.0
-}
-
 // Size
 extension GameScene {
     static var floorSize: CGSize {
@@ -195,7 +210,7 @@ extension GameScene {
     static var floorBaseSize: CGSize {
         return CGSize(
             width: GameScene.floorSize.width,
-            height: UIScreen.main.bounds.size.height / GameScene.maxFloorsShown / 8
+            height: UIScreen.main.bounds.size.height / GameScene.maxFloorsShown / 12
         )
     }
     
@@ -207,10 +222,12 @@ extension GameScene {
     }
     
     static var elevatorSize: CGSize {
+        let width = (GameScene.floorSize.width / CGFloat(slots) - padding)
+        
         return CGSize(
-            width: (GameScene.floorSize.height - GameScene.floorBaseSize.height) * (7/12),
-            height: (GameScene.floorSize.height - GameScene.)
-        ).applying(.init(scaleX: 0.7, y: 0.7))
+            width: width,
+            height: width * (7/5)
+        )
     }
     
     static var playerSize: CGSize {
@@ -344,10 +361,10 @@ fileprivate extension GameScene {
         
         do {
             let cable = CableNode(length: elevator.distance, floor: elevator.floor, slot: elevator.slot)
-            
+
             cable.position.y = elevatorYPosition(at: elevator.floor)
             cable.position.x = elevatorXPosition(at: elevator.slot)
-            
+
             self.addChild(cable)
         }
     }
@@ -412,9 +429,10 @@ fileprivate extension GameScene {
             cableNode.position.y = cableYPosition(at: cableNode.floor)
         }
         
-        // Open all elevators on the player's floor.
-        for elevatorNode in elevatorNodes(on: playerNode.floor) where !elevatorNode.isOpen {
-            elevatorNode.open(wait: Double(elevatorNode.slot) * 0.05)
+        for elevator in model.elevators where elevator.bottom == playerNode.floor {
+            if let node = originNode(for: elevator), !node.isOpen && node.isEnabled {
+                node.open()
+            }
         }
         
         // Clean
@@ -471,12 +489,8 @@ extension GameScene {
 
 extension GameScene {
     @objc func right() {
-        guard !playerNode.isInsideElevator, !playerNode.isMoving, !hasWon, !hasLost else {
+        guard !playerNode.isInsideElevator, !hasWon, !hasLost, !playerNode.isMoving else {
             return
-        }
-        
-        if !isPlaying {
-            isPlaying = true
         }
         
         var range = Array(playerNode.slot ..< model.slots)
@@ -489,11 +503,16 @@ extension GameScene {
             return
         }
         
+        
+        if !isPlaying {
+            isPlaying = true
+        }
+        
         self.playerNode.move(right: true)
     }
     
     @objc func left() {
-        guard !playerNode.isInsideElevator, !playerNode.isMoving, !hasWon, !hasLost else {
+        guard !playerNode.isInsideElevator, !hasWon, !hasLost, !playerNode.isMoving else {
             return
         }
         
@@ -514,11 +533,29 @@ extension GameScene {
     @objc func ride() {
         // Player cannot be inside a elevator.
         // Player must be on a elevator
-        guard !playerNode.isInsideElevator, !playerNode.isMoving, let elevator = playerElevator(), !hasWon, !hasLost else {
+        guard
+            !playerNode.isInsideElevator,
+            let elevator = playerElevator(),
+            let elevatorNode = playerElevatorNode(),
+            !hasWon,
+            !hasLost
+        else {
             return
         }
         
-        self.stopWave()
+        guard !playerNode.isMoving else {
+            playerNode.willEnter = true
+            return
+        }
+        
+        if !elevatorNode.isEnabled || elevator.top == playerNode.floor {
+            
+            Haptic.notification(.warning).generate()
+            
+            elevatorNode.shimmy()
+            
+            return
+        }
         
         var target: Int!, origin: Int!
         
@@ -537,16 +574,26 @@ extension GameScene {
             return
         }
         
+        targetNode(for: elevator)?.isEnabled = false
+        originNode(for: elevator)?.isEnabled = false
+        
         let distance = target - playerNode.floor
         
         let cameraSpeed: TimeInterval = Double(abs(distance)) * GameScene.cameraSpeed
         
         PlayerSkin.current.set(state: .idle)
         
+        Haptic.impact(.light).generate()
+        
+        self.cancelClosingWave()
+        
+        // open the elevator
+        
         self.camera?.run(
             .sequence(
                 [
                     SKAction.run(duration: GameScene.doorSpeed) {
+                        elevatorNode.open()
                         self.playerNode.enter()
                     },
                     SKAction.run(duration: GameScene.doorSpeed) {
@@ -568,13 +615,17 @@ extension GameScene {
                         self.render() // Opens the target Elevator
                         self.clean()
                         self.camera?.position = self.cameraOrigin
+                        self.targetNode(for: elevator)?.open()
                     },
                     SKAction.run(duration: GameScene.doorSpeed) {
+                        self.targetNode(for: elevator)?.close()
                         self.playerNode.exit()
                     },
                     SKAction.run {
                         if self.playerNode.floor == self.model.floors {
                             self.hasWon = true
+                            
+                            Haptic.notification(.success).generate()
                             // self.moveCameraToPlayer()
                         } else {
                             self.isPlaying = true
@@ -583,6 +634,15 @@ extension GameScene {
                 ]
             )
         )
+    }
+}
+
+// Testing if there is a possible move left.
+extension GameScene {
+    var hasAvailableMove: Bool {
+        elevatorNodes(on: playerNode.floor).contains { (node) -> Bool in
+            node.isEnabled && node.isOpen
+        }
     }
 }
 
@@ -611,69 +671,33 @@ extension GameScene {
     }
 }
 
+// Wave 2.0
 extension GameScene {
-    
-    func moveCameraToPlayer() {
-        self.camera?.run(
-            SKAction.moveTo(y: playerNode.position.y, duration: GameScene.waveSpeed).with(timing: .easeIn)
-        )
-    }
-    
-    var isWaving: Bool {
-        return camera?.action(forKey: "wave") != nil
-    }
-    
-    func startWave() {
-        self.camera?.run(
-            .sequence(
-                [
-                    SKAction.group(
-                        [
-                            SKAction.moveBy(
-                                x: 0,
-                                y: GameScene.bottomSpace,
-                                duration: GameScene.waveSpeed
-                            )
-                        ]
-                    ),
-                    SKAction.run {
-                        // You loose.
-                        // close all elevators
-                        self.elevatorNodes.forEach { (elevatorNode) in
-                            elevatorNode.close()
-                        }
-                        self.hasLost = true
-                        self.sandbag()
-                    }
-                ]
-            ),
-            withKey: "wave"
-        )
-    }
-    
-    // When the player rides, it should cancel
-    func stopWave() {
-        camera?.removeAction(forKey: "wave")
-    }
-}
-
-extension GameScene {
-    func sandbag() {
-        elevatorNodes.forEach { (node) in
-            if let texture = node.background.texture {
-                node.physicsBody = SKPhysicsBody(texture: texture, size: node.background.size)
-            }
+    // Instead of the screen moving, have the elevators close slowly.
+    // When all of the elevators are closed, and the pridelayer hasn't picked
+    // one yet, they lose.
+    func startClosingWave() {
+        
+        guard hasAvailableMove else {
+            kill()
+            return
         }
         
-        floorNodes.forEach { (node) in
-            node.physicsBody = SKPhysicsBody(rectangleOf: GameScene.floorSize)
+        elevatorNodes(on: playerNode.floor).forEach { (node) in
+            node.waveClose()
         }
         
-        cableNodes.forEach { (node) in
-            node.physicsBody = SKPhysicsBody(rectangleOf: GameScene.floorSize)
-        }
+        self.run(SKAction.sequence([SKAction.wait(forDuration: GameScene.waveSpeed), SKAction.run(kill)]), withKey: "wave")
+    }
+    
+    func kill() {
+        self.hasLost = true
         
-        playerNode.physicsBody = SKPhysicsBody(texture: playerNode.texture!, size: playerNode.size)
+        print("lost!")
+    }
+    
+    func cancelClosingWave() {
+        self.removeAction(forKey: "wave")
     }
 }
 
@@ -711,7 +735,7 @@ extension GameScene {
         // Left/Right
         let swipe = UISwipeGestureRecognizer.Direction.self
         
-        [(swipe.left, #selector(self.left)), (swipe.right, #selector(self.right))].forEach { (direction, handler) in
+        [(swipe.left, #selector(self.left)), (swipe.right, #selector(self.right)), (swipe.up, #selector(self.ride))].forEach { (direction, handler) in
             let recognizer = UISwipeGestureRecognizer(target: self, action: handler)
             
             recognizer.direction = direction
@@ -720,31 +744,14 @@ extension GameScene {
         }
         
         // Ride
-        let hold = UILongPressGestureRecognizer(target: self, action: #selector(self.ride))
-        
-        hold.minimumPressDuration = 0.2
-        
-        self.view?.addGestureRecognizer(hold)
+        #if DEBUG
+            let tap = UITapGestureRecognizer(target: self, action: #selector(self.ride))
+            
+            self.view?.addGestureRecognizer(tap)
+        #endif
     }
 }
 
-/// Level Panning
-extension GameScene {
-    func startPanningLevel() {
-        camera?.position.y = floorYPosition(at: model.floors)
-
-        camera?.run(
-            SKAction.moveTo(
-                y: floorYPosition(at: 1),
-                duration: TimeInterval(model.floors) * GameScene.floorSpeed
-            ).with(timing: SKActionTimingMode.easeInEaseOut),
-            completion: {
-                self.isPanning = false
-                self.clean()
-            }
-        )
-    }
-}
 
 // Coins
 extension GameScene {
@@ -804,7 +811,7 @@ extension GameScene {
             let label = indicatorLabel as! SKLabelNode
             
             label.fontSize = 48
-            label.text = "Level \(model.number)"
+            label.text = "Level \(model.id)"
             label.position.y = floorYPosition(at: 0) - 24 + GameScene.floorSize.height / 2
             label.position.x = frame.midX
             label.zPosition = 1
@@ -830,6 +837,10 @@ extension GameScene {
             )
         }
     }
+}
+
+enum PlayerAction {
+    case left, right, ride
 }
 
 import SwiftUI

@@ -179,7 +179,7 @@ struct GameView: View {
         ZStack {
             if scene.hasWon {
                 VStack {
-                    Text("Level \(model.number) Complete!")
+                    Text("Level \(model.id) Complete!")
                         .padding(.top, UIScreen.main.bounds.height / 4)
                         .font(.custom("Futura Bold", size: 32))
                         .foregroundColor(.white)
@@ -197,13 +197,13 @@ struct GameView: View {
             GameContainerView(model: model)
                 .edgesIgnoringSafeArea(.all)
                 .zIndex(1)
-                .blur(radius: scene.hasLost ? 10.0 : 0)
                 .onAppear {
                     withAnimation {
                         self.scene.isPlaying = false
                         self.showLevelNumber = true
                     }
-            }
+                }
+                .opacity(self.scene.hasLost ? 0.5 : 1)
             
             self.gameStateViews
                 .zIndex(2)

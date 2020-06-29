@@ -13,9 +13,10 @@ import UIKit
 fileprivate let LOW_GRAPHIC = CGAffineTransform(scaleX: 0.25, y: 0.25)
 
 struct Graphics {
-        
-    //
-    static let elevatorSize = CGSize(width: 140, height: 240) // Good Resolution, I suppose.
+    // 5x7
+    static let elevatorRatio = (CGFloat(5), CGFloat(7))
+    // Good Resolution, I suppose.
+    static let elevatorSize = CGSize(width: Graphics.elevatorRatio.0 * 20, height: Graphics.elevatorRatio.1 * 20)
     
     public static func draw(size: CGSize, block: @escaping (CGContext) -> Void) -> UIImage {
         return UIGraphicsImageRenderer(size: size).image(actions: { (context) in
@@ -53,9 +54,15 @@ struct Graphics {
         return Graphics.draw(size: Graphics.elevatorSize) { (context) in
             context.setFillColor(style.background.cgColor)
             context.fill(
-                CGRect(x: 0, y: 0, width: Graphics.elevatorSize.width, height: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 8)
+                CGRect(
+                    x: Graphics.elevatorSize.width / 16,
+                    y: Graphics.elevatorSize.width / 16,
+                    width: Graphics.elevatorSize.width - Graphics.elevatorSize.width / 8,
+                    height: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 8 - Graphics.elevatorSize.width / 16
+                )
             )
             context.setFillColor(style.backdrop.cgColor)
+            
             context.fill(
                 CGRect(
                     x: 0,
@@ -64,12 +71,6 @@ struct Graphics {
                     height: Graphics.elevatorSize.height / 5
                 )
             )
-//            context.clear(
-//                CGRect(x: 0, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width, height: Graphics.elevatorSize.height / 40)
-//            )
-//            context.fill(
-//                CGRect(x: Graphics.elevatorSize.width / 20, y: Graphics.elevatorSize.height - Graphics.elevatorSize.height / 40, width: Graphics.elevatorSize.width * 0.9, height: Graphics.elevatorSize.height / 40)
-//            )
         }
     }
     
@@ -80,7 +81,14 @@ struct Graphics {
             let padding = Graphics.elevatorSize.width / 50
             // Draw
             context.setFillColor(style.door.cgColor)
-            context.fill(CGRect(origin: .zero, size: Graphics.elevatorSize))
+            context.fill(
+                CGRect(
+                    x: elevatorSize.width / 16,
+                    y: elevatorSize.width / 16,
+                    width: elevatorSize.width - elevatorSize.width / 8,
+                    height: elevatorSize.height - elevatorSize.width / 8
+                )
+            )
             context.setFillColor(style.padding.cgColor)
             context.fill(
                 CGRect(
@@ -122,6 +130,7 @@ struct Graphics {
                     )
                 ]
             )
+             
             context.strokePath()
             
             // Bottom Cut for Backdrop.
@@ -179,5 +188,27 @@ struct Graphics {
             
             layer.draw(in: context)
         }
+    }
+}
+
+import SwiftUI
+
+struct DrawDemo: View {
+    var body: some View {
+        ZStack {
+            Image(uiImage: Graphics.elevatorBackground(style: .demo))
+                .resizable()
+                .scaledToFit()
+            Image(uiImage: Graphics.elevatorOverlay(style: .demo, percent: 0.0))
+                .resizable()
+                .scaledToFit()
+        }
+            .scaleEffect(0.5)
+    }
+}
+
+struct DrawDemo_Previews: PreviewProvider {
+    static var previews: some View {
+        DrawDemo()
     }
 }
