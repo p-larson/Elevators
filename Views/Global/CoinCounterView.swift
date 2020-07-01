@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-//import SwiftFX
+import MovingNumbersView
 
 struct CoinCounterView: View {
     
@@ -19,16 +19,15 @@ struct CoinCounterView: View {
         VStack {
             HStack {
                 Spacer()
-                HStack {
-                    Image("coin")
-                        .resizable()
-                        .frame(width: CoinCounterView.length, height: CoinCounterView.length)
-                    Text(self.storage.coins.description)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5)
-                        .font(.custom("Futura Medium", size: CoinCounterView.length))
-                        .fixedSize()
+                HStack(spacing: 0) {
+                    Text("$")
+                        .font(.system(size: 16))
+                    MovingNumbersView(number: storage.cash, numberOfDecimalPlaces: 2) { string in
+                        Text(string)
+                    }
+                    .font(.custom("Futura", size: 24))
                 }
+                    
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
                 .background(Capsule().foregroundColor(.white)
@@ -41,13 +40,12 @@ struct CoinCounterView: View {
                     )
                 )
                 .animation(.linear)
-                .id(self.storage.coins.description)
             }
             .frame(height: 32)
             .padding(.horizontal, 16)
             
             Spacer()
-        }.statusBar(hidden: true)
+        }
     }
 }
 
@@ -58,7 +56,7 @@ struct CoinCounterTestView: View {
             CoinCounterView()
             Button("+") {
                 withAnimation {
-                    Storage.current.coins += 1
+                    Storage.current.cash += .random(in: 1 ..< 100)
                 }
             }
         }

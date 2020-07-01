@@ -18,6 +18,8 @@ struct GameButton<Content>: View where Content: View {
     @Environment(\.buttonScales) var buttonScales
     @Environment(\.buttonHandler) var buttonHandler
     @Environment(\.buttonCornerRadius) var buttonCornerRadius
+    @Environment(\.buttonHighlights) var buttonHighlights
+    @Environment(\.buttonHighlightsPadding) var buttonHighlightsPadding
     
     @inlinable public init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
@@ -45,6 +47,16 @@ struct GameButton<Content>: View where Content: View {
         }
     }
     
+    var overlay: some View {
+        ZStack {
+            if buttonHighlights {
+                RoundedRectangle(cornerRadius: buttonCornerRadius)
+                    .stroke(lineWidth: buttonHighlightsPadding)
+                    .foregroundColor(.white)
+            }
+        }
+    }
+    
     var body: some View {
         content()
             .padding(.vertical, 8)
@@ -54,6 +66,9 @@ struct GameButton<Content>: View where Content: View {
             .background(background)
             .gesture(gesture)
             .scaleEffect(isPressing && buttonScales ? 0.8 : 1.0)
+            .overlay(overlay)
+            .padding(buttonHighlights ? buttonHighlightsPadding / 2: 0)
+            .brightness(isPressing ? -0.25 : 0)
             .animation(.easeInOut(duration: 0.2))
     }
 }
@@ -69,7 +84,7 @@ struct WideGameButton_Previews: PreviewProvider {
                         Text("Poop")
                     }
                     .foregroundColor(.white)
-                }                .foregroundColor(.red)
+            }                .foregroundColor(.red)
                 
                 GameButton {
                     Text("Play Again")
@@ -78,14 +93,18 @@ struct WideGameButton_Previews: PreviewProvider {
                 }
                 .doesButtonScale(enabled: false)
                 .buttonCornerRadius(0)
-                .buttonPadding(value: 5.0)
+                .buttonPadding(value: 0)
                 .foregroundColor(.red)
                 
                 GameButton {
                     Text("👉")
+                        .foregroundColor(.white)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.orange)
                 .buttonPadding(value: 5.0)
+                .buttonHighlights(true)
+                .buttonPadding(value: 0)
+                .doesButtonScale(enabled: false)
                 
             }
             .font(.custom("Futura Medium", size: 32))

@@ -16,15 +16,21 @@ struct PlayerOutfitView: View {
     
     var outfit: PlayerOutfit?
     let isAnimated: Bool
+    let hasBackground: Bool
+    let isDisplay: Bool
     
     init() {
         self.outfit = nil
         self.isAnimated = true
+        self.hasBackground = true
+        self.isDisplay = false
     }
     
-    init(outfit: PlayerOutfit?) {
+    init(outfit: PlayerOutfit?, hasBackground: Bool = true, isDisplay: Bool = false) {
         self.outfit = outfit
         self.isAnimated = false
+        self.hasBackground = hasBackground
+        self.isDisplay = isDisplay
         
         // Set the default image before animation.
         if let outfit = self.outfit {
@@ -65,8 +71,10 @@ struct PlayerOutfitView: View {
     
     var body: some View {
         ZStack {
-            Color("shop-tile")
-                .cornerRadius(8)
+            if hasBackground {
+                Color("shop-tile")
+                    .cornerRadius(8)
+            }
             if outfit == nil && !isAnimated {
                 Text("Coming Soon")
                     .font(.custom("Futura", size: 16))
@@ -82,7 +90,7 @@ struct PlayerOutfitView: View {
                     .scaledToFit()
                     .onAppear(perform: gif)
                     .padding()
-                    .brightness((outfit?.isUnlocked ?? false || (isAnimated && storage.outfit.isUnlocked)) ? 0 : -1)
+                    .brightness((outfit?.isUnlocked ?? false || (isAnimated && storage.outfit.isUnlocked) || isDisplay) ? 0 : -1)
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)

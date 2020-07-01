@@ -59,7 +59,7 @@ struct DailyPrizeView: View {
         }
     }
     
-    var coins: some View {
+    var cash: some View {
         GeometryReader { proxy in
             ForEach(0 ..< 16) { i in
                 Image("coin")
@@ -96,7 +96,7 @@ struct DailyPrizeView: View {
             Spacer()
             Text("\(self.prize) Coins!")
                 .foregroundColor(Color("Coin"))
-            self.coins
+            self.cash
                 .frame(width: 250, height: 250)
                 .zIndex(1)
             GameButton {
@@ -109,7 +109,7 @@ struct DailyPrizeView: View {
                 self.isShowing = false
                 
                 withAnimation {
-                    Storage.current.coins += .random(in: 1 ..< 5)
+                    Storage.current.cash += .random(in: 1 ..< 5)
                 }
             }
             .zIndex(1)

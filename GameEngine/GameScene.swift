@@ -14,7 +14,8 @@ final public class GameScene: SKScene, ObservableObject {
     // Model
     var model: LevelModel {
         didSet {
-            self.reload()
+            // Disable game.
+            self.isPlaying = false
         }
     }
     // Let's try this, why not.
@@ -26,15 +27,13 @@ final public class GameScene: SKScene, ObservableObject {
         didSet {
             if isPlaying {
                 self.startClosingWave()
-                self.clearIndicators()
+                // self.clearIndicators()
             }
         }
     }
     @Published var hasWon: Bool = false
     @Published var hasLost: Bool = false
-    
     @Published var isSendingElevator = false
-    @Published var isPlayerRiding = false
     
     init(model: LevelModel) {
         self.model = model
@@ -52,7 +51,7 @@ final public class GameScene: SKScene, ObservableObject {
 public extension GameScene {
     static var maxFloorsShown: CGFloat = 6
     static var floorSpeed: TimeInterval = 0.2
-    static var playerSpeed: TimeInterval = 0.05
+    static var playerSpeed: TimeInterval = 0.08
     static var doorSpeed: TimeInterval = 0.15
     static var waveSpeed: TimeInterval = 3.0
     static var cameraSpeed: TimeInterval = 0.15
@@ -62,7 +61,6 @@ public extension GameScene {
 
 // Setup
 extension GameScene {
-    
     public func reload() {
         self.removeAllChildren()
         self.setupPlayer()
@@ -70,14 +68,12 @@ extension GameScene {
         self.clean()
         self.setupCamera()
         self.setupControls()
-        self.setupPressIndicator()
         self.updateTarget()
-        self.hasWon = false
         self.hasLost = false
-        self.isPlaying = false
+        self.hasWon = false
         print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
     }
-    
+
     public override func didMove(to view: SKView) {
         self.reload()
     }
@@ -431,7 +427,7 @@ fileprivate extension GameScene {
         
         for elevator in model.elevators where elevator.bottom == playerNode.floor {
             if let node = originNode(for: elevator), !node.isOpen && node.isEnabled {
-                node.open()
+                node.open(animates: playerNode.floor != 1)
             }
         }
         
@@ -593,16 +589,13 @@ extension GameScene {
             .sequence(
                 [
                     SKAction.run(duration: GameScene.doorSpeed) {
-                        elevatorNode.open()
+                        elevatorNode.open(animates: true)
                         self.playerNode.enter()
                     },
                     SKAction.run(duration: GameScene.doorSpeed) {
                         self.elevatorNodes(on: origin).forEach { (elevatorNode) in
                             elevatorNode.close()
                         }
-                    },
-                    SKAction.run {
-                        self.isPlayerRiding = true
                     },
                     SKAction.moveTo(
                         y: self.cameraOrigin.y + self.cameraYTranslation(distance: distance),
@@ -611,11 +604,10 @@ extension GameScene {
                     SKAction.run(duration: GameScene.doorSpeed) {
                         self.playerNode.floor = target
                         self.playerNode.position.y = self.playerYPosition()
-                        self.isPlayerRiding = false
                         self.render() // Opens the target Elevator
                         self.clean()
                         self.camera?.position = self.cameraOrigin
-                        self.targetNode(for: elevator)?.open()
+                        self.targetNode(for: elevator)?.open(animates: true)
                     },
                     SKAction.run(duration: GameScene.doorSpeed) {
                         self.targetNode(for: elevator)?.close()
@@ -678,9 +670,8 @@ extension GameScene {
     // one yet, they lose.
     func startClosingWave() {
         
-        guard hasAvailableMove else {
-            kill()
-            return
+        if !hasAvailableMove {
+            print("has no available move!"); kill(); return
         }
         
         elevatorNodes(on: playerNode.floor).forEach { (node) in
@@ -692,6 +683,7 @@ extension GameScene {
     
     func kill() {
         self.hasLost = true
+        self.isPlaying = false
         
         print("lost!")
     }
@@ -836,6 +828,14 @@ extension GameScene {
                 ).with(timing: .easeInEaseOut)
             )
         }
+    }
+}
+
+extension GameScene {
+    func shake() {
+        self.camera?.run(
+            SKAction.sequence([])
+        )
     }
 }
 

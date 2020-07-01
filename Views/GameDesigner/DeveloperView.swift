@@ -71,7 +71,7 @@ struct DeveloperView: View {
                 
                 Button("Done") {
                     self.isShowing = false
-                    self.scene.reload()
+                    self.scene.isPlaying = true
                 }
 
             }

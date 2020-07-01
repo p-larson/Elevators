@@ -22,6 +22,7 @@ public enum PlayerOutfit: String, CaseIterable, Hashable {
     case banana
     case chef
     case mailman
+    case pilot
     
     public var description: [String] {
         switch self {
@@ -47,6 +48,8 @@ public enum PlayerOutfit: String, CaseIterable, Hashable {
             return ["chop", "slice"]
         case .mailman:
             return ["you've got mail.", "dog?? where??"]
+        case .pilot:
+            return ["Fasten your seat belts"]
         }
     }
     
@@ -60,11 +63,25 @@ public enum PlayerOutfit: String, CaseIterable, Hashable {
     }
     
     var isUnlocked: Bool {
+        get {
+            switch self {
+            case .orange, .goose:
+                return true
+            default:
+                return UserDefaults.standard.bool(forKey: "outfit." + self.rawValue)
+            }
+        }
+    }
+    
+    func unlock() {
         switch self {
         case .orange, .goose:
-            return true
+            return
         default:
-            return UserDefaults.standard.bool(forKey: "outfit.")
+            
+            UserDefaults.standard.set(true, forKey: "outfit." + self.rawValue)
+            
+            return
         }
     }
     

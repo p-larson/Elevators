@@ -9,7 +9,7 @@
 import SwiftUI
 
 public struct ButtonScaleKey: EnvironmentKey {
-    public static let defaultValue = true
+    public static let defaultValue = false
 }
 
 public struct ButtonPressHandlerKey: EnvironmentKey {
@@ -17,11 +17,19 @@ public struct ButtonPressHandlerKey: EnvironmentKey {
 }
 
 public struct ButtonPaddingKey: EnvironmentKey {
-    public static let defaultValue: CGFloat = 5
+    public static let defaultValue: CGFloat = 8
 }
 
 public struct ButtonCornerRadiusKey: EnvironmentKey {
-    public static let defaultValue: CGFloat = 8
+    public static let defaultValue: CGFloat = 16
+}
+
+public struct ButtonHighlightsKey: EnvironmentKey {
+    public static let defaultValue: Bool = true
+}
+
+public struct ButtonHighlightsPaddingKey: EnvironmentKey {
+    public static let defaultValue: CGFloat = 5
 }
 
 public extension EnvironmentValues {
@@ -64,6 +72,26 @@ public extension EnvironmentValues {
             self[ButtonCornerRadiusKey.self] = newValue
         }
     }
+    
+    var buttonHighlights: Bool {
+        get {
+            return self[ButtonHighlightsKey.self]
+        }
+        
+        set {
+            self[ButtonHighlightsKey.self] = newValue
+        }
+    }
+    
+    var buttonHighlightsPadding: CGFloat {
+        get {
+            return self[ButtonHighlightsPaddingKey.self]
+        }
+        
+        set {
+            self[ButtonHighlightsPaddingKey.self] = newValue
+        }
+    }
 }
 
 public extension View {
@@ -81,5 +109,13 @@ public extension View {
     
     @inlinable func buttonCornerRadius(_ value: CGFloat) -> some View {
         self.environment(\.buttonCornerRadius, value)
+    }
+    
+    @inlinable func buttonHighlights(_ value: Bool) -> some View {
+        self.environment(\.buttonHighlights, value)
+    }
+    
+    @inlinable func buttonHighlightsPadding(_ value: CGFloat) -> some View {
+        self.environment(\.buttonHighlightsPadding, value)
     }
 }

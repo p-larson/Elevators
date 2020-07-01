@@ -61,7 +61,7 @@ public extension CoinNode {
         
         self.isCollected = true
         
-        Storage.current.coins += 1
+        Storage.current.cash += 1
         
         self.run(
             SKAction.sequence(

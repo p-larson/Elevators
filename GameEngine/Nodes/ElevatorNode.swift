@@ -128,8 +128,17 @@ extension ElevatorNode {
     }
     
     // Try to open
-    func open() {
+    func open(animates: Bool) {
         self.stopAnimations()
+        
+        if !animates {
+            // No animation
+            self.frameNumber = ElevatorSkin.current.doorFrames.endIndex
+            self.isOpen = true
+            self._overlay.texture = ElevatorSkin.current.doorFrames.last
+            // Stop
+            return
+        }
         
         let fps: TimeInterval = GameScene.doorSpeed / TimeInterval(ElevatorSkin.doorFramesCount)
         let updateFrame: SKAction = .sequence(

@@ -20,6 +20,7 @@ struct ShopView: View {
     @State var presented = false
     @State var showCredits = false
     @State var showRandomUnlock = false
+    @State var outfit: PlayerOutfit? = nil
     
     init(isShowing: Binding<Bool>) {
         self._isShowing = isShowing
@@ -48,15 +49,20 @@ struct ShopView: View {
         PlayerOutfit.spaceman2,
         PlayerOutfit.spacewoman,
         PlayerOutfit.camperlady,
-        PlayerOutfit.pinneapple,
-        PlayerOutfit.scuba
+        PlayerOutfit.pinneapple
     ]
     
     var coinPages: Range<Int> {
         return 0 ..< max(1, Int((Double(coinUnlockables.count) / Double(gridRange.count)).rounded(.up)))
     }
     
-    let adUnlockables = [PlayerOutfit]()
+    let adUnlockables = [
+        PlayerOutfit.scuba,
+        PlayerOutfit.banana,
+        PlayerOutfit.chef,
+        PlayerOutfit.mailman,
+        PlayerOutfit.pilot
+    ]
     
     var adPages: Range<Int> {
         return coinPages.upperBound ..< coinPages.upperBound + max(1, Int((Double(adUnlockables.count) / Double(gridRange.count)).rounded(.up)))
@@ -113,11 +119,11 @@ struct ShopView: View {
         var outfit: PlayerOutfit? = nil
         
         let pagedIndex = page * gridRange.count + index
-        
+        print("showing item on page", page, "index", index, "paged index", pagedIndex)
         if coinPages.contains(page) {
-            outfit = coinUnlockables.safe(index: pagedIndex)
+            outfit = coinUnlockables.safe(index: index)
         } else if adPages.contains(page) {
-            outfit = adUnlockables.safe(index: pagedIndex)
+            outfit = adUnlockables.safe(index: index)
         }
         
         return PlayerOutfitView(outfit: outfit)
@@ -157,7 +163,7 @@ struct ShopView: View {
     var randomUnlockView: some View {
         ZStack {
             if showRandomUnlock {
-                UnlockElevatorView(isShowing: $showRandomUnlock)
+                UnlockElevatorView(outfit: outfit!, isShowing: $showRandomUnlock)
             }
         }
     }
@@ -187,8 +193,11 @@ struct ShopView: View {
                         Text("\(self.storage.outfit.name)")
                         Text("\(self.selection)/128 Collected")
                             .brightness(-0.5)
-                    }.padding(.horizontal, 32)
-                }.font(.custom("Futura Medium", size: 16))
+                    }
+                    .padding(.horizontal, 32)
+                    .foregroundColor(.white)
+                    .font(.custom("Futura Medium", size: 16))
+                }
                 
                 Group {
                     Pager(page: $page, data: Array(pages), id: \.self) { index in
@@ -198,6 +207,7 @@ struct ShopView: View {
                     .itemAspectRatio(1.0, alignment: .center)
                     .itemSpacing(16)
                     .interactive(0.9)
+                .compositingGroup()
                 }
                 .frame(height: UIScreen.main.bounds.height / 3)
                 
@@ -221,14 +231,21 @@ struct ShopView: View {
                                 .frame(width: 32, height: 32)
                             Text("250")
                         }
-                        .foregroundColor(Color("Coin"))
+                        .foregroundColor(.white)
                         .frame(height: 32)
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .font(.custom("Futura Bold", size: 16))
                     }
                     .padding(.horizontal, 16)
                     .onButtonPress {
-                        self.showRandomUnlock = true
+                        let locked = self.coinUnlockables.filter { (outfit) -> Bool in
+                            !outfit.isUnlocked
+                        }
+                        
+                        if let outfit = locked.randomElement() {
+                            self.outfit = outfit
+                            self.showRandomUnlock = true
+                        }
                     }
                 } else if adPages.contains(page) {
                     GameButton {
@@ -264,7 +281,7 @@ struct ShopView: View {
                     Text("Done")
                         .frame(height: 32)
                         .frame(minWidth: 0, maxWidth: .infinity)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .font(.custom("Futura Bold", size: 16))
                 }
                 .padding(.horizontal, 16)
@@ -272,9 +289,11 @@ struct ShopView: View {
                     self.isShowing = false
                 }
             }
+            .buttonHighlightsPadding(5)
+            .buttonHighlights(true)
             .gridStyle(ModularGridStyle(columns: 3, rows: 3, spacing: 8))
             .font(.custom("Futura Bold", size: 32))
-            .foregroundColor(.white)
+            .foregroundColor(Color("theme-1"))
             .onAppear {
                 withAnimation {
                     self.presented = true

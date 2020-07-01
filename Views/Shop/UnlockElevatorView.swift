@@ -31,6 +31,13 @@ struct UnlockElevatorView: View {
     
     @Binding var isShowing: Bool
     
+    let outfit: PlayerOutfit
+    
+    init(outfit: PlayerOutfit, isShowing: Binding<Bool>) {
+        self.outfit = outfit
+        self._isShowing = isShowing
+    }
+    
     var body: some View {
         ZStack {
             GameBackground()
@@ -40,12 +47,7 @@ struct UnlockElevatorView: View {
             Group {
                 Image(uiImage: Graphics.elevatorBackground(style: .demo))
                     .resizable()
-                VStack {
-                    Image("firefighter-idle-1")
-                        .resizable()
-                        .opacity(open ? 1 : 0)
-                        .padding(.top, UIScreen.main.bounds.width / 4 * 0.4)
-                }
+                PlayerOutfitView(outfit: self.outfit, hasBackground: false, isDisplay: true)
                 Image(uiImage: Graphics.elevatorOverlay(style: .demo, percent: CGFloat(frame) / 20.0))
                     .resizable()
             }
@@ -61,6 +63,7 @@ struct UnlockElevatorView: View {
                 } else if !self.open {
                     withAnimation(.spring()) {
                         self.open = true
+                        self.outfit.unlock()
                     }
                     
                     Timer.scheduledTimer(withTimeInterval: GameScene.doorSpeed / 20.0, repeats: true) { (timer) in
@@ -119,7 +122,7 @@ struct UnlockElevatorView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             GameBackground()
-            UnlockElevatorView(isShowing: .constant(false))
+            UnlockElevatorView(outfit: .banana, isShowing: .constant(false))
         }
         .statusBar(hidden: true)
         .previewDevice("iPhone 11")

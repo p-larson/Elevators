@@ -9,11 +9,11 @@
 import Foundation
 import SpriteKit
 
-public class PlayerSkin: ExpressibleByStringLiteral {
+public class PlayerSkin {
     
     fileprivate weak var node: PlayerNode? = nil
     
-    public static var current: PlayerSkin = "strawberry"
+    public static let current = PlayerSkin()
     
     public typealias StringLiteralType = String
     
@@ -21,14 +21,12 @@ public class PlayerSkin: ExpressibleByStringLiteral {
     
     private var skins = [String:SKTexture]()
     
-    public let outfit: PlayerOutfit
+    var outfit: PlayerOutfit {
+        return Storage.current.outfit
+    }
     
     fileprivate(set) public var state: PlayerState = .idle
     fileprivate(set) public var direction: PlayerDirection =  .right
-    
-    required public init(stringLiteral value: String) {
-        self.outfit = PlayerOutfit(rawValue: value)!
-    }
     
     private var frame = 0
     

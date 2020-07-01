@@ -18,7 +18,7 @@ public class Storage: ObservableObject {
     
     // All levels, local and hard file.
     @Published public var levels: [LevelModel]
-    @Published public var coins: Int
+    @Published public var cash: Double
     @Published public var streak: Int
     @Published public var recentClaim: Date?
     @Published public var credits: [String]
@@ -121,7 +121,7 @@ public class Storage: ObservableObject {
         
         self.streak = storage.integer(forKey: "streak")
         self.recentClaim = storage.object(forKey: "recentClaim") as? Date
-        self.coins = storage.integer(forKey: "coins")
+        self.cash = storage.double(forKey: "cash")
         self.credits = storage.stringArray(forKey: "credits") ?? []
         self.outfit = PlayerOutfit(rawValue: storage.string(forKey: "outfit") ?? String()) ?? PlayerOutfit.goose
         
@@ -164,12 +164,14 @@ public class Storage: ObservableObject {
         levels.forEach { (model) in
             print("\t", model.id, model.name)
         }
+        
+        print("Player Outfit = ", outfit.rawValue)
     }
     
     func save() {
         storage.set(streak, forKey: "streak")
         storage.set(recentClaim, forKey: "recentClaim")
-        storage.set(coins, forKey: "coins")
+        storage.set(cash, forKey: "cash")
         storage.set(credits, forKey: "credits")
         storage.set(outfit.rawValue, forKey: "outfit")
         

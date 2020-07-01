@@ -30,7 +30,7 @@ public class TestScene: SKScene {
             node.waveClose()
             opening = false
         } else {
-            node.open()
+            node.open(animates: true)
             opening = true
         }
     }
