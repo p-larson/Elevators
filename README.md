@@ -3,8 +3,8 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 
 # Characters
 - Designs
-  - [ ] App Icon in all sizes
-  - [ ] Loading screen logo animation
+  - [x] App Icon in all sizes
+  ~~- [ ] Loading screen logo animation~~ makes the game flow slowwwww
 - [ ] Soda Can Man (I bet he's from Minnesoda)
 - [ ] Sushi (寿司)
 - [x] Evan (smells nice)
@@ -31,19 +31,22 @@ Swift-5, SwiftUI/SpriteKit, iOS App
 # Todo
 - Design Thoughts
   - [ ] Possible deeper gradient on main play screen - feels a bit flat
-  - [ ] Elevator line connector color tweak from the deep black to a lighter color...
+   ^ ok, like what doe :-]
+  - [x] Elevator line connector color tweak from the deep black to a lighter color...
+    ^ changed 
 - [ ] On level completion, missing coins collected field
-- [ ] Hold to enter elevator is a bit slow: change enter to tap
+- [x] Hold to enter elevator is a bit slow: change enter to tap
+  ^ swipe up now, more interactive.
 ~~- [ ] 3d scroll on ride~~ Too rocky
 - [x] Coin Counter Animation
-- [ ] Random Unlock functionality
+- [x] Random Unlock functionality
 - [x] Add Panning to start of game
 - [x] REOPTIMIZED Game, (all I did was toggle gpu frame capture, reduced memory to 20% of original :-])
 - [x] Random Unlock Screen.
 - [ ] Fill In-App Purchases Template.
 - [ ] Implement Functionality to Daily Rewards.
-- [ ] Add Functionality to Random Unlock.
-- [ ] Add Functionality to Picking Player.
+- [x] Add Functionality to Random Unlock.
+- [x] Add Functionality to Picking Player.
 - [ ] Free Coins Page / Credits / ??? Implement transitioning between.
 - [x] Allow Move/Enter to Start Game (override tap to start).
 - [ ] Sound FX
