@@ -119,8 +119,8 @@ struct ShopView: View {
     func item(on page: Int, index: Int) -> some View {
         var outfit: PlayerOutfit? = nil
         
-        let pagedIndex = page * gridRange.count + index
-        print("showing item on page", page, "index", index, "paged index", pagedIndex)
+        // let pagedIndex = page * gridRange.count + index
+        
         if coinPages.contains(page) {
             outfit = coinUnlockables.safe(index: index)
         } else if adPages.contains(page) {
@@ -141,6 +141,28 @@ struct ShopView: View {
             return AnyView(
                 Grid(gridRange) { index in
                     return self.item(on: page, index: index)
+                }
+                .overlayPreferenceValue(GridItemBoundsPreferencesKey.self) { value in
+                    AnyView(
+                        ZStack {
+                            if self.showSelector(on: self.page) {
+                                RoundedRectangle(cornerRadius: 16)
+                                    .strokeBorder(lineWidth: 4)
+                                    .foregroundColor(.white)
+                                    .frame(
+                                        width: value[self.selection % (self.gridLength * self.gridLength)].width,
+                                        height: value[self.selection % (self.gridLength * self.gridLength)].height
+                                )
+                                    .position(
+                                        x: value[self.selection % (self.gridLength * self.gridLength)].midX,
+                                        y: value[self.selection % (self.gridLength * self.gridLength)].midY
+                                )
+                            } else {
+                                EmptyView()
+                            }
+                        }
+                        .animation(nil)
+                    )
                 }
             )
         }
@@ -197,11 +219,12 @@ struct ShopView: View {
                     }
                     .padding(.horizontal, 32)
                     .foregroundColor(.white)
-                    .font(.custom("Futura Medium", size: 16))
+                    .font(.custom("Futura   Medium", size: 16))
                 }
                 
                 Pager(page: $page, data: Array(pages), id: \.self) { index in
                     self.content(page: index)
+                    
                 }
                 .itemAspectRatio(1.0, alignment: .center)
                 .itemSpacing(16)
@@ -213,6 +236,8 @@ struct ShopView: View {
                         Circle()
                             .foregroundColor(page == self.page ? .white : .gray)
                             .frame(width: 8, height: 8)
+                            .scaleEffect(page == self.page ? 1 : 0.8)
+                            .animation(.easeInOut(duration: 0.3), value: self.page)
                     }
                 }
                 .padding(.top, -16)

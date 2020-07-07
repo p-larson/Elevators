@@ -41,12 +41,10 @@ struct GameView: View {
             
             ConfettiView(isEmitting: scene.hasWon)
                 .zIndex(3)
+
             
-            if !scene.isPlaying {
-                OverheadView(showShop: $showShop, showDailyPrize: $showDailyPrize)
-                    // .transition(.move(edge: .bottom))
-                    .zIndex(4)
-            }
+            OverheadView(showShop: $showShop, showDailyGift: $showDailyPrize)
+                .zIndex(4)
             
             if showShop {
                 ShopView(isShowing: $showShop)

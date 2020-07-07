@@ -24,10 +24,11 @@ struct LoseView: View {
                 }
                 .foregroundColor(.white)
                 .frame(minWidth: 0, maxWidth: .infinity)
+                .frame(height: 40)
                 .offset(x: !self.showSkipLabel ? -UIScreen.main.bounds.width : 0, y: 0)
                 .scaleEffect(self.showSkipLabel ? 1 : 1.3)
             }
-            .foregroundColor(Color.green)
+            .foregroundColor(.red)
             .offset(x: !self.showSkip ? -UIScreen.main.bounds.width : 0, y: 0)
             .scaleEffect(x: 1, y: self.showSkip ? 1 : 0, anchor: .center)
             
@@ -40,6 +41,7 @@ struct LoseView: View {
                 }
                 .foregroundColor(.white)
                 .frame(minWidth: 0, maxWidth: .infinity)
+                .frame(height: 40)
                 .offset(x: !self.showAdLabel ? -UIScreen.main.bounds.width : 0, y: 0)
                 .scaleEffect(self.showAdLabel ? 1 : 1.3)
             }

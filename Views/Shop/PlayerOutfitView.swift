@@ -90,7 +90,7 @@ struct PlayerOutfitView: View {
                     .scaledToFit()
                     .onAppear(perform: gif)
                     .padding()
-                    .brightness((outfit?.isUnlocked ?? false || (isAnimated && storage.outfit.isUnlocked) || isDisplay) ? 0 : -1)
+                    .grayscale((outfit?.isUnlocked ?? false || (isAnimated && storage.outfit.isUnlocked) || isDisplay) ? 0 : 0.9)
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
