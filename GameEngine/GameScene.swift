@@ -241,12 +241,12 @@ extension GameScene {
     }
     
     static var bottomSpace: CGFloat {
-        return UIScreen.main.bounds.size.height / 3
+        return UIScreen.main.bounds.size.height / 5
     }
     
     static func cableSize(of length: Int) -> CGSize {
         return CGSize(
-            width: elevatorSize.width / 5,
+            width: elevatorSize.width / 8,
             height: floorSize.height * CGFloat(length) - elevatorSize.height - GameScene.floorBaseSize.height
         )
     }
@@ -837,10 +837,6 @@ extension GameScene {
             SKAction.sequence([])
         )
     }
-}
-
-enum PlayerAction {
-    case left, right, ride
 }
 
 import SwiftUI

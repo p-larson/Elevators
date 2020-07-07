@@ -13,9 +13,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let impact = UIImpactFeedbackGenerator(style: .light)
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-//        Storage.current.reload()
         return true
     }
 

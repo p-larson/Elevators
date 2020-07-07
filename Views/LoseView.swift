@@ -10,77 +10,70 @@ import SwiftUI
 
 struct LoseView: View {
     
-    @EnvironmentObject var scene: GameScene
-    
-    var transition: AnyTransition {
-        AnyTransition
-            .modifier(active: ScaleModifier(x: 1, y: 0), identity: ScaleModifier(x: 1, y: 1))
-            .animation(Animation.easeInOut(duration: 0.15).delay(0.15))
-    }
+    @State var showSkip = false
+    @State var showSkipLabel = false
+    @State var showAd = false
+    @State var showAdLabel = false
     
     var body: some View {
         VStack(spacing: 8) {
             GameButton {
-                HStack(spacing: 4) {
-                    Text("Skip Level ➞")
-                    Image("coin")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                    Text("25")
-                        .foregroundColor(Color("Coin"))
+                HStack {
+                    Text("Skip Level ($200) ➞")
+                        .foregroundColor(.white)
                 }
-                .frame(minWidth: 0, maxWidth: .infinity)
-                .padding(.vertical, 4)
                 .foregroundColor(.white)
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .offset(x: !self.showSkipLabel ? -UIScreen.main.bounds.width : 0, y: 0)
+                .scaleEffect(self.showSkipLabel ? 1 : 1.3)
             }
-            .foregroundColor(Color.red.opacity(0.75))
+            .foregroundColor(Color.green)
+            .offset(x: !self.showSkip ? -UIScreen.main.bounds.width : 0, y: 0)
+            .scaleEffect(x: 1, y: self.showSkip ? 1 : 0, anchor: .center)
             
             GameButton {
-                HStack(spacing: 4) {
-                    Text("Watch Ad Reward")
+                HStack {
+                    Image("ad")
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                    Text("Video Ad ($50)")
                 }
-                .frame(minWidth: 0, maxWidth: .infinity)
-                .padding(.vertical, 4)
                 .foregroundColor(.white)
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .offset(x: !self.showAdLabel ? -UIScreen.main.bounds.width : 0, y: 0)
+                .scaleEffect(self.showAdLabel ? 1 : 1.3)
             }
-            .foregroundColor(Color.purple.opacity(0.75))
-        }
-        .buttonHighlights(false)
-        .buttonHighlightsPadding(0)
-        .buttonCornerRadius(0)
-        .buttonPadding(value: 0)
-        .doesButtonScale(enabled: false)
-        .font(.custom("Futura Condensed Medium", size: 24))
-        .transition(transition)
-    }
-}
-
-struct LoseDemoView: View {
-    @State var isShowing: Bool = true
-    
-    var body: some View {
-        ZStack {
-            GameBackground()
-                .onTapGesture {
-                    self.isShowing.toggle()
-                }
-                .zIndex(1)
+            .foregroundColor(.purple)
+            .offset(x: !self.showAd ? -UIScreen.main.bounds.width : 0, y: 0)
+            .scaleEffect(x: 1, y: self.showAd ? 1 : 0, anchor: .center)
             
-            if isShowing {
-                OverheadView()
-                    .zIndex(2)
-                LoseView()
-                    .zIndex(2)
+        }
+        .font(.custom("Chalkboard SE Regular", size: 24))
+        .buttonCornerRadius(0)
+        .buttonHighlights(false)
+        .buttonPadding(value: 0)
+        .onAppear {
+            withAnimation(Animation.linear(duration: 0.3)) {
+                self.showSkip = true
+            }
+            
+            withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.3)) {
+                self.showSkipLabel = true
+            }
+            
+            withAnimation(Animation.linear(duration: 0.3).delay(0.3)) {
+                self.showAd = true
+            }
+            
+            withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.6)) {
+                self.showAdLabel = true
             }
         }
-        .animation(.default)
-        .environmentObject(GameScene(model: .demo))
     }
 }
 
 struct LoseView_Previews: PreviewProvider {
     static var previews: some View {
-        LoseDemoView()
+        LoseView()
     }
 }

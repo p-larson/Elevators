@@ -9,13 +9,14 @@
 import SwiftUI
 
 struct OverheadView: View {
-    
+    // Game Data
     @EnvironmentObject var scene: GameScene
-    
+    // State
     @State var canCollectDailyPrize: Bool = true
     @State var showDeveloperMenu: Bool = false
-    @State var isShopping: Bool = false
-    @State var isCollectingDailyPrize: Bool = false
+    // Control
+    @Binding var showShop: Bool
+    @Binding var showDailyPrize: Bool
     
     func play() {
         if scene.hasLost {
@@ -26,7 +27,7 @@ struct OverheadView: View {
     }
     
     func openShop() {
-        self.isShopping = true
+        self.showShop = true
     }
     
     func tryOpeningDailyPrize() {
@@ -35,7 +36,7 @@ struct OverheadView: View {
         }
         
         self.canCollectDailyPrize = false
-        self.isCollectingDailyPrize = true
+        self.showDailyPrize = true
     }
     
     func openDeveloperMenu() {
@@ -84,23 +85,12 @@ struct OverheadView: View {
             .padding(.horizontal, 16)
             .zIndex(1)
             
-            if isShopping {
-                ShopView(isShowing: $isShopping)
-                    .zIndex(2)
-            }
-            
-            if isCollectingDailyPrize {
-                DailyPrizeView(isShowing: $isCollectingDailyPrize)
-                    .zIndex(3)
-            }
-            
             if showDeveloperMenu {
                 DeveloperView(scene: self.scene, isShowing: $showDeveloperMenu)
                     .zIndex(8)
             }
         }
-        .transition(AnyTransition.move(edge: .bottom))
-        .animation(.linear(duration: 0.3))
+        .transition(.move(edge: .bottom))
     }
 }
 
@@ -116,7 +106,7 @@ struct OverheadDemoView: View {
             .zIndex(1)
             
             if !scene.isPlaying {
-                OverheadView()
+                OverheadView(showShop: .constant(false), showDailyPrize: .constant(false))
                     .zIndex(2)
                     .animation(.easeInOut(duration: 0.3))
             }

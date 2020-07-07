@@ -25,15 +25,21 @@ struct GameButton<Content>: View where Content: View {
         self.content = content
     }
     
+    func toggle() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            self.isPressing.toggle()
+        }
+    }
+    
     var gesture: some Gesture {
         LongPressGesture(minimumDuration: 0)
             .onEnded { (value) in
-                self.isPressing.toggle()
+                self.toggle()
                 AppDelegate.impact.impactOccurred()
         }
         .sequenced(before: DragGesture(minimumDistance: 0.0, coordinateSpace: .local)
             .onEnded({ (action) in
-                self.isPressing.toggle()
+                self.toggle()
                 self.buttonHandler?()
             }))
     }
@@ -69,7 +75,6 @@ struct GameButton<Content>: View where Content: View {
             .overlay(overlay)
             .padding(buttonHighlights ? buttonHighlightsPadding / 2: 0)
             .brightness(isPressing ? -0.25 : 0)
-            .animation(.easeInOut(duration: 0.2))
     }
 }
 

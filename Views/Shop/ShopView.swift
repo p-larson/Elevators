@@ -9,6 +9,7 @@
 import SwiftUI
 import SwiftUIPager
 import Grid
+import GridStack
 
 struct ShopView: View {
     
@@ -17,7 +18,6 @@ struct ShopView: View {
     @Binding var isShowing: Bool
     @State var selection = 0
     @State var page = 0
-    @State var presented = false
     @State var showCredits = false
     @State var showRandomUnlock = false
     @State var outfit: PlayerOutfit? = nil
@@ -110,7 +110,8 @@ struct ShopView: View {
                     } else {
                         EmptyView()
                     }
-                }.animation(nil)
+                }
+                .animation(nil)
             )
         }
     }
@@ -132,7 +133,7 @@ struct ShopView: View {
                     self.storage.outfit = outfit
                     self.selection = index + page * self.gridRange.count
                 }
-            }
+        }
     }
     
     func content(page: Int) -> some View {
@@ -188,7 +189,7 @@ struct ShopView: View {
                         .frame(
                             width: UIScreen.main.bounds.width / 3,
                             height: UIScreen.main.bounds.width / 3
-                        )
+                    )
                     HStack {
                         Text("\(self.storage.outfit.name)")
                         Text("\(self.selection)/128 Collected")
@@ -199,17 +200,13 @@ struct ShopView: View {
                     .font(.custom("Futura Medium", size: 16))
                 }
                 
-                Group {
-                    Pager(page: $page, data: Array(pages), id: \.self) { index in
-                        self.content(page: index)
-                            .overlayPreferenceValue(GridItemBoundsPreferencesKey.self, self.selection(on: index))
-                    }
-                    .itemAspectRatio(1.0, alignment: .center)
-                    .itemSpacing(16)
-                    .interactive(0.9)
-                .compositingGroup()
+                Pager(page: $page, data: Array(pages), id: \.self) { index in
+                    self.content(page: index)
                 }
-                .frame(height: UIScreen.main.bounds.height / 3)
+                .itemAspectRatio(1.0, alignment: .center)
+                .itemSpacing(16)
+                .padding(16)
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                 
                 HStack {
                     ForEach(pages, id: \.self) { page in
@@ -218,6 +215,7 @@ struct ShopView: View {
                             .frame(width: 8, height: 8)
                     }
                 }
+                .padding(.top, -16)
                 
                 Spacer()
                 
@@ -241,7 +239,7 @@ struct ShopView: View {
                         let locked = self.coinUnlockables.filter { (outfit) -> Bool in
                             !outfit.isUnlocked
                         }
-                        
+
                         if let outfit = locked.randomElement() {
                             self.outfit = outfit
                             self.showRandomUnlock = true
@@ -266,10 +264,10 @@ struct ShopView: View {
                 } else {
                     GameButton {
                         Text("Free Coins")
-                        .foregroundColor(.white)
-                        .frame(height: 32)
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .font(.custom("Futura Bold", size: 16))
+                            .foregroundColor(.white)
+                            .frame(height: 32)
+                            .frame(minWidth: 0, maxWidth: .infinity)
+                            .font(.custom("Futura Bold", size: 16))
                     }
                     .padding(.horizontal, 16)
                     .foregroundColor(.red)
@@ -279,14 +277,16 @@ struct ShopView: View {
                 }
                 GameButton {
                     Text("Done")
-                        .frame(height: 32)
+                         .frame(height: 32)
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .foregroundColor(.white)
                         .font(.custom("Futura Bold", size: 16))
                 }
                 .padding(.horizontal, 16)
                 .onButtonPress {
-                    self.isShowing = false
+                     withAnimation {
+                         self.isShowing = false
+                     }
                 }
             }
             .buttonHighlightsPadding(5)
@@ -294,17 +294,11 @@ struct ShopView: View {
             .gridStyle(ModularGridStyle(columns: 3, rows: 3, spacing: 8))
             .font(.custom("Futura Bold", size: 32))
             .foregroundColor(Color("theme-1"))
-            .onAppear {
-                withAnimation {
-                    self.presented = true
-                }
-            }
             
             self.randomUnlockView
                 .zIndex(2)
             
             self.creditsView
-            
         }
     }
 }
@@ -315,13 +309,12 @@ struct ShopTestView: View {
     var body: some View {
         ZStack {
             Button("Present") {
-                withAnimation {
-                    self.presented = true
-                }
+                self.presented = true
             }
             
             if presented {
                 ShopView(isShowing: $presented)
+                    .zIndex(2)
             }
         }
     }

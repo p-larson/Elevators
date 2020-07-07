@@ -92,34 +92,38 @@ struct DailyPrizeView: View {
     ]
     
     var body: some View {
-        VStack {
-            Spacer()
-            Text("\(self.prize) Coins!")
-                .foregroundColor(Color("Coin"))
-            self.cash
-                .frame(width: 250, height: 250)
-                .zIndex(1)
-            GameButton {
-                Text("Claim")
-                    .foregroundColor(.white)
-            }
-            .foregroundColor(Color("theme-1"))
-            .onButtonPress {
-                self.claimed = true
-                self.isShowing = false
-                
-                withAnimation {
-                    Storage.current.cash += .random(in: 1 ..< 5)
+        ZStack {
+            GameBackground()
+            VStack {
+                Spacer()
+                Text("\(self.prize) Coins!")
+                    .foregroundColor(Color("Coin"))
+                self.cash
+                    .frame(width: 250, height: 250)
+                    .zIndex(1)
+                GameButton {
+                    Text("Claim")
+                        .foregroundColor(.white)
                 }
+                .foregroundColor(Color("theme-1"))
+                .onButtonPress {
+                    self.claimed = true
+                    self.isShowing = false
+                    
+                    withAnimation {
+                        Storage.current.cash += .random(in: 1 ..< 5)
+                    }
+                }
+                .zIndex(1)
+                self.indicator
+                    .padding(.top, 32)
+                Spacer()
             }
-            .zIndex(1)
-            self.indicator
-                .padding(.top, 32)
-            Spacer()
+            .font(.custom("Futura Medium", size: 16))
+            .padding()
+            .background(Color.white.edgesIgnoringSafeArea(.all))
         }
-        .font(.custom("Futura Bold", size: 24))
-        .padding()
-        .background(Color.white.edgesIgnoringSafeArea(.all))
+        
     }
 }
 

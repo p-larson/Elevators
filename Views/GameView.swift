@@ -12,10 +12,9 @@ import SpriteKit
 struct GameView: View {
     // Game Data
     @ObservedObject var scene: GameScene
-    
-    @State var isLoading = true
-    @State var isShopping = false
-    @State var isCollectingDailyPrize = false
+    // State
+    @State var showShop = false
+    @State var showDailyPrize = false
     // Developer (For Debugging)
     @State var developer = true
     @State var showDeveloperView = false
@@ -34,8 +33,6 @@ struct GameView: View {
             GameContainerView(model: model)
                 .edgesIgnoringSafeArea(.all)
                 .zIndex(1)
-                .opacity(scene.isPlaying ? 1 : 0.75)
-                .animation(.linear)
             
             if scene.hasLost {
                 LoseView()
@@ -46,21 +43,29 @@ struct GameView: View {
                 .zIndex(3)
             
             if !scene.isPlaying {
-                OverheadView()
+                OverheadView(showShop: $showShop, showDailyPrize: $showDailyPrize)
+                    // .transition(.move(edge: .bottom))
                     .zIndex(4)
-                    .animation(.linear(duration: 0.3))
+            }
+            
+            if showShop {
+                ShopView(isShowing: $showShop)
+                    // .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(5)
+            }
+            
+            if showDailyPrize {
+                DailyPrizeView(isShowing: $showDailyPrize)
+                    // .transition(.move(edge: .bottom))
+                    .zIndex(6)
             }
             
             CoinCounterView()
-                .zIndex(6)
-
-            if isLoading {
-                LoadingView(isShowing: $isLoading)
-                    .transition(.opacity)
-                    .animation(.linear)
-                    .zIndex(10)
-            }
+                .zIndex(7)
         }
+        .animation(.easeInOut(duration: 0.3), value: scene.isPlaying)
+        // .animation(.easeInOut(duration: 0.3), value: showShop)
+        .animation(.easeInOut(duration: 0.3), value: showDailyPrize)
         .environmentObject(scene)
         .statusBar(hidden: true)
         .font(.custom("Futura Medium", size: 32))
