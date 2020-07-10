@@ -16,7 +16,17 @@ class PlayerNode: SKSpriteNode {
     var target: Int? = nil
     var willEnter = false
     
-    fileprivate(set) var isMoving: Bool = false
+    fileprivate(set) var isMoving = false {
+        didSet {
+            if !isMoving {
+                self.removeAction(forKey: "move")
+            }
+        }
+    }
+    
+    var direction: PlayerDirection = .right
+    
+//    fileprivate(set) var isMoving: Bool = false
     
     fileprivate(set) var isInsideElevator: Bool = false {
         didSet {
@@ -34,6 +44,45 @@ class PlayerNode: SKSpriteNode {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension PlayerNode {
+    // Move in the
+    func move(direction: PlayerDirection, swipe: Bool) {
+        guard let gamescene = gamescene else {
+            return
+        }
+        
+        var targetSlot: Int!
+        
+        if swipe {
+            // Move to the next slot in the direction
+            targetSlot = direction == .right ? min(gamescene.maxSlot, slot + 1) : max(0, slot - 1)
+        } else {
+            // Move towards the ending slot in the direction
+            targetSlot = direction == .right ? gamescene.maxSlot : 0
+            
+        }
+        
+        PlayerSkin.current.set(direction: direction)
+        
+        // No Movement needed.
+        guard targetSlot != slot else {
+            return
+        }
+        
+        let targetX = gamescene.elevatorXPosition(at: targetSlot)
+        let deltaX = Double((targetX - position.x))
+        let duration: TimeInterval = (GameScene.playerSpeed * abs(deltaX)) / Double(gamescene.slotWidth)
+        let completion: () -> Void = {
+            self.isMoving = false
+//            
+        }
+        // Action
+        let action = SKAction.sequence([SKAction.moveTo(x: targetX, duration: duration), SKAction.run(completion)])
+        
+        self.run(action, withKey: "move")
     }
 }
 

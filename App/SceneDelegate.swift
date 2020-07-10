@@ -28,8 +28,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         let contentView = GameView(model: model ?? .demo)
+//        let contentView = DailyGiftView_Previews.previews
 //        let contentView = GameView()
-//        let contentView = OverheadDemoView()
+//        let contentView = Overhead2View_Previews.previews
         
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)

@@ -16,7 +16,7 @@ public enum ShopItemType: Int, Codable {
 public struct ShopItem: View, Codable {
     public let price: Double
     public let type: ShopItemType
-    public let count: Double?
+    public let count: Int?
     public let id: UUID
     
     public var body: some View {

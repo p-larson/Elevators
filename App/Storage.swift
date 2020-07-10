@@ -18,7 +18,7 @@ public class Storage: ObservableObject {
     
     // All levels, local and hard file.
     @Published public var levels: [LevelModel]
-    @Published public var cash: Double
+    @Published public var cash: Int
     @Published public var streak: Int
     @Published public var recentClaim: Date?
     @Published public var credits: [String]
@@ -121,7 +121,7 @@ public class Storage: ObservableObject {
         
         self.streak = storage.integer(forKey: "streak")
         self.recentClaim = storage.object(forKey: "recentClaim") as? Date
-        self.cash = storage.double(forKey: "cash")
+        self.cash = storage.integer(forKey: "cash")
         self.credits = storage.stringArray(forKey: "credits") ?? []
         self.outfit = PlayerOutfit(rawValue: storage.string(forKey: "outfit") ?? String()) ?? PlayerOutfit.goose
         

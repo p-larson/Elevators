@@ -23,9 +23,10 @@ final public class GameScene: SKScene, ObservableObject {
     // Data
     var playerNode: PlayerNode!
     // State
+    @Published var hasLoaded = false
     @Published var isPlaying: Bool = false {
         didSet {
-            if isPlaying {
+            if isPlaying && hasLoaded {
                 self.startClosingWave()
                 // self.clearIndicators()
             }
@@ -67,10 +68,11 @@ extension GameScene {
         self.render()
         self.clean()
         self.setupCamera()
-        self.setupControls()
+        // self.setupControls()
         self.updateTarget()
         self.hasLost = false
         self.hasWon = false
+        self.hasLoaded = true
         print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
     }
 
@@ -726,21 +728,56 @@ extension GameScene {
     func setupControls() {
         // Left/Right
         let swipe = UISwipeGestureRecognizer.Direction.self
-        
+
         [(swipe.left, #selector(self.left)), (swipe.right, #selector(self.right)), (swipe.up, #selector(self.ride))].forEach { (direction, handler) in
             let recognizer = UISwipeGestureRecognizer(target: self, action: handler)
-            
+
             recognizer.direction = direction
-            
+
             self.view?.addGestureRecognizer(recognizer)
         }
-        
+
         // Ride
         #if DEBUG
             let tap = UITapGestureRecognizer(target: self, action: #selector(self.ride))
-            
+
             self.view?.addGestureRecognizer(tap)
         #endif
+    }
+}
+
+// Touch left/right side for movement
+extension GameScene {
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else {
+            return
+        }
+        
+        if touch.location(in: self).x < frame.midX {
+//            direction = .left
+        } else {
+//            direction = .right
+        }
+    }
+    
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else {
+            return
+        }
+        
+        if touch.location(in: self).x < frame.midX {
+            
+        } else {
+            
+        }
+    }
+    
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else {
+            return
+        }
+        
+        
     }
 }
 

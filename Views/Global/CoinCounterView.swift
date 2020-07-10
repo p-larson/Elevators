@@ -22,24 +22,24 @@ struct CoinCounterView: View {
                 HStack(spacing: 0) {
                     Text("$")
                         .font(.system(size: 16))
-                    MovingNumbersView(number: storage.cash, numberOfDecimalPlaces: 2) { string in
+                    MovingNumbersView(number: Double(storage.cash), numberOfDecimalPlaces: 0, animationDuration: 0.3) { string in
                         Text(string)
+                            .fixedSize()
                     }
+                    .mask(LinearGradient(
+                        gradient: Gradient(stops: [
+                            Gradient.Stop(color: .clear, location: 0),
+                            Gradient.Stop(color: .black, location: 0.2),
+                            Gradient.Stop(color: .black, location: 0.8),
+                            Gradient.Stop(color: .clear, location: 1.0)]),
+                        startPoint: .top,
+                        endPoint: .bottom))
                     .font(.custom("Futura", size: 24))
                 }
-                    
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
                 .background(Capsule().foregroundColor(.white)
                 .shadow(color: Color.black.opacity(0.15), radius: 0, x: 0, y: 5))
-                .transition(
-                    AnyTransition
-                        .asymmetric(
-                            insertion: AnyTransition.scale(scale: 1.2),
-                            removal: AnyTransition.scale(scale: 1.0)
-                    )
-                )
-                .animation(.linear)
             }
             .frame(height: 32)
             .padding(.horizontal, 16)
@@ -54,9 +54,15 @@ struct CoinCounterTestView: View {
     var body: some View {
         ZStack {
             CoinCounterView()
-            Button("+") {
-                withAnimation {
-                    Storage.current.cash += .random(in: 1 ..< 100)
+            HStack {
+                Button("+") {
+                    Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { (timer) in
+                        if Storage.current.cash < 1000 {
+                            Storage.current.cash += .random(in: 1 ..< 100)
+                        } else {
+                            timer.invalidate()
+                        }
+                    }
                 }
             }
         }

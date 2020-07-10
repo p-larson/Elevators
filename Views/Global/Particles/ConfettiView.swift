@@ -26,6 +26,7 @@ struct ConfettiView: View {
     var body: some View {
         ZStack {
             if self.isEmitting {
+                
                 ParticlesEmitter {
                     self.colors.map { color in
                         let confetti = EmitterCell().content(.image(UIImage(named: "confetti")!))

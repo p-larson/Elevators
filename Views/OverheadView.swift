@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Haptica
 
 struct OverheadView: View {
     // Environment
@@ -14,28 +15,19 @@ struct OverheadView: View {
     // Control
     @Binding var showShop: Bool
     @Binding var showDailyGift: Bool
+    @Binding var hasCollectedDailyGift: Bool
     // State
     @State private var canCollectDailyPrize = true
-    @State private var showPlayButton = false
-    @State private var showShopButton = false
-    @State private var showDailyGiftButton = false
-    @State private var showDeveloperButton = false
+    @State private var showButtons = false
     
     func showButtons(_ value: Bool) {
-        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10)) {
-            self.showPlayButton = value
+        
+        guard value != showButtons else {
+            return
         }
         
-        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.15)) {
-            self.showShopButton = value
-        }
-        
-        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.3)) {
-            self.showDailyGiftButton = value
-        }
-        
-        withAnimation(Animation.easeInOut(duration: 0.3).delay(0.6)) {
-            self.showDeveloperButton = value
+        withAnimation(Animation.easeInOut(duration: 0.3)) {
+            self.showButtons = value
         }
     }
     
@@ -45,15 +37,15 @@ struct OverheadView: View {
                 
             }
             .scaleEffect(0.5)
-            .opacity(showDeveloperButton ? 1 : 0)
+            .opacity(showButtons ? 1 : 0)
             .foregroundColor(.white)
             Spacer()
             HStack {
                 GameButton {
                     Text("▶︎")
                         .brightness(1)
+                        .frame(width: 32)
                 }
-                .offset(x: 0, y: showPlayButton ? 0 : 200)
                 .onButtonPress {
                     // Reload if needed
                     if self.scene.hasLost {
@@ -61,30 +53,34 @@ struct OverheadView: View {
                     }
                     // Start playing
                     self.scene.isPlaying = true
-                    // Hide buttons
-                    self.showButtons(false)
                 }
                 
                 
                 GameButton {
                     Text("🛒")
                         .brightness(1)
+                        .frame(width: 32)
                 }
-                .offset(x: 0, y: showShopButton ? 0 : 200)
                 .onButtonPress {
                     self.showShop = true
                 }
                 
                 GameButton {
                     Text("🎁")
-                        .modifier(NotificationModifier(delay: 2.0, duration: 0.2, isEnabled: self.$canCollectDailyPrize))
-                        .brightness(self.canCollectDailyPrize ? 0 : -1)
+                        .frame(width: 32)
                 }
-                .offset(x: 0, y: showDailyGiftButton ? 0 : 200)
+                .foregroundColor(.pink)
                 .onButtonPress {
-                    self.showDailyGift = true
+                    if !self.hasCollectedDailyGift {
+                        self.showDailyGift = true
+                    } else {
+                        Haptic.notification(.error).generate()
+                    }
                 }
+                .grayscale(hasCollectedDailyGift ? 0.8 : 0)
+                
             }
+            .offset(x: 0, y: showButtons ? 0 : 200)
         }
         .buttonPadding(value: 8.0)
         .buttonHighlights(true)
@@ -94,11 +90,8 @@ struct OverheadView: View {
         .onAppear {
             self.showButtons(true)
         }
-            
         .onReceive(scene.$isPlaying) { (output) in
-            self.showPlayButton = false
-            self.showShopButton = false
-            self.showDailyGiftButton = false
+            self.showButtons(!output)
         }
     }
 }
@@ -107,7 +100,7 @@ struct Overhead2View_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             GameBackground()
-            OverheadView(showShop: .constant(false), showDailyGift: .constant(false))
-        }
+            OverheadView(showShop: .constant(false), showDailyGift: .constant(false), hasCollectedDailyGift: .constant(false))
+        }.environmentObject(GameScene(model: .demo))
     }
 }

@@ -15,6 +15,7 @@ struct GameView: View {
     // State
     @State var showShop = false
     @State var showDailyPrize = false
+    @State var hasCollectedDailyGift = false
     // Developer (For Debugging)
     @State var developer = true
     @State var showDeveloperView = false
@@ -43,7 +44,7 @@ struct GameView: View {
                 .zIndex(3)
 
             
-            OverheadView(showShop: $showShop, showDailyGift: $showDailyPrize)
+            OverheadView(showShop: $showShop, showDailyGift: $showDailyPrize, hasCollectedDailyGift: $hasCollectedDailyGift)
                 .zIndex(4)
             
             if showShop {
@@ -53,8 +54,7 @@ struct GameView: View {
             }
             
             if showDailyPrize {
-                DailyPrizeView(isShowing: $showDailyPrize)
-                    // .transition(.move(edge: .bottom))
+                DailyGiftView(isShowing: $showDailyPrize, hasCollectedDailyGift: $hasCollectedDailyGift)
                     .zIndex(6)
             }
             

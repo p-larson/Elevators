@@ -173,7 +173,7 @@ struct Graphics {
         }
     }
     
-    static func cry() -> UIImage {
+    static func cash() -> UIImage {
         
         let size = CGSize(width: 25, height: 25)
         
@@ -183,7 +183,7 @@ struct Graphics {
             layer.frame = CGRect(origin: .zero, size: size)
             
             layer.fontSize = 20
-            layer.string = "😭"
+            layer.string = "＄"
             layer.alignmentMode = .center
             
             layer.draw(in: context)
