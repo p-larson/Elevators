@@ -25,7 +25,7 @@ struct LevelDesignerView: View {
     
     init(from model: LevelModel? = nil) {
         guard let model = model else {
-            self._id = State(initialValue: Storage.current.levels.count)
+            self._id = State(initialValue: GameData.levels.count)
             return
         }
         // Override

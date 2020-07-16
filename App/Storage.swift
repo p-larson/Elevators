@@ -8,9 +8,9 @@
 
 import Foundation
 
+let GameData = Storage()
+
 public class Storage: ObservableObject {
-    public static let current = Storage()
-    
     let storage = UserDefaults()
     
     private let encoder = JSONEncoder()
@@ -36,18 +36,6 @@ public class Storage: ObservableObject {
     
     func isLocalallySaved(model: LevelModel) -> Bool {
         local.contains(model)
-    }
-    
-    public func hasCompletd(model: LevelModel) -> Bool {
-        (storage.array(forKey: "completed") as? [Int])?.contains(model.id) ?? false
-    }
-    
-    public func markCompleted(model: LevelModel) {
-        var completed = (storage.array(forKey: "completed") as? [Int]) ?? [Int]()
-        
-        completed.append(model.id)
-        
-        storage.set(completed, forKey: "completed")
     }
     
     public func remove(_ indexSet: IndexSet) {
@@ -117,8 +105,7 @@ public class Storage: ObservableObject {
         }
     }
     
-    private init() {
-        
+    fileprivate init() {
         self.streak = storage.integer(forKey: "streak")
         self.recentClaim = storage.object(forKey: "recentClaim") as? Date
         self.cash = storage.integer(forKey: "cash")
@@ -226,12 +213,6 @@ public class Storage: ObservableObject {
         }
     }
     
-//    var developerMode: Bool {
-//        get {
-//            
-//        }
-//    }
-    
     var settings: GameSettingsModel {
         get {
             if let data = storage.data(forKey: "settings"), let value = try? decoder.decode(GameSettingsModel.self, from: data) {
@@ -277,5 +258,41 @@ public class Storage: ObservableObject {
         self.credits.append(username)
         
         storage.set(Date(), forKey: "credit." + username)
+    }
+}
+
+// Level Saving
+extension Storage {
+    public func isComplete(model: LevelModel) -> Bool {
+        (storage.array(forKey: "completed") as? [Int])?.contains(model.id) ?? false
+    }
+    
+    public func markCompleted(model: LevelModel) {
+        var completed = (storage.array(forKey: "completed") as? [Int]) ?? [Int]()
+        
+        completed.append(model.id)
+        
+        storage.set(completed, forKey: "completed")
+    }
+}
+
+// Level Loading
+extension Storage {
+    var levelsList: [LevelModel] {
+        levels.sorted { (l1, l2) -> Bool in
+            l1.id < l2.id
+        }
+    }
+    
+    func next(from level: LevelModel) -> LevelModel? {
+        levelsList.filter { (l) -> Bool in
+            l <= level
+        }.first
+    }
+    
+    var currentLevel: LevelModel? {
+        levelsList.first { (model) -> Bool in
+            !isComplete(model: model)
+        }
     }
 }

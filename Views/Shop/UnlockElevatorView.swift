@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Haptica
 
 struct Shake: GeometryEffect {
     var amount: CGFloat = 10
@@ -58,7 +59,7 @@ struct UnlockElevatorView: View {
                 if self.attempts < self.completion {
                     withAnimation(.spring()) {
                         self.attempts += 1
-                        AppDelegate.impact.impactOccurred(intensity: CGFloat(self.attempts) / CGFloat(self.completion))
+                        Haptic.impact(.medium).generate()
                     }
                 } else if !self.open {
                     withAnimation(.spring()) {

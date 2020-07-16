@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Haptica
 
 struct GameButton<Content>: View where Content: View {
     
@@ -35,7 +36,7 @@ struct GameButton<Content>: View where Content: View {
         LongPressGesture(minimumDuration: 0)
             .onEnded { (value) in
                 self.toggle()
-                AppDelegate.impact.impactOccurred()
+                Haptic.impact(.light).generate()
         }
         .sequenced(before: DragGesture(minimumDistance: 0.0, coordinateSpace: .local)
             .onEnded({ (action) in

@@ -13,7 +13,7 @@ struct CoinCounterView: View {
     
     static let length: CGFloat = 24
     
-    @ObservedObject var storage = Storage.current
+    @ObservedObject var storage = GameData
     
     var body: some View {
         VStack {
@@ -57,8 +57,8 @@ struct CoinCounterTestView: View {
             HStack {
                 Button("+") {
                     Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { (timer) in
-                        if Storage.current.cash < 1000 {
-                            Storage.current.cash += .random(in: 1 ..< 100)
+                        if GameData.cash < 1000 {
+                            GameData.cash += .random(in: 1 ..< 100)
                         } else {
                             timer.invalidate()
                         }

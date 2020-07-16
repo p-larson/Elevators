@@ -70,14 +70,14 @@ struct DailyGiftView: View {
                 
                 let prize = self.reward
                 let increment = prize / 5
-                let final = Storage.current.cash + prize
+                let final = GameData.cash + prize
                 
                 var i = 0
                 
                 Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
                     i += 1; if i == 5 {
                         self.reward = 0
-                        Storage.current.cash = final
+                        GameData.cash = final
                         timer.invalidate()
                         
                         withAnimation(Animation.easeInOut(duration: 0.3).delay(0.7)) {
@@ -89,7 +89,7 @@ struct DailyGiftView: View {
                         }
                     } else {
                         self.reward -= increment
-                        Storage.current.cash += increment
+                        GameData.cash += increment
                     }
                 }
             }

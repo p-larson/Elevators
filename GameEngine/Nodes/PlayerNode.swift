@@ -15,18 +15,7 @@ class PlayerNode: SKSpriteNode {
     var floor: Int
     var target: Int? = nil
     var willEnter = false
-    
-    fileprivate(set) var isMoving = false {
-        didSet {
-            if !isMoving {
-                self.removeAction(forKey: "move")
-            }
-        }
-    }
-    
-    var direction: PlayerDirection = .right
-    
-//    fileprivate(set) var isMoving: Bool = false
+    fileprivate(set) var direction: PlayerDirection = .right
     
     fileprivate(set) var isInsideElevator: Bool = false {
         didSet {
@@ -48,22 +37,105 @@ class PlayerNode: SKSpriteNode {
 }
 
 extension PlayerNode {
+    
+    func set(direction: PlayerDirection) {
+        if self.direction != direction || !isMoving && !isInsideElevator {
+            move(direction: direction)
+        }
+    }
+    
+    var isMoving: Bool {
+        action(forKey: "move") != nil
+    }
+    
+    func stopMoving() {
+        self.removeAction(forKey: "move")
+        PlayerSkin.current.set(state: .idle)
+    }
+    
+    var right: [Int] {
+        (slot - GameScene.maxSlot) == 0 ? [] : Array(min(slot + 1, GameScene.maxSlot) ..< GameScene.slots)
+    }
+    
+    var left: [Int] {
+        Array(0 ..< slot).reversed() as [Int]
+    }
+    
+    var closestSlot: Int {
+        guard let gc = gamescene else {
+            return slot
+        }
+        
+        return (0 ..< GameScene.slots).map { abs(gc.elevatorXPosition(at: $0) - position.x) }.enumerated().min {
+            e1, e2 in
+            
+            return e1.element < e2.element
+        }?.offset ?? slot
+    }
+    
+    var nextSlot: Int {
+        if direction == .right {
+            return min(slot + 1, GameScene.maxSlot)
+        } else {
+            return max(slot - 1, 0)
+        }
+    }
+    
+    func direciton(to slot: Int) -> PlayerDirection {
+        guard let gc = gamescene else {
+            return direction
+        }
+        
+        let slotX = gc.elevatorXPosition(at: slot)
+        
+        if slotX > position.x {
+            return PlayerDirection.right
+        } else {
+            return PlayerDirection.left
+        }
+    }
+    
+    func center() -> TimeInterval {
+        guard let gc = gamescene else {
+            return 0
+        }
+        
+        self.removeAction(forKey: "center")
+        
+        // slot = nextSlot
+        
+        PlayerSkin.current.set(state: .run)
+        PlayerSkin.current.set(direction: direciton(to: slot))
+        
+        let targetX = gc.elevatorXPosition(at: slot)
+        let deltaX = Double(targetX - position.x)
+        let duration: TimeInterval = (GameScene.playerSpeed * abs(deltaX)) / Double(gc.slotWidth)
+        let completion = {
+            PlayerSkin.current.set(state: .idle)
+        }
+        
+        let move = SKAction.sequence([SKAction.moveTo(x: targetX, duration: duration), SKAction.run(completion)])
+        
+        self.run(move, withKey: "center")
+        
+        return duration
+    }
+    
+    var isCentering: Bool {
+        action(forKey: "center") != nil
+    }
+    
+    func stopCentering() {
+        removeAction(forKey: "center")
+    }
+    
     // Move in the
-    func move(direction: PlayerDirection, swipe: Bool) {
-        guard let gamescene = gamescene else {
+    func move(direction: PlayerDirection) {
+        guard let gc = gamescene else {
             return
         }
         
-        var targetSlot: Int!
-        
-        if swipe {
-            // Move to the next slot in the direction
-            targetSlot = direction == .right ? min(gamescene.maxSlot, slot + 1) : max(0, slot - 1)
-        } else {
-            // Move towards the ending slot in the direction
-            targetSlot = direction == .right ? gamescene.maxSlot : 0
-            
-        }
+        let targetSlot = direction == .right ? GameScene.maxSlot : 0
         
         PlayerSkin.current.set(direction: direction)
         
@@ -72,67 +144,50 @@ extension PlayerNode {
             return
         }
         
-        let targetX = gamescene.elevatorXPosition(at: targetSlot)
-        let deltaX = Double((targetX - position.x))
-        let duration: TimeInterval = (GameScene.playerSpeed * abs(deltaX)) / Double(gamescene.slotWidth)
-        let completion: () -> Void = {
-            self.isMoving = false
-//            
-        }
-        // Action
-        let action = SKAction.sequence([SKAction.moveTo(x: targetX, duration: duration), SKAction.run(completion)])
+        self.stopCentering()
         
-        self.run(action, withKey: "move")
+        self.direction = direction
+        
+        PlayerSkin.current.set(state: .run)
+        
+        let targetX = gc.elevatorXPosition(at: targetSlot)
+        let deltaX = Double(targetX - position.x)
+        let duration: TimeInterval = (GameScene.playerSpeed * abs(deltaX)) / Double(gc.slotWidth)
+        let completion = {
+            PlayerSkin.current.set(state: .idle)
+        }
+        
+        let move = SKAction.sequence([SKAction.moveTo(x: targetX, duration: duration), SKAction.run(completion)])
+
+        let path = direction == .right ? self.right : self.left
+        
+        let timing: [(Int, TimeInterval)] = path.enumerated().map { (index, nextSlot) in
+            if index == 0 {
+                let targetX = gc.elevatorXPosition(at: nextSlot)
+                let deltaX = Double(targetX - position.x)
+                return (nextSlot, (GameScene.playerSpeed * abs(deltaX)) / Double(gc.slotWidth))
+            } else {
+                return (nextSlot, GameScene.playerSpeed)
+            }
+        }
+        
+        let slotChangeClock: [SKAction] = timing.map { nextSlot, duration in
+            SKAction.sequence(
+                [
+                    SKAction.run {
+                        self.slot = nextSlot
+                        self.gamescene?.updateTarget()
+                    },
+                    SKAction.wait(forDuration: duration)
+                ]
+            )
+        }
+        
+        self.run(SKAction.group([SKAction.sequence(slotChangeClock), move]), withKey: "move")
     }
 }
 
-extension PlayerNode {  
-    
-    var scrunch: SKAction {
-        .scaleY(to: 0.5, duration: 0.1)
-    }
-    
-    var press: SKAction {
-        .scaleY(to: 1, duration: 0.1)
-    }
-    
-    func stop() -> SKAction {
-        .run {
-            self.isMoving = false
-            self.gamescene?.updateTarget()
-
-            PlayerSkin.current.set(state: .idle)
-        }
-    }
-    
-    var bounce: SKAction {
-        .sequence(
-            [
-                .moveBy(x: 0, y: frame.height / 5, duration: 0.1),
-                .moveBy(x: 0, y: frame.height / -5, duration: 0.1),
-            ]
-        )
-    }
-    
-    func move(right: Bool) {
-        self.isMoving = true
-        
-        let x = (right ? 1 : -1) * (gamescene?.slotWidth ?? 0)
-
-        Haptic.impact(.light).generate()
-        
-        PlayerSkin.current.set(state: .idle)
-        PlayerSkin.current.set(direction: right ? .right : .left)
-        
-        self.slot += right ? 1 : -1
-        
-        self.run(
-            .sequence(
-                [scrunch, .group([bounce, press, .moveBy(x: x, y: 0, duration: GameScene.playerSpeed)]), stop(), .run(check)]
-            )
-        )
-    }
-    
+extension PlayerNode {
     func enter() {
         // Fadeout
         self.isInsideElevator = true
@@ -142,7 +197,7 @@ extension PlayerNode {
     }
     
     func exit() {
-
+        
         self.isInsideElevator = false
         
         self.run(
@@ -157,13 +212,4 @@ extension PlayerNode {
             )
         )
     }
-    
-    func check() {
-        if willEnter {
-            gamescene?.ride()
-        }
-        
-        willEnter = false
-    }
-
 }

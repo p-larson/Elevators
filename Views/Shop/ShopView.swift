@@ -9,11 +9,11 @@
 import SwiftUI
 import SwiftUIPager
 import Grid
-import GridStack
+import Haptica
 
 struct ShopView: View {
     
-    @ObservedObject var storage = Storage.current
+    @ObservedObject var storage = GameData
     
     @Binding var isShowing: Bool
     @State var selection = 0
@@ -132,6 +132,9 @@ struct ShopView: View {
                 if let outfit = outfit, outfit.isUnlocked {
                     self.storage.outfit = outfit
                     self.selection = index + page * self.gridRange.count
+                    Haptic.impact(.light).generate()
+                } else {
+                    Haptic.notification(.warning).generate()
                 }
         }
     }
@@ -309,9 +312,7 @@ struct ShopView: View {
                 }
                 .padding(.horizontal, 16)
                 .onButtonPress {
-                     withAnimation {
-                         self.isShowing = false
-                     }
+                    self.isShowing = false
                 }
             }
             .buttonHighlightsPadding(5)
@@ -328,26 +329,9 @@ struct ShopView: View {
     }
 }
 
-struct ShopTestView: View {
-    @State var presented = true
-    
-    var body: some View {
-        ZStack {
-            Button("Present") {
-                self.presented = true
-            }
-            
-            if presented {
-                ShopView(isShowing: $presented)
-                    .zIndex(2)
-            }
-        }
-    }
-}
-
-struct ShopView6_Previews: PreviewProvider {
+struct ShopView_Previews: PreviewProvider {
     static var previews: some View {
-        ShopTestView()
+        ShopView(isShowing: .constant(true))
             .statusBar(hidden: true)
             .previewDevice("iPhone 11")
     }

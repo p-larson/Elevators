@@ -10,79 +10,47 @@ import SwiftUI
 import SpriteKit
 
 struct GameView: View {
-    // Game Data
-    @ObservedObject var scene: GameScene
     // State
     @State var showShop = false
     @State var showDailyPrize = false
     @State var hasCollectedDailyGift = false
-    // Developer (For Debugging)
     @State var developer = true
     @State var showDeveloperView = false
-    
-    // Game Model
     @State var model: LevelModel
-    // Initializer with Model
-    init(model: LevelModel) {
-        self._model = State(initialValue: model)
-        self._scene = ObservedObject(initialValue: GameScene(model: model))
-    }
     
     var body: some View {
         ZStack {
             GameBackground()
-            GameContainerView(model: model)
+            GameContainerView()
                 .edgesIgnoringSafeArea(.all)
                 .zIndex(1)
-            
-            if scene.hasLost {
-                LoseView()
-                    .zIndex(2)
-            }
-            
-            ConfettiView(isEmitting: scene.hasWon)
-                .zIndex(3)
 
-            
-            OverheadView(showShop: $showShop, showDailyGift: $showDailyPrize, hasCollectedDailyGift: $hasCollectedDailyGift)
-                .zIndex(4)
+            OverheadView(model: $model, showShop: $showShop, showDailyGift: $showDailyPrize)
+                .zIndex(2)
             
             if showShop {
                 ShopView(isShowing: $showShop)
-                    // .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
-                    .zIndex(5)
+                    .zIndex(3)
             }
             
             if showDailyPrize {
                 DailyGiftView(isShowing: $showDailyPrize, hasCollectedDailyGift: $hasCollectedDailyGift)
-                    .zIndex(6)
+                    .zIndex(4)
             }
             
             CoinCounterView()
-                .zIndex(7)
+                .zIndex(5)
         }
-        .animation(.easeInOut(duration: 0.3), value: scene.isPlaying)
-        // .animation(.easeInOut(duration: 0.3), value: showShop)
-        .animation(.easeInOut(duration: 0.3), value: showDailyPrize)
-        .environmentObject(scene)
+        .environmentObject(GameScene(model: model))
         .statusBar(hidden: true)
         .font(.custom("Futura Medium", size: 32))
-    }
-}
-
-extension GameView {
-    var introTransition: AnyTransition {
-        AnyTransition.asymmetric(
-            insertion: AnyTransition.move(edge: .leading),
-            removal: AnyTransition.move(edge: .trailing)
-        ).animation(.easeInOut)
     }
 }
 
 struct GameView_Previews: PreviewProvider {
     
     static var previews: some View {
-        GameView(model: Storage.current.level(named: "you betcha")!)
+        GameView(model: GameData.level(named: "you betcha")!)
             .previewDevice("iPhone 11")
     }
 }

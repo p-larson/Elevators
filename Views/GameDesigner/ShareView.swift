@@ -73,7 +73,7 @@ struct ShareView: View {
     
     private var content: [NSURL] {
         self.models.compactMap { (id) -> NSURL? in
-            Storage.current.getFile(for: id)
+            GameData.getFile(for: id)
         }
     }
     

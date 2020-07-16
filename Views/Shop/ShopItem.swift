@@ -69,7 +69,7 @@ public extension ShopItem {
             return
         case .coin:
             
-            Storage.current.cash += count ?? 0
+            GameData.cash += count ?? 0
             
             return
         }

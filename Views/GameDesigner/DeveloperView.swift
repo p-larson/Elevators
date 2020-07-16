@@ -13,7 +13,7 @@ struct DeveloperView: View {
     let scene: GameScene
     @Binding var isShowing: Bool
     
-    @ObservedObject var saves = Storage.current
+    @ObservedObject var saves = GameData
     
     var body: some View {
         NavigationView {
@@ -35,7 +35,7 @@ struct DeveloperView: View {
                                 HStack {
                                     Text("\(model.id). \(model.name)")
                                     Spacer()
-                                    if Storage.current.isLocalallySaved(model: model) {
+                                    if GameData.isLocalallySaved(model: model) {
                                         Text("Local")
                                             .foregroundColor(.red)
                                             .underline()
@@ -45,12 +45,12 @@ struct DeveloperView: View {
                                             .italic()
                                     }
                                 }
-                            }.deleteDisabled(!Storage.current.isLocalallySaved(model: model))
+                            }.deleteDisabled(!GameData.isLocalallySaved(model: model))
                         }
                         .onMove { (indexSet, destination) in
                             self.saves.move(offsets: indexSet, destination: destination)
                         }.onDelete { (indexSet) in
-                            Storage.current.remove(indexSet)
+                            GameData.remove(indexSet)
                         }
                         .listStyle(GroupedListStyle())
                     }

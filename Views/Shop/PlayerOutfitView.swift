@@ -12,7 +12,7 @@ struct PlayerOutfitView: View {
     
     @State var image = String()
     
-    @ObservedObject var storage = Storage.current
+    @ObservedObject var storage = GameData
     
     var outfit: PlayerOutfit?
     let isAnimated: Bool

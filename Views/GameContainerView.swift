@@ -11,14 +11,8 @@ import SpriteKit
 
 struct GameContainerView: UIViewRepresentable {
     typealias UIViewType = SKView
-    
-    let model: LevelModel
-    
+        
     @EnvironmentObject var scene: GameScene
-    
-    init(model: LevelModel) {
-        self.model = model
-    }
     
     func makeUIView(context: Context) -> SKView {
         let view = SKView(frame: UIScreen.main.bounds)
@@ -38,6 +32,6 @@ struct GameContainerView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: SKView, context: Context) {
-        uiView.isUserInteractionEnabled = true
+        uiView.isUserInteractionEnabled = !scene.hasLost && !scene.hasWon
     }
 }

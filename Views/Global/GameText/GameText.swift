@@ -28,7 +28,7 @@ struct GameText: View {
         Text(text)
             .padding(2)
             .font(.custom("Being Strong regular", size: gameTextSize))
-            .foregroundColor(Color("theme-2"))
+            .foregroundColor(.black)
     }
     
     var body: some View {
@@ -42,8 +42,8 @@ struct GameText_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             GameBackground()
-            GameText("Collect Your Daily Gift!")
-                .gameTextSize(24)
+            GameText("Level 4 Completed!")
+                .gameTextSize(32)
         }
     }
 }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct LevelModel: Identifiable, Encodable & Decodable {
+public struct LevelModel: Identifiable, Codable, Hashable {
     
     fileprivate static let DEMO = Int.min
     
@@ -20,6 +20,9 @@ public struct LevelModel: Identifiable, Encodable & Decodable {
     public var start: CellModel?
     public var id: Int
     
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     
     enum CodingKeys: CodingKey {
         case name, floors, slots, elevators, coins, selected, start, id
@@ -75,6 +78,12 @@ extension LevelModel: CustomStringConvertible {
 extension LevelModel: Equatable {
     public static func ==(lhs: LevelModel, rhs: LevelModel) -> Bool {
         return lhs.id == rhs.id
+    }
+}
+
+extension LevelModel: Comparable {
+    public static func < (lhs: LevelModel, rhs: LevelModel) -> Bool {
+        lhs.id < rhs.id
     }
 }
 

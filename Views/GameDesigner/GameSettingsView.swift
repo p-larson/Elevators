@@ -21,7 +21,7 @@ struct GameSettingsModel: Codable {
 
 struct GameSettingsView: View {
     
-    @State var model: GameSettingsModel = Storage.current.settings
+    @State var model: GameSettingsModel = GameData.settings
     
     var body: some View {
         VStack {
@@ -33,7 +33,7 @@ struct GameSettingsView: View {
             Stepper("\(model.cameraSpeed.description) Camera Speed", value: $model.cameraSpeed, step: 0.01)
             Stepper("\(model.padding.description) Padding", value: $model.padding, step: 1)
             Button("Save") {
-                Storage.current.settings = self.model
+                GameData.settings = self.model
             }
         }.padding(.horizontal, 16)
     }

@@ -22,7 +22,7 @@ struct CreditsView: View {
     
     @Binding var isShowing: Bool
     
-    @ObservedObject var storage = Storage.current
+    @ObservedObject var storage = GameData
     
     let credits = [
         Credit(description: "Designed and Developed by", name: "Peter Larson", username: "p.larson"),

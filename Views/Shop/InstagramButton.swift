@@ -39,7 +39,7 @@ struct InstagramButton: View {
             }
             
             if !self.collected {
-                Storage.current.collect(self.username)
+                GameData.collect(self.username)
             }
         }) { // Label
             Text(label)

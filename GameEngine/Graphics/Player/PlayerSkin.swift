@@ -22,7 +22,7 @@ public class PlayerSkin {
     private var skins = [String:SKTexture]()
     
     var outfit: PlayerOutfit {
-        return Storage.current.outfit
+        return GameData.outfit
     }
     
     fileprivate(set) public var state: PlayerState = .idle
