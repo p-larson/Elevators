@@ -23,10 +23,10 @@ final public class GameScene: SKScene, ObservableObject {
     // Player Node
     var playerNode: PlayerNode!
     // Published State
-    @Published var hasLoaded = false
+    @Published private(set) public var isLoaded = false
     @Published var isPlaying: Bool = false {
         didSet {
-            if isPlaying && hasLoaded {
+            if isPlaying && isLoaded {
                 self.startClosingWave()
             }
         }
@@ -68,6 +68,7 @@ public extension GameScene {
 extension GameScene {
     public func reload() {
         self.removeAllChildren()
+        self.isLoaded = false
         self.setupPlayer()
         self.render()
         self.clean()
@@ -76,7 +77,7 @@ extension GameScene {
         self.hasLost = false
         self.hasWon = false
         self.isPlaying = false
-        self.hasLoaded = true
+        self.isLoaded = true
         print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
     }
     

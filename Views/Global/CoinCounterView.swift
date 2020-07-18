@@ -46,6 +46,7 @@ struct CoinCounterView: View {
             
             Spacer()
         }
+        .foregroundColor(.black)
     }
 }
 

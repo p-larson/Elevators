@@ -31,7 +31,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             fatalError("App has no playable game levels!")
         }
         
-        let contentView = GameView(model: level!)
+        let contentView = GameView2(level: level!)
         
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)

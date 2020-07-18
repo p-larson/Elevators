@@ -176,7 +176,6 @@ struct OverheadView: View {
                 self.showShop = true
             }
         }
-
         .offset(x: 0, y: showButtons ? 0 : UIScreen.main.bounds.height / 4)
     }
     

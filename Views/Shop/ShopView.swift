@@ -119,8 +119,6 @@ struct ShopView: View {
     func item(on page: Int, index: Int) -> some View {
         var outfit: PlayerOutfit? = nil
         
-        // let pagedIndex = page * gridRange.count + index
-        
         if coinPages.contains(page) {
             outfit = coinUnlockables.safe(index: index)
         } else if adPages.contains(page) {
