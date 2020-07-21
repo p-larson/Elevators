@@ -16,13 +16,17 @@ public class PlayerSkin {
     public static let current = PlayerSkin()
     
     public typealias StringLiteralType = String
-    
-    private var timer: Timer? = nil
-    
+        
     private var skins = [String:SKTexture]()
     
     var outfit: PlayerOutfit {
-        return GameData.outfit
+        didSet {
+            skins.removeAll()
+        }
+    }
+    
+    init(outfit: PlayerOutfit = GameData.outfit) {
+        self.outfit = outfit
     }
     
     fileprivate(set) public var state: PlayerState = .idle
@@ -48,7 +52,7 @@ public class PlayerSkin {
         if skins[name] == nil {
             skins[name] = SKTexture(imageNamed: name)
         }
-                
+        
         return skins[name]!
     }
     
@@ -60,7 +64,7 @@ public class PlayerSkin {
             if direction == .left {
                 self.node?.xScale = -1
             }
-            
+                
             else if direction == .right {
                 self.node?.xScale = 1
             }
@@ -72,11 +76,21 @@ public class PlayerSkin {
         self.frame = 0
     }
     
-    func animate(_ node: PlayerNode) {
-        self.node = node
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 20.0, repeats: true) { (timer) in
-            node.texture = self.nextTexture()
-        }
+    func animate(_ target: PlayerNode) {
+        self.node = target
+        
+        node?.run(
+            SKAction.repeatForever(
+                SKAction.sequence(
+                    [
+                        SKAction.run {
+                            self.node?.texture = self.nextTexture()
+                        },
+                        SKAction.wait(forDuration: 1.0 / 20.0)
+                    ]
+                )
+            ),
+            withKey: "animation"
+        )
     }
 }

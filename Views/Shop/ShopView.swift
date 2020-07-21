@@ -129,6 +129,7 @@ struct ShopView: View {
             .onTapGesture {
                 if let outfit = outfit, outfit.isUnlocked {
                     self.storage.outfit = outfit
+                    PlayerSkin.current.outfit = outfit
                     self.selection = index + page * self.gridRange.count
                     Haptic.impact(.light).generate()
                 } else {

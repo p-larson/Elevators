@@ -14,9 +14,9 @@ struct GameView: View {
     @State fileprivate var showShop = false
     @State fileprivate var showDailyGift = false
     @State fileprivate var showDeveloper = false
-    @State fileprivate var isLoading = true
     @State fileprivate var canCollectGift = true
     @State fileprivate var model: LevelModel
+    @State fileprivate var isLoaded = false
     // *** Observables ***
     @ObservedObject private(set) public var scene: GameScene
     // Init
@@ -30,9 +30,13 @@ struct GameView: View {
             GameBackground()
                 .brightness(hideGame ? -0.75 : 0)
             ZStack {
-                GameContainerView()
-                    .edgesIgnoringSafeArea(.all)
-                    .disabled(!scene.isLoaded)
+                if isLoaded {
+                    GameContainerView()
+                        .edgesIgnoringSafeArea(.all)
+                        .disabled(!scene.isLoaded)
+                }
+                
+                backgroundFade
                 
                 VStack(spacing: 0) {
                     Spacer()
@@ -63,6 +67,10 @@ struct GameView: View {
             levelDetail
             
             CoinCounterView()
+            
+            if showLoadingScreen {
+                loadingScreen
+            }
         }
         .environmentObject(scene)
         .statusBar(hidden: true)
@@ -72,6 +80,7 @@ struct GameView: View {
         .onReceive(scene.$isPlaying, perform: onPlayingChange(value:))
         .onReceive(scene.$hasWon, perform: onWin(value:))
         .onReceive(scene.$hasLost, perform: onLost(value:))
+        .onAppear(perform: load)
     }
     
     // *** State Animation ***
@@ -88,11 +97,17 @@ struct GameView: View {
     @State fileprivate var showAdLabel = false
     @State fileprivate var showRetryButton = false
     @State fileprivate var showRetryLabel = false
+    @State fileprivate var fadeGame = false
     // Menu
     @State fileprivate var showMenu = false
-    // Load Screen
+    // Level Load Screen
     @State fileprivate var showLevelTitle = false
     @State fileprivate var hideGame = true
+    // App Loading Screen
+    @State fileprivate var isAnimatingLogo = false
+    @State fileprivate var showLoadingScreen = true
+    @State fileprivate var isLoading = true
+    @State fileprivate var logoFrame = 1
 }
 
 // *** Sub Views ***
@@ -225,6 +240,14 @@ fileprivate extension GameView {
         .offset(x: 0, y: showMenu ? 0 : UIScreen.main.bounds.height / 4)
     }
 }
+// Background Fade
+fileprivate extension GameView {
+    var backgroundFade: some View {
+        Color("theme-1")
+            .edgesIgnoringSafeArea(.all)
+            .opacity(fadeGame ? 0.25 : 0)
+    }
+}
 // Detail View
 fileprivate extension GameView {
     var levelDetail: some View {
@@ -235,6 +258,41 @@ fileprivate extension GameView {
         .opacity(showLevelTitle ? 1 : 0)
     }
 }
+// App Load Screen
+fileprivate extension GameView {
+    var loadingScreen: some View {
+        ZStack {
+            Color("theme-1")
+                .edgesIgnoringSafeArea(.all)
+            Image("cornpopstudios.\(logoFrame)")
+                .resizable()
+                .scaledToFit()
+                // .scaleEffect(showLoadingScreen)
+            VStack {
+                Spacer()
+                Text("Loading...")
+                    .foregroundColor(.white)
+            }
+        }.onAppear {
+            self.logoFrame = 1
+            self.isAnimatingLogo = true
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                Timer.scheduledTimer(withTimeInterval: 1.0 / 24.0, repeats: true) { (timer) in
+                    if self.logoFrame < 68 {
+                        self.logoFrame += 1
+                    } else if self.logoFrame == 68 {
+                        timer.invalidate()
+                        self.isAnimatingLogo = false
+                        self.updateLoadingStatus()
+                    }
+                }
+            }
+        }
+        .opacity(isLoading ? 1 : 0)
+    }
+}
+
 
 // *** Publisher Event Handling ***
 
@@ -269,6 +327,8 @@ fileprivate extension GameView {
         withAnimation(Animation.linear(duration: 0.3)) {
             self.showMenu = !value
         }
+        // Adjust scene speed
+        self.scene.speed = value ? 1 : 0.5
     }
 }
 // On Win Event
@@ -301,6 +361,7 @@ fileprivate extension GameView {
         
         withAnimation(Animation.linear(duration: 0.3)) {
             self.showSkipButton = value
+            self.fadeGame = value
         }
         
         withAnimation(Animation.linear(duration: 0.3).delay(0.3)) {
@@ -326,10 +387,36 @@ fileprivate extension GameView {
     }
 }
 
+// View Load
+fileprivate extension GameView {
+    func load() {
+        ElevatorSkin.current.load {
+            self.isLoaded = true
+            self.updateLoadingStatus()
+        }
+    }
+    
+    func updateLoadingStatus() {
+        if isLoaded && !isAnimatingLogo {
+            withAnimation(Animation.easeInOut(duration: 0.3)) {
+                self.isLoading = false
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.showLoadingScreen = false
+            }
+        }
+    }
+}
+
 // *** Preview ***
 
 struct GameView_Previews: PreviewProvider {
     static var previews: some View {
-        GameView(level: GameData.level(named: "You Betcha")!)
+        GameView(
+            level: .demo
+        )
     }
 }
+
+// Created by Peter Larson, all rights reserved.

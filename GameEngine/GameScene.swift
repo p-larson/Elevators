@@ -511,12 +511,7 @@ extension GameScene {
             let elevatorNode = playerElevatorNode(),
             !hasWon,
             !hasLost
-            else {
-                return
-        }
-        
-        guard !playerNode.isMoving else {
-            playerNode.willEnter = true
+        else {
             return
         }
         

@@ -11,11 +11,14 @@ import SpriteKit
 import Haptica
 
 class PlayerNode: SKSpriteNode {
-    var slot: Int = 0
-    var floor: Int
-    var target: Int? = nil
-    var willEnter = false
-    fileprivate(set) var direction: PlayerDirection = .right
+    // Data
+    public var slot: Int = 0
+    public var floor: Int
+    public var target: Int? = nil
+    // Player Outfit Animation
+    var direction: PlayerDirection = .right
+    var state: PlayerState = .idle
+    var frameNumber = 0
     
     fileprivate(set) var isInsideElevator: Bool = false {
         didSet {
@@ -35,9 +38,9 @@ class PlayerNode: SKSpriteNode {
         fatalError("init(coder:) has not been implemented")
     }
 }
+// *** Movement ***
 
 extension PlayerNode {
-    
     func set(direction: PlayerDirection) {
         if self.direction != direction || !isMoving && !isInsideElevator {
             move(direction: direction)
@@ -186,7 +189,7 @@ extension PlayerNode {
         self.run(SKAction.group([SKAction.sequence(slotChangeClock), move]), withKey: "move")
     }
 }
-
+// *** Elevator Riding ***
 extension PlayerNode {
     func enter() {
         // Fadeout

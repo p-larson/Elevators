@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SpriteKit
 
 let GameData = Storage()
 
@@ -15,7 +16,6 @@ public class Storage: ObservableObject {
     
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    
     // All levels, local and hard file.
     @Published public var levels: [LevelModel]
     @Published public var cash: Int
@@ -23,6 +23,8 @@ public class Storage: ObservableObject {
     @Published public var recentClaim: Date?
     @Published public var credits: [String]
     @Published public var outfit: PlayerOutfit
+    // Player Outfit Dependents
+    // var outfitCache = [String:SKTexture]()
     // Save of local models
     private var local: [LevelModel]
     
@@ -132,8 +134,8 @@ public class Storage: ObservableObject {
                 guard
                     let data = try? Data(contentsOf: url),
                     let model = decode(data)
-                else {
-                    continue
+                    else {
+                        continue
                 }
                 
                 print("Read Level from File (\(url.lastPathComponent))")
@@ -170,18 +172,18 @@ public class Storage: ObservableObject {
             guard
                 let localData = storage.data(forKey: "levels"),
                 let localSave = try? decoder.decode([LevelModel].self, from: localData)
-            else {
-                
-                print("FAILED TO LOAD FROM SAVE.")
-                
-                return
+                else {
+                    
+                    print("FAILED TO LOAD FROM SAVE.")
+                    
+                    return
             }
             
             localSave.forEach { (model) in
                 print("Saved \(model).")
             }
         } catch {
-           print("FAILED TO SAVE LOCAL MODELS.", error)
+            print("FAILED TO SAVE LOCAL MODELS.", error)
         }
     }
     
@@ -200,8 +202,8 @@ public class Storage: ObservableObject {
             }),
             let data = try? encoder.encode(model),
             let file = data.dataToFile(fileName: "level_\(model.name)-\(model.id).txt")
-        else {
-            return nil
+            else {
+                return nil
         }
         
         return file
@@ -233,7 +235,7 @@ public class Storage: ObservableObject {
         
         set {
             storage.set(try? encoder.encode(newValue), forKey: "settings")
-                        
+            
             GameScene.maxFloorsShown = newValue.maxFloorsShown
             GameScene.floorSpeed = newValue.floorSpeed
             GameScene.playerSpeed = newValue.playerSpeed
@@ -296,3 +298,52 @@ extension Storage {
         }
     }
 }
+
+// Player Outfit Cache
+//extension Storage {
+//    
+//    private func fileName(for state: PlayerState, direction: PlayerDirection? = nil, frame: Int) -> String {
+//        if !outfit.isSymmetric, let direction = direction {
+//            return "\(outfit.rawValue)-\(state)-\(direction)-\(frame)"
+//        } else {
+//            return "\(outfit.rawValue)-\(state)-\(frame)"
+//        }
+//    }
+//    
+//    func resetOutiftCache() {
+//        outfitCache = [:]
+//        
+//        // 14 Frames for each direction and state.
+//        var name: String!
+//        
+//        (1 ... 14).forEach { frame in
+//            PlayerState.allCases.forEach { (state) in
+//                if outfit.isSymmetric {
+//                    name = fileName(for: state, frame: frame)
+//                    outfitCache[name] = SKTexture(imageNamed: name)
+//                } else {
+//                    PlayerDirection.allCases.forEach { (direction) in
+//                        name = fileName(for: state, direction: direction, frame: frame)
+//                        outfitCache[name] = SKTexture(imageNamed: name)
+//                    }
+//                }
+//            }
+//        }
+//        
+//        SKTexture.preload(Array(outfitCache.values)) {
+//            print("Loaded Player Outfit Textures for", self.outfit.rawValue)
+//        }
+//    }
+//    
+//    func frames(for node: PlayerNode) -> [SKTexture] {
+//        return (1 ... 14).compactMap { (frame) -> SKTexture? in
+//            let texture = outfitCache[fileName(for: node.state, direction: node.direction, frame: frame)]
+//            
+//            if texture == nil {
+//                print("WARNING - Player Frame for", outfit.rawValue, node.state, node.direction, "is not loaded in the cache!")
+//            }
+//            
+//            return texture
+//        }
+//    }
+//}

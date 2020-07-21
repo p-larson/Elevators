@@ -38,26 +38,30 @@ public class ElevatorSkin {
         elevatorStyle = save.object(forKey: "elevator-style") as? ElevatorStyle ?? ElevatorStyle.demo
         
         elevatorBackground = SKTexture(image: Graphics.elevatorBackground(style: elevatorStyle))
-        
-        // # frames =
-        print("Generating", ElevatorSkin.doorFramesCount, "door frames.")
-        doorFrames = (1 ... ElevatorSkin.doorFramesCount).map { frame in
-            return SKTexture(
-                image: Graphics.elevatorOverlay(
-                    style: self.elevatorStyle,
-                    percent: CGFloat(frame) / CGFloat(ElevatorSkin.doorFramesCount)
+    }
+    
+    public func load(completion handler: @escaping () -> ()) {
+        DispatchQueue.main.async {
+            print("Generating", ElevatorSkin.doorFramesCount, "door frames.")
+            self.doorFrames = (1 ... ElevatorSkin.doorFramesCount).map { frame in
+                return SKTexture(
+                    image: Graphics.elevatorOverlay(
+                        style: self.elevatorStyle,
+                        percent: CGFloat(frame) / CGFloat(ElevatorSkin.doorFramesCount)
+                    )
                 )
-            )
-        }
-        print("Generating", ElevatorSkin.waveFramesCount, "wave frames.")
-        waveFrames = (1 ... ElevatorSkin.waveFramesCount).map { frame in
-            return SKTexture(
-                image: Graphics.elevatorOverlay(
-                    style: self.elevatorStyle,
-                    percent: CGFloat(frame) / CGFloat(ElevatorSkin.waveFramesCount)
+            }
+            print("Generating", ElevatorSkin.waveFramesCount, "wave frames.")
+            self.waveFrames = (1 ... ElevatorSkin.waveFramesCount).map { frame in
+                return SKTexture(
+                    image: Graphics.elevatorOverlay(
+                        style: self.elevatorStyle,
+                        percent: CGFloat(frame) / CGFloat(ElevatorSkin.waveFramesCount)
+                    )
                 )
-            )
+            }
+            print("Finished Generating Elevator Frames.")
+            handler()
         }
-
     }
 }
