@@ -22,63 +22,28 @@ public struct ShopItem: View, Codable {
     public var body: some View {
         
         ZStack {
-            
-            Color.white.cornerRadius(16)
-            
+            Color("shop-tile")
+                .shadow(radius: 5)
+                .cornerRadius(16)
             VStack {
-                Text("+200 Game Cash")
-                    .foregroundColor(.green)
+                Text("200 Elevator Bucks")
+                Image("cash")
+                    .resizable()
+                    .scaledToFit()
                 HStack {
-                    Image("cash")
-                        .resizable()
-                        .scaledToFit()
-                    Text("$1.00")
-                        .foregroundColor(.black)
+                    Text("$1")
+                    Spacer()
+                    GameButton {
+                        Text("Buy")
+                            .foregroundColor(.white)
+                    }
+                    .foregroundColor(Color("theme-1"))
                 }
             }
             .padding()
         }
         .foregroundColor(.white)
         .font(.custom("Chalkboard SE Bold", size: 24))
-        
-        
-//        VStack(spacing: 0) {
-//            ZStack {
-//
-//                Color.white
-//
-//                if self.type == .ad {
-//                    Text("Remove\nAll Ads")
-//                        .multilineTextAlignment(.center)
-//                        .lineLimit(2)
-//                        .foregroundColor(Color("shop-text"))
-//
-//                }
-//
-//                if self.type == .coin && self.count != nil {
-//                    Image("coin")
-//                        .resizable()
-//                        .scaledToFit()
-//                        .padding()
-//                    VStack {
-//                        Spacer()
-//
-//                        HStack {
-//                            Text("x\(self.count!.description)")
-//                                .foregroundColor(Color("shop-text"))
-//                        }
-//                    }.padding()
-//                }
-//
-//            }
-//            GameButton {
-//                Text("$\(self.price.description)")
-//                    .frame(minWidth: 0, maxWidth: .infinity)
-//                    .foregroundColor(.white)
-//            }
-//            .foregroundColor(Color("Coin"))
-//            .font(.custom("Futura Bold", size: 24))
-//        }.buttonCornerRadius(0).doesButtonScale(enabled: false).cornerRadius(16)
     }
 }
 
@@ -89,7 +54,6 @@ public extension ShopItem {
         case .ad:
             return
         case .coin:
-            
             GameData.cash += count ?? 0
             
             return

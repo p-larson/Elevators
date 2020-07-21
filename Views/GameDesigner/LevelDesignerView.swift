@@ -52,7 +52,7 @@ struct LevelDesignerView: View {
     
     var game: some View {
         GameView(
-            model: model
+            level: model
         ).edgesIgnoringSafeArea(.all).onAppear {
             print("LevelView has been added to view hierarchy.")
         }

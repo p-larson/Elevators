@@ -94,7 +94,6 @@ struct DailyGiftView: View {
                 }
             }
             
-            //
             ZStack {
                 Text("🎁")
                     .brightness(1)

@@ -1,5 +1,5 @@
 //
-//  GameView2.swift
+//  GameView.swift
 //  Elevators
 //
 //  Created by Peter Larson on 7/16/20.
@@ -9,7 +9,7 @@
 import SwiftUI
 import Haptica
 
-struct GameView2: View {
+struct GameView: View {
     // *** State ***
     @State fileprivate var showShop = false
     @State fileprivate var showDailyGift = false
@@ -33,6 +33,7 @@ struct GameView2: View {
                 GameContainerView()
                     .edgesIgnoringSafeArea(.all)
                     .disabled(!scene.isLoaded)
+                
                 VStack(spacing: 0) {
                     Spacer()
                     
@@ -58,7 +59,7 @@ struct GameView2: View {
                 }
             }
             .opacity(hideGame ? 0 : 1)
-
+            
             levelDetail
             
             CoinCounterView()
@@ -67,81 +68,10 @@ struct GameView2: View {
         .statusBar(hidden: true)
         .foregroundColor(Color("theme-1"))
         .font(.custom("Chalkboard SE Bold", size: 24))
-        .onReceive(scene.$isLoaded) { (loaded) in
-            // Only animate loading screen when the scene is not loaded yet.
-            if loaded {
-                return
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.3)) {
-                self.hideGame = true
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.3).delay(0.15)) {
-                self.showLevelTitle = true
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.3).delay(1.15)) {
-                self.hideGame = false
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.55).delay(1.45)) {
-                self.showLevelTitle = false
-            }
-        }
-        .onReceive(scene.$isPlaying) { (playing) in
-            withAnimation(Animation.linear(duration: 0.3)) {
-                self.showMenu = !playing
-            }
-        }
-        .onReceive(scene.$hasWon) { (value) in
-            if value {
-                print("Player Won")
-            }
-            
-            withAnimation(Animation.linear(duration: 0.3)) {
-                self.showContinueButton = value
-            }
-            
-            withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.3)) {
-                self.showContinueLabel = value
-                self.scaleWinTitle = value
-            }
-            
-            withAnimation(Animation.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
-                self.glowContinue = value
-            }
-        }
-        .onReceive(scene.$hasLost) { (value) in
-            if value {
-                print("Player has Lost.")
-            }
-            
-            withAnimation(Animation.linear(duration: 0.3)) {
-                self.showSkipButton = value
-            }
-            
-            withAnimation(Animation.linear(duration: 0.3).delay(0.3)) {
-                self.showAdButton = value
-            }
-            
-            withAnimation(Animation.linear(duration: 0.3).delay(0.6)) {
-                self.showRetryButton = value
-            }
-            
-            withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.3)) {
-                self.showSkipLabel = value
-                self.showLostTitle = value
-            }
-            
-            withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.6)) {
-                self.showAdLabel = value
-            }
-            
-            withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.9)) {
-                self.showRetryLabel = value
-            }
-        }
+        .onReceive(scene.$isLoaded, perform: willLoad(loaded:))
+        .onReceive(scene.$isPlaying, perform: onPlayingChange(value:))
+        .onReceive(scene.$hasWon, perform: onWin(value:))
+        .onReceive(scene.$hasLost, perform: onLost(value:))
     }
     
     // *** State Animation ***
@@ -168,7 +98,7 @@ struct GameView2: View {
 // *** Sub Views ***
 
 // Win View
-fileprivate extension GameView2 {
+fileprivate extension GameView {
     var win: some View {
         VStack(spacing: 8) {
             GameText("Level 4 Complete")
@@ -202,7 +132,7 @@ fileprivate extension GameView2 {
 }
 
 // Lost View
-fileprivate extension GameView2 {
+fileprivate extension GameView {
     var lost: some View {
         VStack(spacing: 8) {
             GameText("Try Again!")
@@ -251,7 +181,7 @@ fileprivate extension GameView2 {
 }
 
 // Menu View
-fileprivate extension GameView2 {
+fileprivate extension GameView {
     var menu: some View {
         HStack {
             GameButton {
@@ -282,7 +212,7 @@ fileprivate extension GameView2 {
                 
                 self.scene.isPlaying = true
             }
-                        
+            
             GameButton {
                 Text("🛒")
                     .brightness(1)
@@ -295,8 +225,8 @@ fileprivate extension GameView2 {
         .offset(x: 0, y: showMenu ? 0 : UIScreen.main.bounds.height / 4)
     }
 }
-
-extension GameView2 {
+// Detail View
+fileprivate extension GameView {
     var levelDetail: some View {
         VStack {
             GameText("Level \(model.id)")
@@ -307,14 +237,99 @@ extension GameView2 {
 }
 
 // *** Publisher Event Handling ***
-extension GameView2 {
-    
+
+// Game Will Load Event
+fileprivate extension GameView {
+    func willLoad(loaded: Bool) {
+        // Only animate loading screen when the scene is not loaded yet.
+        if loaded {
+            return
+        }
+        
+        withAnimation(Animation.easeInOut(duration: 0.3)) {
+            self.hideGame = true
+        }
+        
+        withAnimation(Animation.easeInOut(duration: 0.3).delay(0.15)) {
+            self.showLevelTitle = true
+        }
+        
+        withAnimation(Animation.easeInOut(duration: 0.3).delay(1.15)) {
+            self.hideGame = false
+        }
+        
+        withAnimation(Animation.easeInOut(duration: 0.55).delay(1.45)) {
+            self.showLevelTitle = false
+        }
+    }
+}
+// On Playing State Change Event
+fileprivate extension GameView {
+    func onPlayingChange(value: Bool) {
+        withAnimation(Animation.linear(duration: 0.3)) {
+            self.showMenu = !value
+        }
+    }
+}
+// On Win Event
+fileprivate extension GameView {
+    func onWin(value: Bool) {
+        if value {
+            print("Player Won")
+        }
+        
+        withAnimation(Animation.linear(duration: 0.3)) {
+            self.showContinueButton = value
+        }
+        
+        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.3)) {
+            self.showContinueLabel = value
+            self.scaleWinTitle = value
+        }
+        
+        withAnimation(Animation.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
+            self.glowContinue = value
+        }
+    }
+}
+// On Lost Event
+fileprivate extension GameView {
+    func onLost(value: Bool) {
+        if value {
+            print("Player has Lost.")
+        }
+        
+        withAnimation(Animation.linear(duration: 0.3)) {
+            self.showSkipButton = value
+        }
+        
+        withAnimation(Animation.linear(duration: 0.3).delay(0.3)) {
+            self.showAdButton = value
+        }
+        
+        withAnimation(Animation.linear(duration: 0.3).delay(0.6)) {
+            self.showRetryButton = value
+        }
+        
+        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.3)) {
+            self.showSkipLabel = value
+            self.showLostTitle = value
+        }
+        
+        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.6)) {
+            self.showAdLabel = value
+        }
+        
+        withAnimation(Animation.interpolatingSpring(stiffness: 100, damping: 10).delay(0.9)) {
+            self.showRetryLabel = value
+        }
+    }
 }
 
 // *** Preview ***
 
-struct GameView2_Previews: PreviewProvider {
+struct GameView_Previews: PreviewProvider {
     static var previews: some View {
-        GameView2(level: GameData.level(named: "You Betcha")!)
+        GameView(level: GameData.level(named: "You Betcha")!)
     }
 }
