@@ -39,6 +39,13 @@ struct GameView: View {
                 backgroundFade
                 
                 VStack(spacing: 0) {
+                    Button("Open Game Designer") {
+                        self.showDeveloper = true
+                    }
+                    .opacity(showMenu ? 1 : 0)
+                    .padding(.top, 16)
+                    .foregroundColor(.gray)
+                    .font(.system(size: 32))
                     Spacer()
                     
                     if scene.hasLost {
@@ -67,6 +74,10 @@ struct GameView: View {
             levelDetail
             
             BuckCounterView()
+            
+            if showDeveloper {
+                DeveloperView(scene: scene, isShowing: $showDeveloper)
+            }
             
             if showLoadingScreen {
                 loadingScreen
