@@ -28,7 +28,6 @@ struct GameView: View {
     var body: some View {
         ZStack {
             GameBackground()
-                .brightness(hideGame ? -0.75 : 0)
             ZStack {
                 if isLoaded {
                     GameContainerView()
@@ -39,13 +38,6 @@ struct GameView: View {
                 backgroundFade
                 
                 VStack(spacing: 0) {
-                    Button("Open Game Designer") {
-                        self.showDeveloper = true
-                    }
-                    .opacity(showMenu ? 1 : 0)
-                    .padding(.top, 16)
-                    .foregroundColor(.gray)
-                    .font(.system(size: 32))
                     Spacer()
                     
                     if scene.hasLost {
@@ -69,14 +61,15 @@ struct GameView: View {
                     DailyGiftView(isShowing: $showDailyGift, hasCollectedDailyGift: $canCollectGift)
                 }
             }
-            .opacity(hideGame ? 0 : 1)
-            
-            levelDetail
             
             BuckCounterView()
             
             if showDeveloper {
                 DeveloperView(scene: scene, isShowing: $showDeveloper)
+            }
+            
+            if showIntermission {
+                intermission
             }
             
             if showLoadingScreen {
@@ -111,9 +104,9 @@ struct GameView: View {
     @State fileprivate var fadeGame = false
     // Menu
     @State fileprivate var showMenu = false
-    // Level Load Screen
-    @State fileprivate var showLevelTitle = false
-    @State fileprivate var hideGame = true
+    // Intermission Screen
+    @State fileprivate var showIntermission = false
+    @State fileprivate var showTitle = false
     // App Loading Screen
     @State fileprivate var isAnimatingLogo = false
     @State fileprivate var showLoadingScreen = true
@@ -211,6 +204,14 @@ fileprivate extension GameView {
     var menu: some View {
         HStack {
             GameButton {
+                Text("⚙")
+                    .frame(width: 32)
+            }
+            .foregroundColor(Color(#colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1)))
+            .onButtonPress {
+                self.showDeveloper = true
+            }
+            GameButton {
                 Text("🎁")
                     .frame(width: 32)
                     .grayscale(self.canCollectGift ? 0.9 : 0.9)
@@ -226,8 +227,11 @@ fileprivate extension GameView {
             }
             
             GameButton {
-                Text("▶︎")
+                Text(self.scene.hasLost ? "↺" : "▶︎")
                     .brightness(1)
+                    .rotationEffect(.degrees(self.scene.hasLost ? -90 : 0))
+                    .offset(x: self.scene.hasLost ? -5 : 0)
+                    .scaleEffect(self.scene.hasLost ? 1.25 : 1)
                     .frame(width: 32)
                     .padding(.horizontal, 16)
             }
@@ -261,12 +265,40 @@ fileprivate extension GameView {
 }
 // Detail View
 fileprivate extension GameView {
-    var levelDetail: some View {
-        VStack {
-            GameText("Level \(model.id)")
-                .colorInvert()
+    var intermission: some View {
+        GeometryReader { proxy in
+            ZStack {
+                Color(.white)
+                    .shadow(radius: 5)
+                VStack {
+                    Text("Level 1")
+                        .font(.system(size: 48, weight: .regular, design: .rounded))
+                    Text("Attempt #0")
+                        .font(.system(size: 18, weight: .thin, design: .monospaced))
+                }
+                .padding(.top, proxy.safeAreaInsets.top)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height / 8 + proxy.safeAreaInsets.top)
+            .position(x: proxy.size.width / 2, y: UIScreen.main.bounds.minY + proxy.size.height / 16 + proxy.safeAreaInsets.top / 2)
+            .offset(y: self.showTitle ? 0 : -UIScreen.main.bounds.height / 4)
         }
-        .opacity(showLevelTitle ? 1 : 0)
+        .edgesIgnoringSafeArea(.all)
+        .foregroundColor(.black)
+        .onAppear {
+            self.showTitle = false
+            
+            withAnimation(Animation.easeInOut(duration: 0.3).delay(0.7)) {
+                self.showTitle = true
+            }
+            
+            withAnimation(Animation.easeOut(duration: 0.3).delay(4.7)) {
+                self.showTitle = false
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                self.showIntermission = false
+            }
+        }
     }
 }
 // App Load Screen
@@ -278,7 +310,6 @@ fileprivate extension GameView {
             Image("cornpopstudios.\(logoFrame)")
                 .resizable()
                 .scaledToFit()
-                // .scaleEffect(showLoadingScreen)
             VStack {
                 Spacer()
                 Text("Loading...")
@@ -311,30 +342,17 @@ fileprivate extension GameView {
 fileprivate extension GameView {
     func willLoad(loaded: Bool) {
         // Only animate loading screen when the scene is not loaded yet.
-        if loaded {
+        if loaded || isLoading {
             return
         }
         
-        withAnimation(Animation.easeInOut(duration: 0.3)) {
-            self.hideGame = true
-        }
-        
-        withAnimation(Animation.easeInOut(duration: 0.3).delay(0.15)) {
-            self.showLevelTitle = true
-        }
-        
-        withAnimation(Animation.easeInOut(duration: 0.3).delay(1.15)) {
-            self.hideGame = false
-        }
-        
-        withAnimation(Animation.easeInOut(duration: 0.55).delay(1.45)) {
-            self.showLevelTitle = false
-        }
+        self.showIntermission = true
     }
 }
 // On Playing State Change Event
 fileprivate extension GameView {
     func onPlayingChange(value: Bool) {
+        
         withAnimation(Animation.linear(duration: 0.3)) {
             self.showMenu = !value
         }
@@ -415,6 +433,7 @@ fileprivate extension GameView {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 self.showLoadingScreen = false
+                self.showIntermission = true
             }
         }
     }

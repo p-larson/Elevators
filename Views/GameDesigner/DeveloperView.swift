@@ -78,7 +78,7 @@ struct DeveloperView: View {
             .navigationBarTitle("Menu", displayMode: .large)
             .navigationBarItems(trailing: EditButton())
             .font(.custom("Futura Medium", size: 16))
-
+            .foregroundColor(.black)
         }
     }
 }
