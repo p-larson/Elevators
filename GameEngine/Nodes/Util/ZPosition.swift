@@ -15,6 +15,6 @@ struct ZPosition {
     static let elevatorBackground: CGFloat = 3
     static let playerInside: CGFloat = 4
     static let elevatorOverlay: CGFloat = 5
-    static let coin: CGFloat = 6
+    static let buck: CGFloat = 6
     static let playerOutside: CGFloat = 7
 }

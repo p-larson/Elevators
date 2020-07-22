@@ -9,7 +9,7 @@
 import SwiftUI
 import MovingNumbersView
 
-struct CoinCounterView: View {
+struct BuckCounterView: View {
     
     static let length: CGFloat = 24
     
@@ -22,7 +22,7 @@ struct CoinCounterView: View {
                 HStack(spacing: 0) {
                     Text("$")
                         .font(.system(size: 16))
-                    MovingNumbersView(number: Double(storage.cash), numberOfDecimalPlaces: 0, animationDuration: 0.3) { string in
+                    MovingNumbersView(number: Double(storage.buck), numberOfDecimalPlaces: 0, animationDuration: 0.3) { string in
                         Text(string)
                             .fixedSize()
                     }
@@ -50,16 +50,16 @@ struct CoinCounterView: View {
     }
 }
 
-struct CoinCounterTestView: View {
+struct BuckCounterTestView: View {
     
     var body: some View {
         ZStack {
-            CoinCounterView()
+            BuckCounterView()
             HStack {
                 Button("+") {
                     Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { (timer) in
-                        if GameData.cash < 1000 {
-                            GameData.cash += .random(in: 1 ..< 100)
+                        if GameData.buck < 1000 {
+                            GameData.buck += .random(in: 1 ..< 100)
                         } else {
                             timer.invalidate()
                         }
@@ -70,11 +70,11 @@ struct CoinCounterTestView: View {
     }
 }
 
-struct CoinCounterPreviews: PreviewProvider {
+struct BuckCounterPreviews: PreviewProvider {
     static var previews: some View {
         ZStack {
             GameBackground()
-            CoinCounterTestView()
+            BuckCounterTestView()
         }.previewDevice("iPhone 11")
     }
 }

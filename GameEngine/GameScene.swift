@@ -78,7 +78,7 @@ extension GameScene {
         self.hasWon = false
         self.isPlaying = false
         self.isLoaded = true
-        print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.coins.count) Coins.")
+        print("Loading Scene. \(model.slots) Slots, \(model.floors) Floors, \(model.elevators.count) Elevators, \(model.bucks.count) Bucks.")
     }
     
     public override func didMove(to view: SKView) {
@@ -138,8 +138,8 @@ extension GameScene {
         }
     }
     
-    func coin(for model: CoinModel) -> CoinNode? {
-        coinNodes.first { (node) -> Bool in
+    func buck(for model: BuckModel) -> BuckNode? {
+        buckNodes.first { (node) -> Bool in
             node.model == model
         }
     }
@@ -184,14 +184,14 @@ extension GameScene {
         }
     }
     
-    var coinNodes: [CoinNode] {
-        children.compactMap { (child) -> CoinNode? in
-            child as? CoinNode
+    var buckNodes: [BuckNode] {
+        children.compactMap { (child) -> BuckNode? in
+            child as? BuckNode
         }
     }
     
-    func playerCoin() -> CoinNode? {
-        coinNodes.first { (node) -> Bool in
+    func playerBuck() -> BuckNode? {
+        buckNodes.first { (node) -> Bool in
             node.model.floor == playerNode.floor && node.model.slot == playerNode.slot
         }
     }
@@ -248,10 +248,10 @@ extension GameScene {
         ).applying(.init(scaleX: 0.6, y: 0.6))
     }
     
-    static var coinSize: CGSize {
+    static var buckSize: CGSize {
         return CGSize(
             width: (GameScene.playerSize.width / 2),
-            height: (GameScene.playerSize.width / 2)
+            height: (GameScene.playerSize.width / 2 / 5)
         )
     }
     
@@ -379,11 +379,11 @@ fileprivate extension GameScene {
         self.addChild(node)
     }
     
-    func load(_ model: CoinModel) {
-        let node = CoinNode(model: model)
+    func load(_ model: BuckModel) {
+        let node = BuckNode(model: model)
         
         node.position.x = elevatorXPosition(at: model.slot)
-        node.position.y = elevatorYPosition(at: model.floor) + GameScene.coinSize.height
+        node.position.y = elevatorYPosition(at: model.floor) + GameScene.buckSize.height
         
         self.addChild(node)
     }
@@ -413,13 +413,13 @@ fileprivate extension GameScene {
                 self.load(floor)
             }
         }
-        // Coins
-        for coin in model.coins where rendered.contains(coin.floor) {
-            if let node = self.coin(for: coin) {
-                node.position.x = elevatorXPosition(at: coin.slot)
-                node.position.y = elevatorYPosition(at: coin.floor) + GameScene.coinSize.height
+        // Bucks
+        for buck in model.bucks where rendered.contains(buck.floor) {
+            if let node = self.buck(for: buck) {
+                node.position.x = elevatorXPosition(at: buck.slot)
+                node.position.y = elevatorYPosition(at: buck.floor) + GameScene.buckSize.height
             } else {
-                self.load(coin)
+                self.load(buck)
             }
         }
         
@@ -452,8 +452,8 @@ fileprivate extension GameScene {
             cableNode.removeFromParent()
         }
         
-        for coinNode in coinNodes where !rendered.contains(coinNode.model.floor) {
-            coinNode.removeFromParent()
+        for buckNode in buckNodes where !rendered.contains(buckNode.model.floor) {
+            buckNode.removeFromParent()
         }
     }
 }
@@ -693,7 +693,7 @@ extension GameScene {
 extension GameScene {
     
     func updateTarget() {
-        self.checkCoins()
+        self.checkBucks()
         
         guard
             let model = playerElevator(),
@@ -760,14 +760,14 @@ extension GameScene {
 }
 
 
-// Coin Check
+// Buck Check
 extension GameScene {
-    func checkCoins() {
-        guard let coin = playerCoin(), !coin.isCollected else {
+    func checkBucks() {
+        guard let buck = playerBuck(), !buck.isCollected else {
             return
         }
         
-        coin.collect()
+        buck.collect()
     }
 }
 

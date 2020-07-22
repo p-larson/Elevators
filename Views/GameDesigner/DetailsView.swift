@@ -14,7 +14,7 @@ struct DetailsView: View {
     @Binding var floors: Int
     @Binding var slots: Int
     @Binding var elevators: [ElevatorModel]
-    @Binding var coins: [CoinModel]
+    @Binding var bucks: [BuckModel]
     @Binding var start: CellModel?
     @Binding var id: Int
     
@@ -31,7 +31,7 @@ struct DetailsView: View {
             
             Section(header: Text("Data").font(.title)) {
                 Text("Elevators: \(elevators.count)")
-                Text("Coins: \(coins.count)")
+                Text("Bucks: \(bucks.count)")
                 Text("Starting Position: \(start?.description ?? "none")")
             }
             
@@ -61,7 +61,7 @@ struct DetailsView: View {
                                 floors: self.floors,
                                 slots: self.slots,
                                 elevators: self.elevators,
-                                coins: self.coins,
+                                bucks: self.bucks,
                                 start: self.start,
                                 id: self.id
                             )
@@ -82,7 +82,7 @@ struct DetailsView_Previews: PreviewProvider {
             floors: .constant(10),
             slots: .constant(5),
             elevators: .constant([]),
-            coins: .constant([]),
+            bucks: .constant([]),
             start: .constant(nil),
             id: .constant(0),
             isDetailing: .constant(false)

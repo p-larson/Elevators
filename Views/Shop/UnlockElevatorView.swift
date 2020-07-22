@@ -96,7 +96,7 @@ struct UnlockElevatorView: View {
                         Text("Claim")
                             .foregroundColor(.white)
                     }
-                    .foregroundColor(Color("Coin"))
+                    .foregroundColor(Color("Buck"))
                     .onButtonPress {
                         self.isShowing = false
                     }

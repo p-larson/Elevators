@@ -66,7 +66,7 @@ struct GameView: View {
             
             levelDetail
             
-            CoinCounterView()
+            BuckCounterView()
             
             if showLoadingScreen {
                 loadingScreen

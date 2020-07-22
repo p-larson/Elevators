@@ -27,7 +27,7 @@ struct ShopView: View {
         
         // Set the selection to the index of the current outfit.
         
-        coinUnlockables.enumerated().forEach { (index, outfit) in
+        buckUnlockables.enumerated().forEach { (index, outfit) in
             if outfit == self.storage.outfit {
                 self._selection = State(initialValue: index)
             }
@@ -40,7 +40,7 @@ struct ShopView: View {
         }
     }
     
-    let coinUnlockables = [
+    let buckUnlockables = [
         PlayerOutfit.orange,
         PlayerOutfit.goose,
         PlayerOutfit.strawberry,
@@ -52,8 +52,8 @@ struct ShopView: View {
         PlayerOutfit.pinneapple
     ]
     
-    var coinPages: Range<Int> {
-        return 0 ..< max(1, Int((Double(coinUnlockables.count) / Double(gridRange.count)).rounded(.up)))
+    var buckPages: Range<Int> {
+        return 0 ..< max(1, Int((Double(buckUnlockables.count) / Double(gridRange.count)).rounded(.up)))
     }
     
     let adUnlockables = [
@@ -65,18 +65,18 @@ struct ShopView: View {
     ]
     
     var adPages: Range<Int> {
-        return coinPages.upperBound ..< coinPages.upperBound + max(1, Int((Double(adUnlockables.count) / Double(gridRange.count)).rounded(.up)))
+        return buckPages.upperBound ..< buckPages.upperBound + max(1, Int((Double(adUnlockables.count) / Double(gridRange.count)).rounded(.up)))
     }
     
     let purchasables: [ShopItem] = [
-        ShopItem(price: 0.99, type: .coin, count: 100, id: UUID()),
-        ShopItem(price: 4.99, type: .coin, count: 1_000, id: UUID()),
-        ShopItem(price: 9.99, type: .coin, count: 3_000, id: UUID()),
+        ShopItem(price: 0.99, type: .buck, count: 100, id: UUID()),
+        ShopItem(price: 4.99, type: .buck, count: 1_000, id: UUID()),
+        ShopItem(price: 9.99, type: .buck, count: 3_000, id: UUID()),
         ShopItem(price: 0.99, type: .ad, count: nil, id: UUID())
     ]
     
     var pages: ClosedRange<Int> {
-        coinPages.lowerBound ... adPages.upperBound
+        buckPages.lowerBound ... adPages.upperBound
     }
     
     func showSelector(on page: Int) -> Bool {
@@ -119,8 +119,8 @@ struct ShopView: View {
     func item(on page: Int, index: Int) -> some View {
         var outfit: PlayerOutfit? = nil
         
-        if coinPages.contains(page) {
-            outfit = coinUnlockables.safe(index: index)
+        if buckPages.contains(page) {
+            outfit = buckUnlockables.safe(index: index)
         } else if adPages.contains(page) {
             outfit = adUnlockables.safe(index: index)
         }
@@ -139,7 +139,7 @@ struct ShopView: View {
     }
     
     func content(page: Int) -> some View {
-        if coinPages.contains(page) || adPages.contains(page) {
+        if buckPages.contains(page) || adPages.contains(page) {
             return AnyView(
                 Grid(gridRange) { index in
                     return self.item(on: page, index: index)
@@ -246,11 +246,11 @@ struct ShopView: View {
                 
                 Spacer()
                 
-                if coinPages.contains(page) {
+                if buckPages.contains(page) {
                     GameButton {
                         HStack {
                             Text("Random Unlock")
-                            Image("coin")
+                            Image("buck")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 32, height: 32)
@@ -263,7 +263,7 @@ struct ShopView: View {
                     }
                     .padding(.horizontal, 16)
                     .onButtonPress {
-                        let locked = self.coinUnlockables.filter { (outfit) -> Bool in
+                        let locked = self.buckUnlockables.filter { (outfit) -> Bool in
                             !outfit.isUnlocked
                         }
 
@@ -290,7 +290,7 @@ struct ShopView: View {
                     .padding(.horizontal, 16)
                 } else {
                     GameButton {
-                        Text("Free Coins")
+                        Text("Free Bucks")
                             .foregroundColor(.white)
                             .frame(height: 32)
                             .frame(minWidth: 0, maxWidth: .infinity)

@@ -13,7 +13,7 @@ struct LevelDesignerView: View {
     @State var floors: Int = 10
     @State var slots: Int = 5
     @State var elevators = [ElevatorModel]()
-    @State var coins = [CoinModel]()
+    @State var bucks = [BuckModel]()
     @State var start: CellModel? = nil
     @State var selected: CellModel? = nil
     @State var id: Int
@@ -34,7 +34,7 @@ struct LevelDesignerView: View {
         self._floors = State(initialValue: model.floors)
         self._slots = State(initialValue: model.slots)
         self._elevators = State(initialValue: model.elevators)
-        self._coins = State(initialValue: model.coins)
+        self._bucks = State(initialValue: model.bucks)
         self._start = State(initialValue: model.start)
     }
     
@@ -44,7 +44,7 @@ struct LevelDesignerView: View {
             floors: floors,
             slots: slots,
             elevators: elevators,
-            coins: coins,
+            bucks: bucks,
             start: start,
             id: id
         )
@@ -65,7 +65,7 @@ struct LevelDesignerView: View {
                 floors: $floors,
                 slots: $slots,
                 elevators: $elevators,
-                coins: $coins,
+                bucks: $bucks,
                 start: $start,
                 id: $id,
                 isDetailing: $isDetailing
@@ -98,8 +98,8 @@ struct LevelDesignerView: View {
                         self.connector(for: cell, proxy)
                             .zIndex(1)
                     }
-                    ForEach(self.coins) { coin in
-                        self.coin(for: coin, proxy)
+                    ForEach(self.bucks) { buck in
+                        self.buck(for: buck, proxy)
                             .zIndex(2)
                     }
                     ForEach(self.elevators) { elevator in
@@ -164,23 +164,23 @@ extension LevelDesignerView {
         add(model)
     }
     
-    func remove(_ model: CoinModel) {
-        self.coins.removeAll { (coin) -> Bool in
-            coin == model
+    func remove(_ model: BuckModel) {
+        self.bucks.removeAll { (buck) -> Bool in
+            buck == model
         }
     }
     
-    func add(_ model: CoinModel) {
-        self.coins.append(model)
+    func add(_ model: BuckModel) {
+        self.bucks.append(model)
     }
     
-    func replace(_ model: CoinModel) {
+    func replace(_ model: BuckModel) {
         remove(model)
         add(model)
     }
     
-    func coin(at cell: CellModel) -> CoinModel? {
-        coins.first { (model) -> Bool in
+    func buck(at cell: CellModel) -> BuckModel? {
+        bucks.first { (model) -> Bool in
             model.floor == cell.floor && model.slot == cell.slot
         }
     }
@@ -217,10 +217,10 @@ extension LevelDesignerView {
                 y: self.y(for: cell.floor, proxy)
         )
             .onTapGesture(count: 2, perform: {
-                if let coin = self.coin(at: cell) {
-                    self.remove(coin)
+                if let buck = self.buck(at: cell) {
+                    self.remove(buck)
                 } else {
-                    self.add(CoinModel(slot: cell.slot, floor: cell.floor))
+                    self.add(BuckModel(slot: cell.slot, floor: cell.floor))
                 }
             })
             .onTapGesture {
@@ -263,17 +263,17 @@ extension LevelDesignerView {
                 y: self.y(for: cell.floor, proxy)
         )
             .onTapGesture(count: 2, perform: {
-                if let coin = self.coin(at: cell) {
-                    self.remove(coin)
+                if let buck = self.buck(at: cell) {
+                    self.remove(buck)
                 } else {
-                    self.add(CoinModel(slot: cell.slot, floor: cell.floor))
+                    self.add(BuckModel(slot: cell.slot, floor: cell.floor))
                 }
                 
                 self.feedback.impactOccurred()
             })
     }
     
-    func coin(for model: CoinModel, _ proxy: GeometryProxy) -> some View {
+    func buck(for model: BuckModel, _ proxy: GeometryProxy) -> some View {
         Circle()
             .foregroundColor(Color.yellow)
             .padding(2)
@@ -305,10 +305,10 @@ extension LevelDesignerView {
                 y: self.y(for: model.floor, proxy)
         )
             .onTapGesture(count: 2, perform: {
-                if let coin = self.coin(at: CellModel(slot: model.slot, floor: model.floor)) {
-                    self.remove(coin)
+                if let buck = self.buck(at: CellModel(slot: model.slot, floor: model.floor)) {
+                    self.remove(buck)
                 } else {
-                    self.add(CoinModel(slot: model.slot, floor: model.floor))
+                    self.add(BuckModel(slot: model.slot, floor: model.floor))
                 }
                 self.feedback.impactOccurred()
             })

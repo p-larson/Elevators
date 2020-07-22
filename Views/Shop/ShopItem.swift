@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 
 public enum ShopItemType: Int, Codable {
-    case coin, ad
+    case buck, ad
 }
 
 public struct ShopItem: View, Codable {
@@ -27,7 +27,7 @@ public struct ShopItem: View, Codable {
                 .cornerRadius(16)
             VStack {
                 Text("200 Elevator Bucks")
-                Image("cash")
+                Image("buck")
                     .resizable()
                     .scaledToFit()
                 HStack {
@@ -53,8 +53,8 @@ public extension ShopItem {
         switch type {
         case .ad:
             return
-        case .coin:
-            GameData.cash += count ?? 0
+        case .buck:
+            GameData.buck += count ?? 0
             
             return
         }
@@ -68,7 +68,7 @@ struct ShopItem_Previews: PreviewProvider {
             VStack {
                 ShopItem(price: 0.99, type: .ad, count: 100, id: UUID())
                     .frame(width: 250, height: 250)
-                ShopItem(price: 0.99, type: .coin, count: 100, id: UUID())
+                ShopItem(price: 0.99, type: .buck, count: 100, id: UUID())
                     .frame(width: 250, height: 250)
             }
         }

@@ -18,7 +18,7 @@ public class Storage: ObservableObject {
     private let decoder = JSONDecoder()
     // All levels, local and hard file.
     @Published public var levels: [LevelModel]
-    @Published public var cash: Int
+    @Published public var buck: Int
     @Published public var streak: Int
     @Published public var recentClaim: Date?
     @Published public var credits: [String]
@@ -110,7 +110,7 @@ public class Storage: ObservableObject {
     fileprivate init() {
         self.streak = storage.integer(forKey: "streak")
         self.recentClaim = storage.object(forKey: "recentClaim") as? Date
-        self.cash = storage.integer(forKey: "cash")
+        self.buck = storage.integer(forKey: "buck")
         self.credits = storage.stringArray(forKey: "credits") ?? []
         self.outfit = PlayerOutfit(rawValue: storage.string(forKey: "outfit") ?? String()) ?? PlayerOutfit.goose
         
@@ -160,7 +160,7 @@ public class Storage: ObservableObject {
     func save() {
         storage.set(streak, forKey: "streak")
         storage.set(recentClaim, forKey: "recentClaim")
-        storage.set(cash, forKey: "cash")
+        storage.set(buck, forKey: "buck")
         storage.set(credits, forKey: "credits")
         storage.set(outfit.rawValue, forKey: "outfit")
         

@@ -1,5 +1,5 @@
 //
-//  CoinNode.swift
+//  BuckNode.swift
 //  Elevators
 //
 //  Created by Peter Larson on 5/11/20.
@@ -9,28 +9,28 @@
 import Foundation
 import SpriteKit
 
-public class CoinNode: SKSpriteNode {
+public class BuckNode: SKSpriteNode {
     
-    static let texture = SKTexture(imageNamed: "coin.png")
+    static let texture = SKTexture(imageNamed: "buck.png")
     
-    let model: CoinModel
+    let model: BuckModel
     
     var isCollected = false
     
-    init(model: CoinModel) {
+    init(model: BuckModel) {
         
         self.model = model
         
-        super.init(texture: CoinNode.texture, color: .yellow, size: GameScene.coinSize)
+        super.init(texture: BuckNode.texture, color: .yellow, size: GameScene.buckSize)
                 
-        self.zPosition = ZPosition.coin
+        self.zPosition = ZPosition.buck
         
         self.run(
             SKAction.repeatForever(
                 SKAction.sequence(
                     [
-                        SKAction.moveBy(x: 0, y: GameScene.coinSize.height / 2, duration: 1),
-                        SKAction.moveBy(x: 0, y: GameScene.coinSize.height / 2, duration: 1).reversed()
+                        SKAction.moveBy(x: 0, y: GameScene.buckSize.height / 2, duration: 1),
+                        SKAction.moveBy(x: 0, y: GameScene.buckSize.height / 2, duration: 1).reversed()
                     ]
                 )//.with(timing: SKActionTimingMode.easeIn)
             )
@@ -42,7 +42,7 @@ public class CoinNode: SKSpriteNode {
     }
 }
 
-public extension CoinNode {
+public extension BuckNode {
     
     func idle() {
         run(
@@ -61,7 +61,7 @@ public extension CoinNode {
         
         self.isCollected = true
         
-        GameData.cash += 1
+        GameData.buck += 1
         
         self.run(
             SKAction.sequence(

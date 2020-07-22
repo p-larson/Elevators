@@ -56,7 +56,7 @@ struct CreditsView: View {
                         )
                     }
                 }
-                Text("Credit rewards reset every week and are worth 25 coins each.\nPlease enjoy these gifts, thank you for downloading our app,\nIt has been our pleasure to create this game for you.")
+                Text("Credit rewards reset every week and are worth 25 bucks each.\nPlease enjoy these gifts, thank you for downloading our app,\nIt has been our pleasure to create this game for you.")
                     .foregroundColor(.gray)
                     .padding(.top, 4)
                     .font(.custom("Futura", size: 10))

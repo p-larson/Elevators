@@ -173,7 +173,7 @@ struct Graphics {
         }
     }
     
-    static func cash() -> UIImage {
+    static func buck() -> UIImage {
         
         let size = CGSize(width: 25, height: 25)
         

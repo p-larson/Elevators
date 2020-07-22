@@ -10,15 +10,11 @@ import Foundation
 import SpriteKit
 import Haptica
 
-class PlayerNode: SKSpriteNode {
-    // Data
+public class PlayerNode: SKSpriteNode {
     public var slot: Int = 0
     public var floor: Int
     public var target: Int? = nil
-    // Player Outfit Animation
-    var direction: PlayerDirection = .right
-    var state: PlayerState = .idle
-    var frameNumber = 0
+    var skin: PlayerSkin
     
     fileprivate(set) var isInsideElevator: Bool = false {
         didSet {
@@ -26,9 +22,10 @@ class PlayerNode: SKSpriteNode {
         }
     }
     
-    init(floor: Int = 1) {
+    init(floor: Int = 1, skin: PlayerSkin = .current) {
         self.floor = floor
-        super.init(texture: PlayerSkin.current.nextTexture(), color: .clear, size: GameScene.playerSize)
+        self.skin = skin
+        super.init(texture: skin.nextTexture(), color: .clear, size: GameScene.playerSize)
         self.anchorPoint = .init(x: 0.5, y: 0)
         self.zPosition = ZPosition.playerOutside
         // self.showBoundingBox()
@@ -42,7 +39,7 @@ class PlayerNode: SKSpriteNode {
 
 extension PlayerNode {
     func set(direction: PlayerDirection) {
-        if self.direction != direction || !isMoving && !isInsideElevator {
+        if self.skin.direction != direction || !isMoving && !isInsideElevator {
             move(direction: direction)
         }
     }
@@ -53,7 +50,7 @@ extension PlayerNode {
     
     func stopMoving() {
         self.removeAction(forKey: "move")
-        PlayerSkin.current.set(state: .idle)
+        skin.set(state: .idle)
     }
     
     var right: [Int] {
@@ -77,7 +74,7 @@ extension PlayerNode {
     }
     
     var nextSlot: Int {
-        if direction == .right {
+        if skin.direction == .right {
             return min(slot + 1, GameScene.maxSlot)
         } else {
             return max(slot - 1, 0)
@@ -86,7 +83,7 @@ extension PlayerNode {
     
     func direciton(to slot: Int) -> PlayerDirection {
         guard let gc = gamescene else {
-            return direction
+            return skin.direction
         }
         
         let slotX = gc.elevatorXPosition(at: slot)
@@ -107,14 +104,14 @@ extension PlayerNode {
         
         // slot = nextSlot
         
-        PlayerSkin.current.set(state: .run)
-        PlayerSkin.current.set(direction: direciton(to: slot))
+        skin.set(state: .run)
+        skin.set(direction: direciton(to: slot))
         
         let targetX = gc.elevatorXPosition(at: slot)
         let deltaX = Double(targetX - position.x)
         let duration: TimeInterval = (GameScene.playerSpeed * abs(deltaX)) / Double(gc.slotWidth)
         let completion = {
-            PlayerSkin.current.set(state: .idle)
+            self.skin.set(state: .idle)
         }
         
         let move = SKAction.sequence([SKAction.moveTo(x: targetX, duration: duration), SKAction.run(completion)])
@@ -140,7 +137,7 @@ extension PlayerNode {
         
         let targetSlot = direction == .right ? GameScene.maxSlot : 0
         
-        PlayerSkin.current.set(direction: direction)
+        skin.set(direction: direction)
         
         // No Movement needed.
         guard targetSlot != slot else {
@@ -149,15 +146,16 @@ extension PlayerNode {
         
         self.stopCentering()
         
-        self.direction = direction
+        // self.skin.direction = direction
+        skin.set(direction: direction)
         
-        PlayerSkin.current.set(state: .run)
+        skin.set(state: .run)
         
         let targetX = gc.elevatorXPosition(at: targetSlot)
         let deltaX = Double(targetX - position.x)
         let duration: TimeInterval = (GameScene.playerSpeed * abs(deltaX)) / Double(gc.slotWidth)
         let completion = {
-            PlayerSkin.current.set(state: .idle)
+            self.skin.set(state: .idle)
         }
         
         let move = SKAction.sequence([SKAction.moveTo(x: targetX, duration: duration), SKAction.run(completion)])
@@ -208,7 +206,7 @@ extension PlayerNode {
                 [
                     SKAction.fadeIn(withDuration: GameScene.doorSpeed),
                     SKAction.run {
-                        self.gamescene?.checkCoins()
+                        self.gamescene?.checkBucks()
                     },
                     // .run(nextActionInQueue)
                 ]

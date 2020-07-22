@@ -16,7 +16,7 @@ public struct LevelModel: Identifiable, Codable, Hashable {
     public var floors: Int
     public var slots: Int
     public var elevators: [ElevatorModel]
-    public var coins: [CoinModel]
+    public var bucks: [BuckModel]
     public var start: CellModel?
     public var id: Int
     
@@ -25,15 +25,15 @@ public struct LevelModel: Identifiable, Codable, Hashable {
     }
     
     enum CodingKeys: CodingKey {
-        case name, floors, slots, elevators, coins, selected, start, id
+        case name, floors, slots, elevators, bucks, selected, start, id
     }
     
-    init(name: String, floors: Int, slots: Int, elevators: [ElevatorModel], coins: [CoinModel], start: CellModel? = nil, id: Int) {
+    init(name: String, floors: Int, slots: Int, elevators: [ElevatorModel], bucks: [BuckModel], start: CellModel? = nil, id: Int) {
         self.name = name
         self.floors = floors
         self.slots = slots
         self.elevators = elevators
-        self.coins = coins
+        self.bucks = bucks
         self.start = start
         self.id = id
     }
@@ -47,8 +47,8 @@ public struct LevelModel: Identifiable, Codable, Hashable {
         if !elevators.isEmpty {
             try container.encode(elevators, forKey: .elevators)
         }
-        if !coins.isEmpty {
-            try container.encode(coins, forKey: .coins)
+        if !bucks.isEmpty {
+            try container.encode(bucks, forKey: .bucks)
         }
         if start != nil {
             try container.encode(start, forKey: .start)
@@ -63,7 +63,7 @@ public struct LevelModel: Identifiable, Codable, Hashable {
         self.floors = try values.decode(Int.self, forKey: .floors)
         self.slots = try values.decode(Int.self, forKey: .slots)
         self.elevators = (try? values.decode([ElevatorModel].self, forKey: .elevators)) ?? [ElevatorModel]()
-        self.coins = (try? values.decode([CoinModel].self, forKey: .coins)) ?? [CoinModel]()
+        self.bucks = (try? values.decode([BuckModel].self, forKey: .bucks)) ?? [BuckModel]()
         self.start = try? values.decode(CellModel.self, forKey: .start)
         self.id = try values.decode(Int.self, forKey: .id)
     }
@@ -96,7 +96,7 @@ extension LevelModel {
             elevators: [
                 .init(floor: 1, slot: 0, target: 5),
             ],
-            coins: [
+            bucks: [
                 .init(slot: 0, floor: 5)
             ],
             start: nil,

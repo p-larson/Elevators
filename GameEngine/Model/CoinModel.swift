@@ -1,5 +1,5 @@
 //
-//  CoinModel.swift
+//  BuckModel.swift
 //  Elevators
 //
 //  Created by Peter Larson on 5/7/20.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct CoinModel: Identifiable, Encodable, Decodable, Equatable {
+public struct BuckModel: Identifiable, Encodable, Decodable, Equatable {
     public let id = UUID()
     let slot, floor: Int
     
@@ -37,12 +37,12 @@ public struct CoinModel: Identifiable, Encodable, Decodable, Equatable {
         try container.encode(slot, forKey: .slot)
     }
     
-    public static func == (lhs: CoinModel, rhs: CoinModel) -> Bool {
+    public static func == (lhs: BuckModel, rhs: BuckModel) -> Bool {
         return lhs.floor == rhs.floor && lhs.slot == rhs.slot
     }
 }
 
-extension CoinModel: CustomStringConvertible {
+extension BuckModel: CustomStringConvertible {
     public var description: String {
         return "(\(slot), \(floor))"
     }

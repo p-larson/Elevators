@@ -70,14 +70,14 @@ struct DailyGiftView: View {
                 
                 let prize = self.reward
                 let increment = prize / 5
-                let final = GameData.cash + prize
+                let final = GameData.buck + prize
                 
                 var i = 0
                 
                 Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
                     i += 1; if i == 5 {
                         self.reward = 0
-                        GameData.cash = final
+                        GameData.buck = final
                         timer.invalidate()
                         
                         withAnimation(Animation.easeInOut(duration: 0.3).delay(0.7)) {
@@ -89,7 +89,7 @@ struct DailyGiftView: View {
                         }
                     } else {
                         self.reward -= increment
-                        GameData.cash += increment
+                        GameData.buck += increment
                     }
                 }
             }
@@ -159,7 +159,7 @@ struct DailyGiftView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             DailyGiftView(isShowing: .constant(false), hasCollectedDailyGift: .constant(false))
-            CoinCounterView()
+            BuckCounterView()
         }.statusBar(hidden: true)
     }
 }

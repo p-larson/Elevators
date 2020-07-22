@@ -8,16 +8,16 @@
 
 import SwiftUI
 
-struct CashView: View {
+struct buckView: View {
     
     @State private var show = false
     
-    let cash = Graphics.cash(), intensity: Float = 0.9
+    let buck = Graphics.buck(), intensity: Float = 0.9
     
     var body: some View {
         ParticlesEmitter {
             EmitterCell()
-                .content(.image(cash))
+                .content(.image(buck))
                 .birthRate(50.0)
                 .lifetime(14.0)
                 .color(.systemGreen)
@@ -50,7 +50,7 @@ struct CryTestView: View {
     
     var body: some View {
         ZStack {
-            CashView()
+            buckView()
             Button("Toggle") {
                 self.isEmitting.toggle()
             }
